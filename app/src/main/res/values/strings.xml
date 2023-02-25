@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">VkNewsClient</string>
+    <string name="post_text" translatable="false">Сколько здесь ни гулял\nНо никогда не замечал следы\nДумал, из леса вой, да из людей так некому здесь выть\nНо острые глаза пялятся зорко\nОкружив мой дом\nЖдут, когда оступлюсь, чтобы навязать мне свой закон</string>
 </resources>
