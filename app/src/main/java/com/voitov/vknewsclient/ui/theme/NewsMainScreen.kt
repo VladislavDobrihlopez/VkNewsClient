@@ -51,8 +51,8 @@ fun VkNews() {
         },
 
         ) {
-        repeat(3) {
-            Column(modifier = Modifier.padding(all = 8.dp)) {
+        Column(modifier = Modifier.padding(all = 8.dp)) {
+            repeat(1) {
                 NewsPost()
             }
         }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -25,9 +26,9 @@ import com.voitov.vknewsclient.R
 @Composable
 fun NewsPost() {
     Card(
+        shape = RoundedCornerShape(12.dp),
         modifier = Modifier
-            .background(MaterialTheme.colors.surface)
-            .fillMaxWidth()
+            .fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier
