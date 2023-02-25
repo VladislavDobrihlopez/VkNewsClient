@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.voitov.vknewsclient.ui.theme.NewsPost
+import com.voitov.vknewsclient.ui.theme.VkNews
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 
 class MainActivity : ComponentActivity() {
@@ -22,9 +22,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                         .background(MaterialTheme.colors.background)
-                        .padding(all = 8.dp)
                 ) {
-                    NewsPost()
+                    VkNews()
                 }
             }
         }
