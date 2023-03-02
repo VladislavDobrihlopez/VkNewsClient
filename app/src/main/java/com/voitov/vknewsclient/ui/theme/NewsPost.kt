@@ -1,7 +1,8 @@
 package com.voitov.vknewsclient.ui.theme
 
+import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,27 +23,40 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.voitov.vknewsclient.R
+import com.voitov.vknewsclient.ui.theme.domain.MetricsType
+import com.voitov.vknewsclient.ui.theme.domain.PostItem
+import com.voitov.vknewsclient.ui.theme.domain.SocialMetric
 
 @Composable
-fun NewsPost() {
+fun NewsPost(
+    modifier: Modifier = Modifier,
+    postItem: PostItem,
+    onFeedbackItemClickListener: (SocialMetric) -> Unit
+) {
+    Log.d(TAG, "NewsPost")
+
     Card(
         shape = RoundedCornerShape(12.dp),
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier
                 .padding(all = 8.dp)
         ) {
-            PostHeader()
-            PostContent()
-            PostFeedback()
+            PostHeader(postItem)
+            PostContent(postItem)
+            PostFeedback(
+                postItem.metrics
+            ) {
+                onFeedbackItemClickListener(it)
+            }
         }
     }
 }
 
 @Composable
-private fun PostHeader() {
+private fun PostHeader(postItem: PostItem) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -50,16 +64,16 @@ private fun PostHeader() {
             modifier = Modifier
                 .clip(CircleShape)
                 .size(50.dp),
-            painter = painterResource(id = R.drawable.post_community_image),
+            painter = painterResource(id = postItem.avatarResId),
             contentDescription = "community thumbnail"
         )
         Spacer(modifier = Modifier.padding(all = 8.dp))
         Column(
             modifier = Modifier.weight(1f)
         ) {
-            Text("Max Korzh", color = MaterialTheme.colors.onPrimary)
+            Text(postItem.authorName, color = MaterialTheme.colors.onPrimary)
             Spacer(modifier = Modifier.padding(vertical = 2.dp))
-            Text("12:00", color = MaterialTheme.colors.onSecondary)
+            Text(postItem.time, color = MaterialTheme.colors.onSecondary)
         }
         Image(
             imageVector = Icons.Rounded.MoreVert,
@@ -70,55 +84,90 @@ private fun PostHeader() {
 }
 
 @Composable
-private fun PostContent() {
-    PostText()
+private fun PostContent(postItem: PostItem) {
+    PostText(postItem)
     Spacer(modifier = Modifier.padding(vertical = 4.dp))
-    PostAdditionalResources()
+    PostAdditionalResources(postItem)
 }
 
 @Composable
-private fun PostText() {
+private fun PostText(postItem: PostItem) {
     Text(
-        text = stringResource(R.string.post_text),
+        text = stringResource(postItem.contentTextResId),
         modifier = Modifier.fillMaxWidth(),
     )
 }
 
 @Composable
-private fun PostAdditionalResources() {
+private fun PostAdditionalResources(postItem: PostItem) {
     Image(
         modifier = Modifier
             .fillMaxWidth(),
-        painter = painterResource(R.drawable.post_content_image),
+        painter = painterResource(postItem.contentImagesResId),
         contentDescription = "",
         contentScale = ContentScale.FillWidth,
     )
 }
 
 @Composable
-private fun PostFeedback() {
+private fun PostFeedback(
+    metrics: List<SocialMetric>,
+    onItemClickListener: (SocialMetric) -> Unit,
+) {
+    Log.d(TAG, "PostFeedback")
     Row(
         modifier = Modifier.padding(top = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(modifier = Modifier.weight(1f)) {
-            IconWithText(pictResId = R.drawable.ic_views_count, text = "100k")
+            val views = metrics.getMetricByType(MetricsType.VIEWS)
+            IconWithText(pictResId = R.drawable.ic_views_count, text = views.count.toString()) {
+                onItemClickListener(views)
+            }
         }
 
         Row(
             modifier = Modifier.weight(1f),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            IconWithText(pictResId = R.drawable.ic_share, text = "25")
-            IconWithText(pictResId = R.drawable.ic_comment, text = "150")
-            IconWithText(pictResId = R.drawable.ic_like, text = "250")
+            with(metrics.getMetricByType(MetricsType.SHARES)) {
+                IconWithText(
+                    pictResId = R.drawable.ic_share,
+                    text = count.toString()
+                ) {
+                    onItemClickListener(this@with)
+                }
+            }
+            with(metrics.getMetricByType(MetricsType.COMMENTS)) {
+                IconWithText(
+                    pictResId = R.drawable.ic_comment,
+                    text = count.toString()
+                ) {
+                    onItemClickListener(this@with)
+                }
+            }
+            with(metrics.getMetricByType(MetricsType.LIKES)) {
+                IconWithText(pictResId = R.drawable.ic_like, text = count.toString())
+                {
+                    onItemClickListener(this@with)
+                }
+            }
         }
     }
 }
 
+fun List<SocialMetric>.getMetricByType(type: MetricsType): SocialMetric {
+    return this.find { it.type == type } ?: throw IllegalStateException()
+}
+
 @Composable
-private fun IconWithText(pictResId: Int, text: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+private fun IconWithText(pictResId: Int, text: String, onItemClickListener: () -> Unit) {
+    Row(
+        modifier = Modifier.clickable {
+            onItemClickListener()
+        },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Icon(
             painter = painterResource(pictResId),
             contentDescription = "",
@@ -136,7 +185,9 @@ private fun IconWithText(pictResId: Int, text: String) {
 @Composable
 fun NewsPostLightTheme() {
     VkNewsClientTheme(darkTheme = false) {
-        NewsPost()
+        NewsPost(postItem = PostItem()) {
+
+        }
     }
 }
 
@@ -144,6 +195,8 @@ fun NewsPostLightTheme() {
 @Composable
 fun NewsPostLightDark() {
     VkNewsClientTheme(darkTheme = true) {
-        NewsPost()
+        NewsPost(postItem = PostItem()) {
+
+        }
     }
 }

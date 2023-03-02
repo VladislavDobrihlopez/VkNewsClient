@@ -11,12 +11,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.voitov.vknewsclient.ui.theme.domain.PostItem
 
 const val TAG = "COMPOSE_TEST"
 
-@Preview
 @Composable
 fun VkNews() {
+    val postState = remember {
+        mutableStateOf(PostItem())
+    }
     Scaffold(
         bottomBar = {
             BottomNavigation {
@@ -51,10 +54,40 @@ fun VkNews() {
         },
 
         ) {
-        Column(modifier = Modifier.padding(all = 8.dp)) {
+        Column() {
             repeat(1) {
-                NewsPost()
+                NewsPost(
+                    Modifier.padding(all = 8.dp),
+                    postState.value
+                ) {
+                    val oldPostInfo = postState.value
+                    val oldFeedbackInfo = oldPostInfo.metrics
+
+                    val itemIndex =
+                        oldFeedbackInfo.indexOf(oldFeedbackInfo.getMetricByType(it.type))
+                    val oldItemMetric = oldFeedbackInfo[itemIndex]
+                    val newItemMetric = oldItemMetric.copy(count = oldItemMetric.count + 1)
+
+                    val newFeedbackInfo = oldFeedbackInfo.toMutableList()
+
+//                    for ((index, item) in oldFeedbackInfo.withIndex()) {
+//                        if (index != itemIndex && item.type == it.type) {
+//                            newFeedbackInfo.add(item)
+//                        }
+//                    }
+
+                    newFeedbackInfo[itemIndex] = newItemMetric
+                    postState.value = oldPostInfo.copy(metrics = newFeedbackInfo)
+                }
             }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewVkNews() {
+    VkNewsClientTheme {
+        VkNews()
     }
 }
