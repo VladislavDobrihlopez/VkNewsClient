@@ -23,15 +23,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.voitov.vknewsclient.R
-import com.voitov.vknewsclient.ui.theme.domain.MetricsType
-import com.voitov.vknewsclient.ui.theme.domain.PostItem
-import com.voitov.vknewsclient.ui.theme.domain.SocialMetric
+import com.voitov.vknewsclient.domain.MetricsType
+import com.voitov.vknewsclient.domain.PostItem
+import com.voitov.vknewsclient.domain.SocialMetric
 
 @Composable
 fun NewsPost(
     modifier: Modifier = Modifier,
     postItem: PostItem,
-    onFeedbackItemClickListener: (SocialMetric) -> Unit
+    onSharesClickListener: (SocialMetric) -> Unit,
+    onCommentsClickListener: (SocialMetric) -> Unit,
+    onLikesClickListener: (SocialMetric) -> Unit,
+    onViewsClickListener: (SocialMetric) -> Unit,
 ) {
     Log.d(TAG, "NewsPost")
 
@@ -47,10 +50,20 @@ fun NewsPost(
             PostHeader(postItem)
             PostContent(postItem)
             PostFeedback(
-                postItem.metrics
-            ) {
-                onFeedbackItemClickListener(it)
-            }
+                postItem.metrics,
+                onViewsClickListener = {
+                    onViewsClickListener(it)
+                },
+                onSharesClickListener = {
+                    onSharesClickListener(it)
+                },
+                onCommentsClickListener = {
+                    onCommentsClickListener(it)
+                },
+                onLikesClickListener = {
+                    onLikesClickListener(it)
+                },
+            )
         }
     }
 }
@@ -112,7 +125,10 @@ private fun PostAdditionalResources(postItem: PostItem) {
 @Composable
 private fun PostFeedback(
     metrics: List<SocialMetric>,
-    onItemClickListener: (SocialMetric) -> Unit,
+    onSharesClickListener: (SocialMetric) -> Unit,
+    onCommentsClickListener: (SocialMetric) -> Unit,
+    onLikesClickListener: (SocialMetric) -> Unit,
+    onViewsClickListener: (SocialMetric) -> Unit,
 ) {
     Log.d(TAG, "PostFeedback")
     Row(
@@ -122,7 +138,7 @@ private fun PostFeedback(
         Row(modifier = Modifier.weight(1f)) {
             val views = metrics.getMetricByType(MetricsType.VIEWS)
             IconWithText(pictResId = R.drawable.ic_views_count, text = views.count.toString()) {
-                onItemClickListener(views)
+                onViewsClickListener(views)
             }
         }
 
@@ -135,7 +151,7 @@ private fun PostFeedback(
                     pictResId = R.drawable.ic_share,
                     text = count.toString()
                 ) {
-                    onItemClickListener(this@with)
+                    onSharesClickListener(this@with)
                 }
             }
             with(metrics.getMetricByType(MetricsType.COMMENTS)) {
@@ -143,13 +159,13 @@ private fun PostFeedback(
                     pictResId = R.drawable.ic_comment,
                     text = count.toString()
                 ) {
-                    onItemClickListener(this@with)
+                    onCommentsClickListener(this@with)
                 }
             }
             with(metrics.getMetricByType(MetricsType.LIKES)) {
                 IconWithText(pictResId = R.drawable.ic_like, text = count.toString())
                 {
-                    onItemClickListener(this@with)
+                    onLikesClickListener(this@with)
                 }
             }
         }
@@ -185,9 +201,13 @@ private fun IconWithText(pictResId: Int, text: String, onItemClickListener: () -
 @Composable
 fun NewsPostLightTheme() {
     VkNewsClientTheme(darkTheme = false) {
-        NewsPost(postItem = PostItem()) {
-
-        }
+        NewsPost(
+            postItem = PostItem(),
+            onViewsClickListener = {},
+            onSharesClickListener = {},
+            onCommentsClickListener = {},
+            onLikesClickListener = {}
+        )
     }
 }
 
@@ -195,8 +215,12 @@ fun NewsPostLightTheme() {
 @Composable
 fun NewsPostLightDark() {
     VkNewsClientTheme(darkTheme = true) {
-        NewsPost(postItem = PostItem()) {
-
-        }
+        NewsPost(
+            postItem = PostItem(),
+            onViewsClickListener = {},
+            onSharesClickListener = {},
+            onCommentsClickListener = {},
+            onLikesClickListener = {}
+        )
     }
 }

@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.ui.theme.domain
+package com.voitov.vknewsclient.domain
 
 import com.voitov.vknewsclient.R
 
