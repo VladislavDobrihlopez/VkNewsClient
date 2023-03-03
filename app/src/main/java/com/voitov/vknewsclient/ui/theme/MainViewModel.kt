@@ -35,14 +35,14 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun updateMetric(postId: Int, type: MetricsType) {
+    fun updateMetric(postId: Int, metric: SocialMetric) {
         checkWhetherIdIsValid(postId)
         val oldPosts = _newsPost.value ?: throw IllegalStateException()
         val oldPostInfo = oldPosts.find { it.id == postId } ?: throw IllegalStateException()
         val oldPostIndex = oldPosts.indexOf(oldPostInfo)
 
         val oldFeedbackInfo = oldPostInfo.metrics
-        val itemIndex = oldFeedbackInfo.indexOf(oldFeedbackInfo.getMetricByType(type))
+        val itemIndex = oldFeedbackInfo.indexOf(oldFeedbackInfo.getMetricByType(metric.type))
         val oldItemMetric = oldFeedbackInfo[itemIndex]
         val newItemMetric = oldItemMetric.copy(count = oldItemMetric.count + 1)
 
