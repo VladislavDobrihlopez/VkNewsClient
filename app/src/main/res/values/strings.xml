@@ -4,4 +4,6 @@
     <string name="bottom_navigation_item_home" translatable="false">Home</string>
     <string name="bottom_navigation_item_favorite" translatable="false">Favorite</string>
     <string name="bottom_navigation_item_profile" translatable="false">Profile</string>
+    <string name="bookmark" translatable="false">add this post to your bookmark</string>
+    <string name="trash_post" translatable="false">Do not show me this piece of shit again!</string>
 </resources>

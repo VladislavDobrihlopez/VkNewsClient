@@ -3,6 +3,7 @@ package com.voitov.vknewsclient.domain
 import com.voitov.vknewsclient.R
 
 data class PostItem(
+    val id: Int,
     val avatarResId: Int = R.drawable.post_community_image,
     val authorName: String = "Maks Korzh",
     val time: String = "12:00",

@@ -194,6 +194,7 @@ private fun IconWithText(pictResId: Int, text: String, onItemClickListener: () -
             text = text,
             color = MaterialTheme.colors.onSecondary
         )
+        Spacer(modifier = Modifier.width(2.dp))
     }
 }
 
@@ -202,7 +203,7 @@ private fun IconWithText(pictResId: Int, text: String, onItemClickListener: () -
 fun NewsPostLightTheme() {
     VkNewsClientTheme(darkTheme = false) {
         NewsPost(
-            postItem = PostItem(),
+            postItem = PostItem(id = 1),
             onViewsClickListener = {},
             onSharesClickListener = {},
             onCommentsClickListener = {},
@@ -216,7 +217,7 @@ fun NewsPostLightTheme() {
 fun NewsPostLightDark() {
     VkNewsClientTheme(darkTheme = true) {
         NewsPost(
-            postItem = PostItem(),
+            postItem = PostItem(id = 1),
             onViewsClickListener = {},
             onSharesClickListener = {},
             onCommentsClickListener = {},
