@@ -133,23 +133,23 @@ private fun PostFeedback(
     Log.d(TAG, "PostFeedback")
     Row(
         modifier = Modifier.padding(top = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(modifier = Modifier.weight(1f)) {
+        Row(modifier = Modifier.weight(0.3f)) {
             val views = metrics.getMetricByType(MetricsType.VIEWS)
             IconWithText(pictResId = R.drawable.ic_views_count, text = views.count.toString()) {
                 onViewsClickListener(views)
             }
         }
-
         Row(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(0.70f),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             with(metrics.getMetricByType(MetricsType.SHARES)) {
                 IconWithText(
                     pictResId = R.drawable.ic_share,
-                    text = count.toString()
+                    text = count.toString(),
                 ) {
                     onSharesClickListener(this@with)
                 }
@@ -177,9 +177,14 @@ fun List<SocialMetric>.getMetricByType(type: MetricsType): SocialMetric {
 }
 
 @Composable
-private fun IconWithText(pictResId: Int, text: String, onItemClickListener: () -> Unit) {
+private fun IconWithText(
+    pictResId: Int,
+    text: String,
+    modifier: Modifier = Modifier,
+    onItemClickListener: () -> Unit,
+) {
     Row(
-        modifier = Modifier.clickable {
+        modifier = modifier.clickable {
             onItemClickListener()
         },
         verticalAlignment = Alignment.CenterVertically

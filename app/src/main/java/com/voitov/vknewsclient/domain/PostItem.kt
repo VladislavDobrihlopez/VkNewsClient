@@ -10,9 +10,9 @@ data class PostItem(
     val contentTextResId: Int = R.string.post_text,
     val contentImagesResId: Int = R.drawable.post_content_image,
     val metrics: List<SocialMetric> = listOf(
-        SocialMetric(MetricsType.LIKES, 21_000),
-        SocialMetric(MetricsType.VIEWS, 100_000),
-        SocialMetric(MetricsType.COMMENTS, 700),
-        SocialMetric(MetricsType.SHARES, 5000),
+        SocialMetric(MetricsType.LIKES, 2_100),
+        SocialMetric(MetricsType.VIEWS, 15_000),
+        SocialMetric(MetricsType.COMMENTS, 7_000),
+        SocialMetric(MetricsType.SHARES, 5_000),
     )
 )
