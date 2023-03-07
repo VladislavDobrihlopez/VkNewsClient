@@ -4,9 +4,8 @@ import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -14,7 +13,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.voitov.vknewsclient.navigation.AppNavGraph
-import com.voitov.vknewsclient.ui.theme.MainViewModel
+import com.voitov.vknewsclient.navigation.AppScreen
+import com.voitov.vknewsclient.MainViewModel
 import com.voitov.vknewsclient.ui.theme.NavigationItem
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 
@@ -40,7 +40,13 @@ fun MainScreen(viewModel: MainViewModel) {
                 items.forEach { navigationItem ->
                     BottomNavigationItem(
                         onClick = {
-                            navHostController.navigate(navigationItem.screen.route)
+                            navHostController.navigate(navigationItem.screen.route) {
+                                popUpTo(AppScreen.NewsFeed.route) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         },
                         icon = {
                             Icon(
@@ -72,12 +78,15 @@ fun MainScreen(viewModel: MainViewModel) {
 
 @Composable
 fun TestScreen(screenName: String) {
-    val touches = remember {
+    val touches = rememberSaveable {
         mutableStateOf(0)
     }
-    Text(text = "$screenName ${touches.value}", color = Color.DarkGray, modifier = Modifier.clickable {
-        touches.value = touches.value + 1
-    })
+    Text(
+        text = "$screenName ${touches.value}",
+        color = Color.DarkGray,
+        modifier = Modifier.clickable {
+            touches.value = touches.value + 1
+        })
 }
 
 @Preview

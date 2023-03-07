@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.ui.theme
+package com.voitov.vknewsclient
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import com.voitov.vknewsclient.domain.MetricsType
 import com.voitov.vknewsclient.domain.PostItem
 import com.voitov.vknewsclient.domain.SocialMetric
+import com.voitov.vknewsclient.ui.theme.getMetricByType
 import kotlin.random.Random
 
 class MainViewModel : ViewModel() {

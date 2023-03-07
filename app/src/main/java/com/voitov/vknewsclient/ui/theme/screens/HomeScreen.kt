@@ -19,7 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.voitov.vknewsclient.R
-import com.voitov.vknewsclient.ui.theme.MainViewModel
+import com.voitov.vknewsclient.MainViewModel
 import com.voitov.vknewsclient.ui.theme.NewsPost
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
