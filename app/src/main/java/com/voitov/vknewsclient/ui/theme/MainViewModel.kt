@@ -29,6 +29,14 @@ class MainViewModel : ViewModel() {
     val newsPost: LiveData<List<PostItem>>
         get() = _newsPost
 
+    private val _selectedNavigationItem = MutableLiveData<NavigationItem>(NavigationItem.Home)
+    val selectedNavigationItem: LiveData<NavigationItem>
+        get() = _selectedNavigationItem
+
+    fun selectNavigationItem(item: NavigationItem) {
+        _selectedNavigationItem.value = item
+    }
+
     private fun checkWhetherIdIsValid(id: Int) {
         if (fakePosts.isEmpty() || (id !in 0 until fakePosts.size)) {
             throw IllegalArgumentException()
