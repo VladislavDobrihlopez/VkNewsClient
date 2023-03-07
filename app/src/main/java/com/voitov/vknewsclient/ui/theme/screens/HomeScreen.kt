@@ -1,5 +1,6 @@
 package com.voitov.vknewsclient.ui.theme.screens
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -27,13 +28,15 @@ fun HomeScreen(paddingVales: PaddingValues, viewModel: MainViewModel) {
     val postsState = viewModel.newsPost.observeAsState(listOf())
     val scrollState = rememberLazyListState()
 
+    Log.d(TAG, "HomeScreen")
+
     LazyColumn(
-        modifier = androidx.compose.ui.Modifier.padding(paddingVales),
+        modifier = Modifier.padding(paddingVales),
         contentPadding = PaddingValues(
             top = 16.dp,
             start = 8.dp,
             end = 8.dp,
-            bottom = 72.dp //bottomBar = 56dp
+            bottom = 16.dp
         ),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         state = scrollState

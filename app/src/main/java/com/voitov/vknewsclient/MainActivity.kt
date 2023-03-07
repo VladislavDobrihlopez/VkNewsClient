@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.ViewModelProvider
 import com.voitov.vknewsclient.ui.theme.MainViewModel
-import com.voitov.vknewsclient.ui.theme.VkNews
+import com.voitov.vknewsclient.ui.theme.screens.MainScreen
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 
 class MainActivity : ComponentActivity() {
@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             VkNewsClientTheme {
-                VkNews(viewModel)
+                MainScreen(viewModel)
             }
         }
     }

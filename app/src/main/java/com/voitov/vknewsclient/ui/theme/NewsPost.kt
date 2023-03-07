@@ -26,6 +26,7 @@ import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.MetricsType
 import com.voitov.vknewsclient.domain.PostItem
 import com.voitov.vknewsclient.domain.SocialMetric
+import com.voitov.vknewsclient.ui.theme.screens.TAG
 
 @Composable
 fun NewsPost(
