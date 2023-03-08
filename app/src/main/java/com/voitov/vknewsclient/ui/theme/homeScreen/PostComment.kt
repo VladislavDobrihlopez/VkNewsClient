@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.ui.theme
+package com.voitov.vknewsclient.ui.theme.homeScreen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.PostCommentItem
+import com.voitov.vknewsclient.ui.theme.IconWithText
+import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 
 @Composable
 fun Comment(item: PostCommentItem) {
@@ -68,6 +70,7 @@ private fun PreviewCommentDarkTheme() {
             Comment(
                 item = PostCommentItem(
                     id = 1,
+                    postId = 1,
                     authorId = 1,
                     text = "somethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomething"
                 )
@@ -84,6 +87,7 @@ private fun PreviewCommentLightTheme() {
             Comment(
                 item = PostCommentItem(
                     id = 1,
+                    postId = 1,
                     authorId = 1,
                     text = "somethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomething"
                 )

@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.ViewModelProvider
-import com.voitov.vknewsclient.ui.theme.screens.MainScreen
+import com.voitov.vknewsclient.ui.theme.MainScreen
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 
 class MainActivity : ComponentActivity() {

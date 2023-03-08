@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.ui.theme
+package com.voitov.vknewsclient.ui.theme.homeScreen
 
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -24,7 +24,9 @@ import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.MetricsType
 import com.voitov.vknewsclient.domain.PostItem
 import com.voitov.vknewsclient.domain.SocialMetric
-import com.voitov.vknewsclient.ui.theme.screens.TAG
+import com.voitov.vknewsclient.ui.theme.IconWithText
+import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
+import com.voitov.vknewsclient.ui.theme.TAG
 
 @Composable
 fun PostCard(

@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.ui.theme.screens
+package com.voitov.vknewsclient.ui.theme
 
 import android.util.Log
 import androidx.compose.foundation.clickable
@@ -15,8 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import com.voitov.vknewsclient.navigation.AppNavGraph
 import com.voitov.vknewsclient.navigation.AppScreen
 import com.voitov.vknewsclient.MainViewModel
-import com.voitov.vknewsclient.ui.theme.NavigationItem
-import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
+import com.voitov.vknewsclient.ui.theme.homeScreen.HomeScreen
 
 const val TAG = "COMPOSE_TEST"
 

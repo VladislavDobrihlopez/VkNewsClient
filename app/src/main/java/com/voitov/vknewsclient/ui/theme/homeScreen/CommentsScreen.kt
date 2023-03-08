@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.ui.theme.screens
+package com.voitov.vknewsclient.ui.theme.homeScreen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
@@ -11,33 +11,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import com.voitov.vknewsclient.MainViewModel
 import com.voitov.vknewsclient.domain.PostCommentItem
-import com.voitov.vknewsclient.domain.PostItem
-import com.voitov.vknewsclient.ui.theme.Comment
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 
 @Composable
 fun CommentsScreen(
-    viewModel: ViewModel,
-    postItem: PostItem,
-    comments: List<PostCommentItem> = listOf(
-        PostCommentItem(
-            id = 1,
-            authorId = 101,
-            text = "somethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomething"
-        ),
-        PostCommentItem(id = 2, authorId = 102, text = "something"),
-        PostCommentItem(id = 3, authorId = 103, text = "something"),
-        PostCommentItem(id = 3, authorId = 103, text = "something"),
-        PostCommentItem(id = 3, authorId = 103, text = "something"),
-        PostCommentItem(id = 3, authorId = 103, text = "something"),
-        PostCommentItem(id = 3, authorId = 103, text = "something")
-    )
+    postId: Int,
+    comments: List<PostCommentItem>,
+    onBackPressed: () -> Unit
 ) {
     Scaffold(
-        topBar = { CommentsScreenTopAppBar(postItem.id) }
+        topBar = { CommentsScreenTopAppBar(postId, onBackPressed) }
     ) {
         LazyColumn(
             modifier = Modifier
@@ -56,26 +40,30 @@ fun CommentsScreen(
 @Composable
 fun CommentsScreenTopAppBar(
     postId: Int,
+    onBackPressed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     TopAppBar(
         modifier = modifier,
         title = { Text(text = "Comments for news with id: $postId") },
         navigationIcon = {
-            IconButton(onClick = {}) {
+            IconButton(onClick = { onBackPressed() }) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,
                     contentDescription = "navigate back"
                 )
             }
-        })
+        }
+    )
 }
 
 @Preview
 @Composable
 fun PreviewCommentsScreenDarkTheme() {
     VkNewsClientTheme(darkTheme = true) {
-        CommentsScreen(MainViewModel(), PostItem(1))
+        CommentsScreen(1, listOf(PostCommentItem(1, 1, 1, text = "some comment"))) {
+
+        }
     }
 }
 
@@ -83,6 +71,8 @@ fun PreviewCommentsScreenDarkTheme() {
 @Composable
 fun PreviewCommentsScreenLightTheme() {
     VkNewsClientTheme(darkTheme = false) {
-        CommentsScreen(MainViewModel(), PostItem(1))
+        CommentsScreen(1, listOf(PostCommentItem(1, 1, 1, text = "some comment"))) {
+
+        }
     }
 }

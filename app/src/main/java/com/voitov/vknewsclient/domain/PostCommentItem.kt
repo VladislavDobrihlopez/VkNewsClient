@@ -5,6 +5,7 @@ import com.voitov.vknewsclient.R
 data class PostCommentItem(
     val id: Int,
     val authorId: Int,
+    val postId: Int,
     val authorName: String = "first_name",
     val authorLastName: String = "last_name",
     val avatarResId: Int = R.drawable.post_community_image,
