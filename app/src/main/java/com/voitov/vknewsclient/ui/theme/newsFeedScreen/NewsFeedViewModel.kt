@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient
+package com.voitov.vknewsclient.ui.theme.newsFeedScreen
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -7,19 +7,9 @@ import com.voitov.vknewsclient.domain.MetricsType
 import com.voitov.vknewsclient.domain.PostCommentItem
 import com.voitov.vknewsclient.domain.PostItem
 import com.voitov.vknewsclient.domain.SocialMetric
-import com.voitov.vknewsclient.ui.theme.homeScreen.HomeScreenState
-import com.voitov.vknewsclient.ui.theme.homeScreen.getMetricByType
 import kotlin.random.Random
 
-class MainViewModel : ViewModel() {
-    private val fakePostComments = mutableListOf<PostCommentItem>().apply {
-        repeat(25) {
-            add(
-                PostCommentItem(id = it, authorId = it, postId = it, text = "Some text")
-            )
-        }
-    }
-
+class NewsFeedViewModel : ViewModel() {
     private val fakePosts = mutableListOf<PostItem>().apply {
         repeat(25) {
             add(
@@ -36,26 +26,18 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    private val initialScreenState = HomeScreenState.NewsFeedState(fakePosts)
+    private val initialScreenState = NewsFeedScreenState.ShowingPostsState(fakePosts)
 
-    private val _screenState = MutableLiveData<HomeScreenState>(initialScreenState)
-    val screenState: LiveData<HomeScreenState>
+    private val _screenState = MutableLiveData<NewsFeedScreenState>(initialScreenState)
+    val screenState: LiveData<NewsFeedScreenState>
         get() = _screenState
 
-    private var savedNewsFeedState: HomeScreenState? = initialScreenState
+    private var savedNewsFeedState: NewsFeedScreenState? = initialScreenState
 
     private fun checkWhetherIdIsValid(id: Int) {
         if (fakePosts.isEmpty() || (id !in 0 until fakePosts.size)) {
             throw IllegalArgumentException()
         }
-    }
-
-    fun displayComments(postId: Int) {
-        savedNewsFeedState = _screenState.value
-        _screenState.value = HomeScreenState.CommentsState(
-            postId = postId,
-            comments = fakePostComments
-        )
     }
 
     fun restorePreviousState() {
@@ -64,7 +46,7 @@ class MainViewModel : ViewModel() {
 
     fun updateMetric(postId: Int, metric: SocialMetric) {
         val currentState = _screenState.value
-        if (currentState !is HomeScreenState.NewsFeedState) {
+        if (currentState !is NewsFeedScreenState.ShowingPostsState) {
             return
         }
 
@@ -86,12 +68,12 @@ class MainViewModel : ViewModel() {
         val newPost = newPosts[oldPostIndex].copy(metrics = newFeedbackInfo)
         newPosts[oldPostIndex] = newPost
 
-        _screenState.value = HomeScreenState.NewsFeedState(newPosts)
+        _screenState.value = NewsFeedScreenState.ShowingPostsState(newPosts)
     }
 
     fun remove(postId: Int) {
         val currentState = _screenState.value
-        if (currentState !is HomeScreenState.NewsFeedState) {
+        if (currentState !is NewsFeedScreenState.ShowingPostsState) {
             return
         }
 
@@ -99,6 +81,6 @@ class MainViewModel : ViewModel() {
         val newPosts = oldPosts.toMutableList()
 
         newPosts.remove(newPosts.find { it.id == postId })
-        _screenState.value = HomeScreenState.NewsFeedState(newPosts)
+        _screenState.value = NewsFeedScreenState.ShowingPostsState(newPosts)
     }
 }

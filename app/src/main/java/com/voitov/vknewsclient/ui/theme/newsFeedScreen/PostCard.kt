@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.ui.theme.homeScreen
+package com.voitov.vknewsclient.ui.theme.newsFeedScreen
 
 import android.util.Log
 import androidx.compose.foundation.Image

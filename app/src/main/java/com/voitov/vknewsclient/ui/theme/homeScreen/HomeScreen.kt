@@ -1,31 +1,38 @@
 package com.voitov.vknewsclient.ui.theme.homeScreen
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
-import com.voitov.vknewsclient.MainViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.voitov.vknewsclient.ui.theme.newsFeedScreen.NewsFeedScreen
+import com.voitov.vknewsclient.ui.theme.newsFeedScreen.NewsFeedScreenState
+import com.voitov.vknewsclient.ui.theme.newsFeedScreen.NewsFeedViewModel
 
 @Composable
-fun HomeScreen(paddingVales: PaddingValues, viewModel: MainViewModel) {
-    val postsState = viewModel.screenState.observeAsState(HomeScreenState.InitialState)
+fun HomeScreen(paddingVales: PaddingValues, onCommentsClickListener: (Int) -> Unit) {
+    val viewModel: NewsFeedViewModel = viewModel()
+    val postsState = viewModel.screenState.observeAsState(NewsFeedScreenState.InitialState)
     when (val currentState = postsState.value) {
-        is HomeScreenState.NewsFeedState -> {
-            NewsFeedScreen(paddingVales, currentState.posts, viewModel)
-        }
-        is HomeScreenState.CommentsState -> {
-            CommentsScreen(
-                postId = currentState.postId,
-                comments = currentState.comments
-            ) {
-                viewModel.restorePreviousState()
-            }
-
-            BackHandler {
-                viewModel.restorePreviousState()
+        is NewsFeedScreenState.ShowingPostsState -> {
+            NewsFeedScreen(paddingVales, currentState.posts, viewModel) {
+                onCommentsClickListener(it)
             }
         }
-        is HomeScreenState.InitialState -> {
+//        is NewsFeedScreenState.CommentsState -> {
+//            CommentsScreen(
+//                postId = currentState.postId,
+//                comments = currentState.comments
+//            ) {
+//                viewModel.restorePreviousState()
+//            }
+//
+//            BackHandler {
+//                viewModel.restorePreviousState()
+//            }
+//        }
+        is NewsFeedScreenState.InitialState -> {
             //do nothing
         }
     }
