@@ -1,6 +1,5 @@
-package com.voitov.vknewsclient.ui.theme.screens
+package com.voitov.vknewsclient.ui.theme.newsFeedScreen
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -10,7 +9,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,19 +17,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.voitov.vknewsclient.R
-import com.voitov.vknewsclient.MainViewModel
-import com.voitov.vknewsclient.ui.theme.NewsPost
+import com.voitov.vknewsclient.domain.PostItem
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
-fun HomeScreen(paddingVales: PaddingValues, viewModel: MainViewModel) {
-    val postsState = viewModel.newsPost.observeAsState(listOf())
+fun NewsFeedScreen(
+    paddingValues: PaddingValues,
+    posts: List<PostItem>,
+    viewModel: NewsFeedViewModel,
+    onCommentsClickListener: (Int) -> Unit
+) {
     val scrollState = rememberLazyListState()
 
-    Log.d(TAG, "HomeScreen")
-
     LazyColumn(
-        modifier = Modifier.padding(paddingVales),
+        modifier = Modifier.padding(paddingValues),
         contentPadding = PaddingValues(
             top = 16.dp,
             start = 8.dp,
@@ -41,7 +40,7 @@ fun HomeScreen(paddingVales: PaddingValues, viewModel: MainViewModel) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
         state = scrollState
     ) {
-        items(items = postsState.value, key = { it.id }) { post ->
+        items(items = posts, key = { it.id }) { post ->
             val dismiss = rememberDismissState()
 
             // change in the future
@@ -91,7 +90,7 @@ fun HomeScreen(paddingVales: PaddingValues, viewModel: MainViewModel) {
                     }
                 }
             ) {
-                NewsPost(
+                PostCard(
                     postItem = post,
                     onViewsClickListener = {
                         viewModel.updateMetric(post.id, it)
@@ -100,7 +99,7 @@ fun HomeScreen(paddingVales: PaddingValues, viewModel: MainViewModel) {
                         viewModel.updateMetric(post.id, it)
                     },
                     onCommentsClickListener = {
-                        viewModel.updateMetric(post.id, it)
+                        onCommentsClickListener(post.id)
                     },
                     onLikesClickListener = {
                         viewModel.updateMetric(post.id, it)
@@ -110,3 +109,4 @@ fun HomeScreen(paddingVales: PaddingValues, viewModel: MainViewModel) {
         }
     }
 }
+

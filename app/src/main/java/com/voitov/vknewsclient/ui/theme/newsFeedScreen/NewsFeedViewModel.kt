@@ -1,15 +1,15 @@
-package com.voitov.vknewsclient
+package com.voitov.vknewsclient.ui.theme.newsFeedScreen
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.voitov.vknewsclient.domain.MetricsType
+import com.voitov.vknewsclient.domain.PostCommentItem
 import com.voitov.vknewsclient.domain.PostItem
 import com.voitov.vknewsclient.domain.SocialMetric
-import com.voitov.vknewsclient.ui.theme.getMetricByType
 import kotlin.random.Random
 
-class MainViewModel : ViewModel() {
+class NewsFeedViewModel : ViewModel() {
     private val fakePosts = mutableListOf<PostItem>().apply {
         repeat(25) {
             add(
@@ -26,9 +26,13 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    private val _newsPost = MutableLiveData<List<PostItem>>(fakePosts)
-    val newsPost: LiveData<List<PostItem>>
-        get() = _newsPost
+    private val initialScreenState = NewsFeedScreenState.ShowingPostsState(fakePosts)
+
+    private val _screenState = MutableLiveData<NewsFeedScreenState>(initialScreenState)
+    val screenState: LiveData<NewsFeedScreenState>
+        get() = _screenState
+
+    private var savedNewsFeedState: NewsFeedScreenState? = initialScreenState
 
     private fun checkWhetherIdIsValid(id: Int) {
         if (fakePosts.isEmpty() || (id !in 0 until fakePosts.size)) {
@@ -36,9 +40,19 @@ class MainViewModel : ViewModel() {
         }
     }
 
+    fun restorePreviousState() {
+        _screenState.value = savedNewsFeedState
+    }
+
     fun updateMetric(postId: Int, metric: SocialMetric) {
+        val currentState = _screenState.value
+        if (currentState !is NewsFeedScreenState.ShowingPostsState) {
+            return
+        }
+
         checkWhetherIdIsValid(postId)
-        val oldPosts = _newsPost.value ?: throw IllegalStateException()
+
+        val oldPosts = currentState.posts
         val oldPostInfo = oldPosts.find { it.id == postId } ?: throw IllegalStateException()
         val oldPostIndex = oldPosts.indexOf(oldPostInfo)
 
@@ -54,14 +68,19 @@ class MainViewModel : ViewModel() {
         val newPost = newPosts[oldPostIndex].copy(metrics = newFeedbackInfo)
         newPosts[oldPostIndex] = newPost
 
-        _newsPost.value = newPosts
+        _screenState.value = NewsFeedScreenState.ShowingPostsState(newPosts)
     }
 
     fun remove(postId: Int) {
-        val oldPosts = _newsPost.value ?: throw IllegalStateException()
+        val currentState = _screenState.value
+        if (currentState !is NewsFeedScreenState.ShowingPostsState) {
+            return
+        }
+
+        val oldPosts = currentState.posts
         val newPosts = oldPosts.toMutableList()
 
         newPosts.remove(newPosts.find { it.id == postId })
-        _newsPost.value = newPosts
+        _screenState.value = NewsFeedScreenState.ShowingPostsState(newPosts)
     }
 }

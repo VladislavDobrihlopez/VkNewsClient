@@ -1,13 +1,11 @@
-package com.voitov.vknewsclient.ui.theme
+package com.voitov.vknewsclient.ui.theme.newsFeedScreen
 
 import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -26,10 +24,12 @@ import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.MetricsType
 import com.voitov.vknewsclient.domain.PostItem
 import com.voitov.vknewsclient.domain.SocialMetric
-import com.voitov.vknewsclient.ui.theme.screens.TAG
+import com.voitov.vknewsclient.ui.theme.IconWithText
+import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
+import com.voitov.vknewsclient.ui.theme.TAG
 
 @Composable
-fun NewsPost(
+fun PostCard(
     modifier: Modifier = Modifier,
     postItem: PostItem,
     onSharesClickListener: (SocialMetric) -> Unit,
@@ -177,38 +177,11 @@ fun List<SocialMetric>.getMetricByType(type: MetricsType): SocialMetric {
     return this.find { it.type == type } ?: throw IllegalStateException()
 }
 
-@Composable
-private fun IconWithText(
-    pictResId: Int,
-    text: String,
-    modifier: Modifier = Modifier,
-    onItemClickListener: () -> Unit,
-) {
-    Row(
-        modifier = modifier.clickable {
-            onItemClickListener()
-        },
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(pictResId),
-            contentDescription = "",
-            tint = MaterialTheme.colors.onSecondary
-        )
-        Spacer(modifier = Modifier.width(2.dp))
-        Text(
-            text = text,
-            color = MaterialTheme.colors.onSecondary
-        )
-        Spacer(modifier = Modifier.width(2.dp))
-    }
-}
-
 @Preview
 @Composable
 fun NewsPostLightTheme() {
     VkNewsClientTheme(darkTheme = false) {
-        NewsPost(
+        PostCard(
             postItem = PostItem(id = 1),
             onViewsClickListener = {},
             onSharesClickListener = {},
@@ -222,7 +195,7 @@ fun NewsPostLightTheme() {
 @Composable
 fun NewsPostLightDark() {
     VkNewsClientTheme(darkTheme = true) {
-        NewsPost(
+        PostCard(
             postItem = PostItem(id = 1),
             onViewsClickListener = {},
             onSharesClickListener = {},
