@@ -14,11 +14,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import com.voitov.vknewsclient.navigation.AppNavGraph
-import com.voitov.vknewsclient.navigation.AppScreen
+import com.voitov.vknewsclient.navigation.rememberNavigationState
 import com.voitov.vknewsclient.ui.theme.commentsScreen.CommentsScreen
 import com.voitov.vknewsclient.ui.theme.homeScreen.HomeScreen
 
@@ -26,7 +24,7 @@ const val TAG = "COMPOSE_TEST"
 
 @Composable
 fun MainScreen() {
-    val navHostController = rememberNavController()
+    val navigationState = rememberNavigationState()
 
     val testLogicCommentsToPost: MutableState<Int?> = remember {
         mutableStateOf(null)
@@ -37,7 +35,8 @@ fun MainScreen() {
     Scaffold(
         bottomBar = {
             BottomNavigation {
-                val navBackStackEntry = navHostController.currentBackStackEntryAsState()
+                val navBackStackEntry =
+                    navigationState.navHostController.currentBackStackEntryAsState()
 
                 Log.d(TAG, "recomposed")
                 val items = listOf(
@@ -55,13 +54,7 @@ fun MainScreen() {
                     BottomNavigationItem(
                         onClick = {
                             if (!bottomItemIsSelected) {
-                                navHostController.navigate(navigationItem.screen.route) {
-                                    popUpTo(navHostController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
+                                navigationState.navigateTo(navigationItem.screen.route)
                             }
                         },
                         icon = {
@@ -86,11 +79,11 @@ fun MainScreen() {
         val postId = testLogicCommentsToPost.value
 
         AppNavGraph(
-            navHostController = navHostController,
+            navHostController = navigationState.navHostController,
             newsFeedContent = {
                 HomeScreen(paddingVales = it,
                     onCommentsClickListener = { clickedPostId ->
-                        navHostController.navigate(AppScreen.Comments.route)
+                        navigationState.navigateToComments()
                         testLogicCommentsToPost.value = clickedPostId
                     }
                 )
@@ -99,10 +92,10 @@ fun MainScreen() {
             profileScreenContent = { TestScreen(screenName = "profile screen") },
             commentsContent = {
                 CommentsScreen(postId = postId!!) {
-                    navHostController.popBackStack()
+                    navigationState.navHostController.popBackStack()
                 }
                 BackHandler {
-                    navHostController.popBackStack()
+                    navigationState.navHostController.popBackStack()
                 }
             }
         )

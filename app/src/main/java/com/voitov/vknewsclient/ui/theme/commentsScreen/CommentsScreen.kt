@@ -40,7 +40,7 @@ fun CommentsScreen(
                 .padding(bottom = 56.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            items(currentState.comments) { comment ->
+            items(items = currentState.comments, key = { it.id }) { comment ->
                 Comment(item = comment)
             }
         }
