@@ -66,23 +66,3 @@ fun CommentsScreenTopAppBar(
         }
     )
 }
-
-@Preview
-@Composable
-fun PreviewCommentsScreenDarkTheme() {
-    VkNewsClientTheme(darkTheme = true) {
-        CommentsScreen(1) {
-
-        }
-    }
-}
-
-@Preview
-@Composable
-fun PreviewCommentsScreenLightTheme() {
-    VkNewsClientTheme(darkTheme = false) {
-        CommentsScreen(1) {
-
-        }
-    }
-}

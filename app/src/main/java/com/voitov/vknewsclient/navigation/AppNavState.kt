@@ -19,8 +19,8 @@ class AppNavState(
         }
     }
 
-    fun navigateToComments() {
-        navHostController.navigate(AppScreen.Comments.route)
+    fun navigateToComments(postId: Int) {
+        navHostController.navigate(AppScreen.Comments.passArgs(postId))
     }
 }
 

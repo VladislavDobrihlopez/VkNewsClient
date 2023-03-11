@@ -76,22 +76,20 @@ fun MainScreen() {
 
         ) {
         Log.d(TAG, "VkNews")
-        val postId = testLogicCommentsToPost.value
 
         AppNavGraph(
             navHostController = navigationState.navHostController,
             newsFeedContent = {
                 HomeScreen(paddingVales = it,
                     onCommentsClickListener = { clickedPostId ->
-                        navigationState.navigateToComments()
-                        testLogicCommentsToPost.value = clickedPostId
+                        navigationState.navigateToComments(clickedPostId)
                     }
                 )
             },
             favoritesScreenContent = { TestScreen(screenName = "favorite screen") },
             profileScreenContent = { TestScreen(screenName = "profile screen") },
-            commentsContent = {
-                CommentsScreen(postId = postId!!) {
+            commentsContent = { clickedPostId ->
+                CommentsScreen(postId = clickedPostId) {
                     navigationState.navHostController.popBackStack()
                 }
                 BackHandler {
