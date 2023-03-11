@@ -13,9 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.voitov.vknewsclient.domain.PostItem
 import com.voitov.vknewsclient.navigation.AppNavGraph
 import com.voitov.vknewsclient.navigation.AppScreen
 import com.voitov.vknewsclient.ui.theme.commentsScreen.CommentsScreen
@@ -37,7 +38,7 @@ fun MainScreen() {
         bottomBar = {
             BottomNavigation {
                 val navBackStackEntry = navHostController.currentBackStackEntryAsState()
-                val currentRoute = navBackStackEntry.value?.destination?.route ?: ""
+
                 Log.d(TAG, "recomposed")
                 val items = listOf(
                     NavigationItem.Profile,
@@ -46,14 +47,21 @@ fun MainScreen() {
                 )
 
                 items.forEach { navigationItem ->
+                    val bottomItemIsSelected =
+                        navBackStackEntry.value?.destination?.hierarchy?.any {
+                            it.route == navigationItem.screen.route
+                        } ?: false
+
                     BottomNavigationItem(
                         onClick = {
-                            navHostController.navigate(navigationItem.screen.route) {
-                                popUpTo(AppScreen.NewsFeed.route) {
-                                    saveState = true
+                            if (!bottomItemIsSelected) {
+                                navHostController.navigate(navigationItem.screen.route) {
+                                    popUpTo(navHostController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
                             }
                         },
                         icon = {
@@ -65,7 +73,7 @@ fun MainScreen() {
                         label = {
                             Text(stringResource(navigationItem.labelResId))
                         },
-                        selected = navigationItem.screen.route == currentRoute,
+                        selected = bottomItemIsSelected,
                         selectedContentColor = MaterialTheme.colors.onPrimary,
                         unselectedContentColor = MaterialTheme.colors.onSecondary,
                     )
@@ -75,27 +83,28 @@ fun MainScreen() {
 
         ) {
         Log.d(TAG, "VkNews")
+        val postId = testLogicCommentsToPost.value
+
         AppNavGraph(
             navHostController = navHostController,
-            homeScreenContent = {
-                val postId = testLogicCommentsToPost.value
-                if (postId == null) {
-                    HomeScreen(paddingVales = it,
-                        onCommentsClickListener = { clickedPostId ->
-                            testLogicCommentsToPost.value = clickedPostId
-                        }
-                    )
-                } else {
-                    CommentsScreen(postId) {
-                        testLogicCommentsToPost.value = null
+            newsFeedContent = {
+                HomeScreen(paddingVales = it,
+                    onCommentsClickListener = { clickedPostId ->
+                        navHostController.navigate(AppScreen.Comments.route)
+                        testLogicCommentsToPost.value = clickedPostId
                     }
-                    BackHandler {
-                        testLogicCommentsToPost.value = null
-                    }
-                }
+                )
             },
             favoritesScreenContent = { TestScreen(screenName = "favorite screen") },
-            profileScreenContent = { TestScreen(screenName = "profile screen") }
+            profileScreenContent = { TestScreen(screenName = "profile screen") },
+            commentsContent = {
+                CommentsScreen(postId = postId!!) {
+                    navHostController.popBackStack()
+                }
+                BackHandler {
+                    navHostController.popBackStack()
+                }
+            }
         )
     }
 }

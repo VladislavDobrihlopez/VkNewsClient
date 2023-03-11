@@ -16,7 +16,7 @@ sealed class NavigationItem(
     object Home : NavigationItem(
         labelResId = R.string.bottom_navigation_item_home,
         icon = Icons.Outlined.Home,
-        screen = AppScreen.NewsFeed
+        screen = AppScreen.Home
     )
 
     object Favorite : NavigationItem(
