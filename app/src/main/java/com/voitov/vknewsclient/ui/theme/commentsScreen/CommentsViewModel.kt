@@ -22,7 +22,7 @@ class CommentsViewModel(
         get() = _screenState
 
     init {
-        showComments(1)
+        showComments(postId)
     }
 
     private fun showComments(postId: Int) {

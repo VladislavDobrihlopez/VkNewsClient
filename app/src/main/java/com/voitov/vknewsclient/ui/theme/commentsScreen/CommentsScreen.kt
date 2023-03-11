@@ -40,7 +40,7 @@ fun CommentsScreen(
                 .padding(bottom = 56.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            items(currentState.comments) { comment ->
+            items(items = currentState.comments, key = { it.id }) { comment ->
                 Comment(item = comment)
             }
         }
@@ -65,24 +65,4 @@ fun CommentsScreenTopAppBar(
             }
         }
     )
-}
-
-@Preview
-@Composable
-fun PreviewCommentsScreenDarkTheme() {
-    VkNewsClientTheme(darkTheme = true) {
-        CommentsScreen(1) {
-
-        }
-    }
-}
-
-@Preview
-@Composable
-fun PreviewCommentsScreenLightTheme() {
-    VkNewsClientTheme(darkTheme = false) {
-        CommentsScreen(1) {
-
-        }
-    }
 }
