@@ -87,7 +87,9 @@ fun MainScreen() {
                 )
             },
             favoritesScreenContent = { TestScreen(screenName = "favorite screen") },
-            profileScreenContent = { TestScreen(screenName = "profile screen") },
+            profileScreenContent = {
+                TestActivityResult()
+            },
             commentsContent = { clickedPostId ->
                 CommentsScreen(postId = clickedPostId) {
                     navigationState.navHostController.popBackStack()
