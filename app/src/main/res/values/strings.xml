@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">VkNewsClient</string>
+    <integer name="com_vk_sdk_AppId">51579174</integer>
     <string name="post_text" translatable="false">Сколько здесь ни гулял\nНо никогда не замечал следы\nДумал, из леса вой, да из людей так некому здесь выть\nНо острые глаза пялятся зорко\nОкружив мой дом\nЖдут, когда оступлюсь, чтобы навязать мне свой закон</string>
     <string name="bottom_navigation_item_home" translatable="false">Home</string>
     <string name="bottom_navigation_item_favorite" translatable="false">Favorite</string>

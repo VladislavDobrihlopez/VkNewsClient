@@ -26,10 +26,6 @@ const val TAG = "COMPOSE_TEST"
 fun MainScreen() {
     val navigationState = rememberNavigationState()
 
-    val testLogicCommentsToPost: MutableState<Int?> = remember {
-        mutableStateOf(null)
-    }
-
     Log.d(TAG, "MainScreen")
 
     Scaffold(
