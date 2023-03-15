@@ -1,14 +1,12 @@
-package com.voitov.vknewsclient.ui.theme.homeScreen
+package com.voitov.vknewsclient.presentation.homeScreen
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.voitov.vknewsclient.ui.theme.newsFeedScreen.NewsFeedScreen
-import com.voitov.vknewsclient.ui.theme.newsFeedScreen.NewsFeedScreenState
-import com.voitov.vknewsclient.ui.theme.newsFeedScreen.NewsFeedViewModel
+import com.voitov.vknewsclient.presentation.newsFeedScreen.NewsFeedScreen
+import com.voitov.vknewsclient.presentation.newsFeedScreen.NewsFeedScreenState
+import com.voitov.vknewsclient.presentation.newsFeedScreen.NewsFeedViewModel
 
 @Composable
 fun HomeScreen(paddingVales: PaddingValues, onCommentsClickListener: (Int) -> Unit) {

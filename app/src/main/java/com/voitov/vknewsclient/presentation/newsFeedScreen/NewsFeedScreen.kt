@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.ui.theme.newsFeedScreen
+package com.voitov.vknewsclient.presentation.newsFeedScreen
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image

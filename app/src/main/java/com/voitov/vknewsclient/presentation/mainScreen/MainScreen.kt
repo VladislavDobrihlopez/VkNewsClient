@@ -1,13 +1,11 @@
-package com.voitov.vknewsclient.ui.theme
+package com.voitov.vknewsclient.presentation.mainScreen
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,8 +15,9 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.voitov.vknewsclient.navigation.AppNavGraph
 import com.voitov.vknewsclient.navigation.rememberNavigationState
-import com.voitov.vknewsclient.ui.theme.commentsScreen.CommentsScreen
-import com.voitov.vknewsclient.ui.theme.homeScreen.HomeScreen
+import com.voitov.vknewsclient.presentation.commentsScreen.CommentsScreen
+import com.voitov.vknewsclient.presentation.homeScreen.HomeScreen
+import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 
 const val TAG = "COMPOSE_TEST"
 

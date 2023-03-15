@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.ui.theme.commentsScreen
+package com.voitov.vknewsclient.presentation.commentsScreen
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

@@ -1,10 +1,9 @@
-package com.voitov.vknewsclient.ui.theme.newsFeedScreen
+package com.voitov.vknewsclient.presentation.newsFeedScreen
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.voitov.vknewsclient.domain.MetricsType
-import com.voitov.vknewsclient.domain.PostCommentItem
 import com.voitov.vknewsclient.domain.PostItem
 import com.voitov.vknewsclient.domain.SocialMetric
 import kotlin.random.Random

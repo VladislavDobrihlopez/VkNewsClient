@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.ui.theme.authorizationScreen
+package com.voitov.vknewsclient.presentation.authorizationScreen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*

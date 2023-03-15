@@ -1,19 +1,25 @@
-package com.voitov.vknewsclient.ui.theme.authorizationScreen
+package com.voitov.vknewsclient.presentation.authorizationScreen
 
+import android.app.Application
+import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.vk.api.sdk.VK
+import com.vk.api.sdk.VKPreferencesKeyValueStorage
+import com.vk.api.sdk.auth.VKAccessToken
 import com.vk.api.sdk.auth.VKAuthenticationResult
 
-class MainViewModel : ViewModel() {
+class AuthorizationViewModel(application: Application) : AndroidViewModel(application) {
     private val _authorizationState =
         MutableLiveData<AuthorizationScreenState>(AuthorizationScreenState.InitialState)
     val authorizationState: LiveData<AuthorizationScreenState>
         get() = _authorizationState
 
     init {
-        _authorizationState.value = if (VK.isLoggedIn()) {
+        val token = VKAccessToken.restore(VKPreferencesKeyValueStorage(application))
+
+        _authorizationState.value = if (token != null && token.isValid) {
             AuthorizationScreenState.AuthorizationSucceeded
         } else {
             AuthorizationScreenState.AuthorizationFailed
@@ -29,5 +35,9 @@ class MainViewModel : ViewModel() {
                 AuthorizationScreenState.AuthorizationFailed
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "authorization"
     }
 }

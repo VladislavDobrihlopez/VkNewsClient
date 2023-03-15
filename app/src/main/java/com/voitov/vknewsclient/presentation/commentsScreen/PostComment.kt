@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.ui.theme.commentsScreen
+package com.voitov.vknewsclient.presentation.commentsScreen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*

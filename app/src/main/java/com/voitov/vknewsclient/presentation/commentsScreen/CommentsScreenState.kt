@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.ui.theme.commentsScreen
+package com.voitov.vknewsclient.presentation.commentsScreen
 
 import com.voitov.vknewsclient.domain.PostCommentItem
 
