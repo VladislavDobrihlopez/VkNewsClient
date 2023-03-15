@@ -16,7 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.voitov.vknewsclient.R
-import com.voitov.vknewsclient.domain.PostCommentItem
+import com.voitov.vknewsclient.domain.entities.PostCommentItem
 import com.voitov.vknewsclient.ui.theme.IconWithText
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 

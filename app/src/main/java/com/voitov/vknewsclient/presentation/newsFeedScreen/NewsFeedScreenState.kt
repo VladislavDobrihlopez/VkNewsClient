@@ -1,6 +1,6 @@
 package com.voitov.vknewsclient.presentation.newsFeedScreen
 
-import com.voitov.vknewsclient.domain.PostItem
+import com.voitov.vknewsclient.domain.entities.PostItem
 
 sealed class NewsFeedScreenState {
     object InitialState : NewsFeedScreenState()

@@ -10,6 +10,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 
@@ -18,6 +19,7 @@ fun IconWithText(
     pictResId: Int,
     text: String,
     modifier: Modifier = Modifier,
+    iconTint: Color = MaterialTheme.colors.onSecondary,
     onItemClickListener: () -> Unit,
 ) {
     Row(
@@ -29,7 +31,7 @@ fun IconWithText(
         Icon(
             painter = painterResource(pictResId),
             contentDescription = "",
-            tint = MaterialTheme.colors.onSecondary
+            tint = iconTint
         )
         Spacer(modifier = Modifier.width(2.dp))
         Text(

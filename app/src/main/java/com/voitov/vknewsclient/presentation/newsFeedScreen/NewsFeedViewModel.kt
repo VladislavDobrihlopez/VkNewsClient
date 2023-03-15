@@ -1,31 +1,51 @@
 package com.voitov.vknewsclient.presentation.newsFeedScreen
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import com.voitov.vknewsclient.domain.MetricsType
-import com.voitov.vknewsclient.domain.PostItem
+import androidx.lifecycle.viewModelScope
+import com.vk.api.sdk.VKPreferencesKeyValueStorage
+import com.vk.api.sdk.auth.VKAccessToken
+import com.voitov.vknewsclient.data.mappers.PostMapper
+import com.voitov.vknewsclient.data.network.ApiFactory
 import com.voitov.vknewsclient.domain.SocialMetric
-import kotlin.random.Random
+import com.voitov.vknewsclient.domain.entities.PostItem
+import kotlinx.coroutines.launch
 
-class NewsFeedViewModel : ViewModel() {
+class NewsFeedViewModel(application: Application) : AndroidViewModel(application) {
     private val fakePosts = mutableListOf<PostItem>().apply {
-        repeat(25) {
-            add(
-                PostItem(
-                    id = it,
-                    metrics = listOf(
-                        SocialMetric(MetricsType.COMMENTS, Random.nextInt(0, 1000)),
-                        SocialMetric(MetricsType.VIEWS, Random.nextInt(0, 1000)),
-                        SocialMetric(MetricsType.SHARES, Random.nextInt(0, 1000)),
-                        SocialMetric(MetricsType.LIKES, Random.nextInt(0, 1000))
-                    )
-                )
-            )
+//        repeat(25) {
+//            add(
+//                PostItem(
+//                    id = it.toString(),
+//                    metrics = listOf(
+//                        SocialMetric(MetricsType.COMMENTS, Random.nextInt(0, 1000)),
+//                        SocialMetric(MetricsType.VIEWS, Random.nextInt(0, 1000)),
+//                        SocialMetric(MetricsType.SHARES, Random.nextInt(0, 1000)),
+//                        SocialMetric(MetricsType.LIKES, Random.nextInt(0, 1000))
+//                    )
+//                )
+//            )
+//        }
+    }
+
+    init {
+        loadNews()
+    }
+
+    private fun loadNews() {
+        viewModelScope.launch {
+            val sharedPreferencesStorage = VKPreferencesKeyValueStorage(getApplication())
+            val token = VKAccessToken.restore(sharedPreferencesStorage) ?: return@launch
+            val response = ApiFactory.apiService.loadNews(token.accessToken)
+            val mapper = PostMapper()
+            val newsFeedContent = mapper.mapDtoResponseToEntitiesOfPostItem(response)
+            _screenState.value = NewsFeedScreenState.ShowingPostsState(newsFeedContent)
         }
     }
 
-    private val initialScreenState = NewsFeedScreenState.ShowingPostsState(fakePosts)
+    private val initialScreenState = NewsFeedScreenState.InitialState
 
     private val _screenState = MutableLiveData<NewsFeedScreenState>(initialScreenState)
     val screenState: LiveData<NewsFeedScreenState>
@@ -52,7 +72,7 @@ class NewsFeedViewModel : ViewModel() {
         checkWhetherIdIsValid(postId)
 
         val oldPosts = currentState.posts
-        val oldPostInfo = oldPosts.find { it.id == postId } ?: throw IllegalStateException()
+        val oldPostInfo = oldPosts.find { it.id.toInt() == postId } ?: throw IllegalStateException()
         val oldPostIndex = oldPosts.indexOf(oldPostInfo)
 
         val oldFeedbackInfo = oldPostInfo.metrics
@@ -79,7 +99,7 @@ class NewsFeedViewModel : ViewModel() {
         val oldPosts = currentState.posts
         val newPosts = oldPosts.toMutableList()
 
-        newPosts.remove(newPosts.find { it.id == postId })
+        newPosts.remove(newPosts.find { it.id.toInt() == postId })
         _screenState.value = NewsFeedScreenState.ShowingPostsState(newPosts)
     }
 }

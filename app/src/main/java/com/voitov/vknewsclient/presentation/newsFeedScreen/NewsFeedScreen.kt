@@ -17,7 +17,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.voitov.vknewsclient.R
-import com.voitov.vknewsclient.domain.PostItem
+import com.voitov.vknewsclient.domain.entities.PostItem
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -45,7 +45,7 @@ fun NewsFeedScreen(
 
             // change in the future
             if (dismiss.isDismissed(DismissDirection.EndToStart)) {
-                viewModel.remove(post.id)
+                //viewModel.remove(post.id.toInt())
             } else {
                 //todo implement bookmark page
                 LaunchedEffect(Unit) {
@@ -93,16 +93,16 @@ fun NewsFeedScreen(
                 PostCard(
                     postItem = post,
                     onViewsClickListener = {
-                        viewModel.updateMetric(post.id, it)
+                        viewModel.updateMetric(post.id.toInt(), it)
                     },
                     onSharesClickListener = {
-                        viewModel.updateMetric(post.id, it)
+                        viewModel.updateMetric(post.id.toInt(), it)
                     },
                     onCommentsClickListener = {
-                        onCommentsClickListener(post.id)
+                        onCommentsClickListener(post.id.toInt())
                     },
                     onLikesClickListener = {
-                        viewModel.updateMetric(post.id, it)
+                        viewModel.updateMetric(post.id.toInt(), it)
                     },
                 )
             }

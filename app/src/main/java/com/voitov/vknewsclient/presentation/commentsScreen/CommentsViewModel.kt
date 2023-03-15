@@ -3,7 +3,7 @@ package com.voitov.vknewsclient.presentation.commentsScreen
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.voitov.vknewsclient.domain.PostCommentItem
+import com.voitov.vknewsclient.domain.entities.PostCommentItem
 
 class CommentsViewModel(
     private val postId: Int

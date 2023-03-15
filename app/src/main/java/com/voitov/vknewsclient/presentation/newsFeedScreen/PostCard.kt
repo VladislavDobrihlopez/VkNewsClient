@@ -14,19 +14,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.MetricsType
-import com.voitov.vknewsclient.domain.PostItem
 import com.voitov.vknewsclient.domain.SocialMetric
+import com.voitov.vknewsclient.domain.entities.PostItem
+import com.voitov.vknewsclient.presentation.mainScreen.TAG
 import com.voitov.vknewsclient.ui.theme.IconWithText
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
-import com.voitov.vknewsclient.presentation.mainScreen.TAG
+import kotlin.random.Random
 
 @Composable
 fun PostCard(
@@ -51,6 +53,7 @@ fun PostCard(
             PostHeader(postItem)
             PostContent(postItem)
             PostFeedback(
+                postItem.isLiked,
                 postItem.metrics,
                 onViewsClickListener = {
                     onViewsClickListener(it)
@@ -74,11 +77,11 @@ private fun PostHeader(postItem: PostItem) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Image(
+        AsyncImage(
+            model = postItem.communityPhotoUrl,
             modifier = Modifier
                 .clip(CircleShape)
                 .size(50.dp),
-            painter = painterResource(id = postItem.avatarResId),
             contentDescription = "community thumbnail"
         )
         Spacer(modifier = Modifier.padding(all = 8.dp))
@@ -87,7 +90,7 @@ private fun PostHeader(postItem: PostItem) {
         ) {
             Text(postItem.authorName, color = MaterialTheme.colors.onPrimary)
             Spacer(modifier = Modifier.padding(vertical = 2.dp))
-            Text(postItem.time, color = MaterialTheme.colors.onSecondary)
+            Text(postItem.date, color = MaterialTheme.colors.onSecondary)
         }
         Image(
             imageVector = Icons.Rounded.MoreVert,
@@ -107,17 +110,18 @@ private fun PostContent(postItem: PostItem) {
 @Composable
 private fun PostText(postItem: PostItem) {
     Text(
-        text = stringResource(postItem.contentTextResId),
+        text = postItem.contentText,
         modifier = Modifier.fillMaxWidth(),
     )
 }
 
 @Composable
 private fun PostAdditionalResources(postItem: PostItem) {
-    Image(
+    AsyncImage(
+        model = postItem.contentImageUrl,
         modifier = Modifier
-            .fillMaxWidth(),
-        painter = painterResource(postItem.contentImagesResId),
+            .fillMaxWidth()
+            .wrapContentHeight(),
         contentDescription = "",
         contentScale = ContentScale.FillWidth,
     )
@@ -125,6 +129,7 @@ private fun PostAdditionalResources(postItem: PostItem) {
 
 @Composable
 private fun PostFeedback(
+    isPostLiked: Boolean,
     metrics: List<SocialMetric>,
     onSharesClickListener: (SocialMetric) -> Unit,
     onCommentsClickListener: (SocialMetric) -> Unit,
@@ -139,7 +144,10 @@ private fun PostFeedback(
     ) {
         Row(modifier = Modifier.weight(0.3f)) {
             val views = metrics.getMetricByType(MetricsType.VIEWS)
-            IconWithText(pictResId = R.drawable.ic_views_count, text = views.count.toString()) {
+            IconWithText(
+                pictResId = R.drawable.ic_views_count,
+                text = shortenLengthOfMetricsIfPossible(views.count)
+            ) {
                 onViewsClickListener(views)
             }
         }
@@ -164,12 +172,35 @@ private fun PostFeedback(
                 }
             }
             with(metrics.getMetricByType(MetricsType.LIKES)) {
-                IconWithText(pictResId = R.drawable.ic_like, text = count.toString())
-                {
+                IconWithText(
+                    pictResId = if (isPostLiked) {
+                        R.drawable.ic_liked
+                    } else {
+                        R.drawable.ic_like
+                    },
+                    text = shortenLengthOfMetricsIfPossible(count),
+                    iconTint = if (isPostLiked) {
+                        Color.Red
+                    } else {
+                        MaterialTheme.colors.onSecondary
+                    }
+                ) {
                     onLikesClickListener(this@with)
                 }
             }
         }
+    }
+}
+
+private fun shortenLengthOfMetricsIfPossible(count: Int): String {
+    return if (count >= 1_000_000) {
+        String.format("%.1f", (count / 1000f)) + "M"
+    } else if (count >= 100_000) {
+        "${count.toDouble() / 1000}K"
+    } else if (count >= 1000) {
+        String.format("%.1f", (count / 1000f)) + "K"
+    } else {
+        count.toString()
     }
 }
 
@@ -182,7 +213,23 @@ fun List<SocialMetric>.getMetricByType(type: MetricsType): SocialMetric {
 fun NewsPostLightTheme() {
     VkNewsClientTheme(darkTheme = false) {
         PostCard(
-            postItem = PostItem(id = 1),
+            postItem = PostItem(
+                id = "1",
+                R.drawable.post_community_image.toString(),
+                "Maks Korzh",
+                "today",
+                contentText = stringResource(
+                    id = R.string.post_text
+                ),
+                contentImageUrl = null,
+                isLiked = Random.nextBoolean(),
+                metrics = listOf(
+                    SocialMetric(MetricsType.LIKES, 2_100),
+                    SocialMetric(MetricsType.VIEWS, 15_000),
+                    SocialMetric(MetricsType.COMMENTS, 7_000),
+                    SocialMetric(MetricsType.SHARES, 5_000),
+                ),
+            ),
             onViewsClickListener = {},
             onSharesClickListener = {},
             onCommentsClickListener = {},
@@ -196,7 +243,23 @@ fun NewsPostLightTheme() {
 fun NewsPostLightDark() {
     VkNewsClientTheme(darkTheme = true) {
         PostCard(
-            postItem = PostItem(id = 1),
+            postItem = PostItem(
+                id = "1",
+                R.drawable.post_community_image.toString(),
+                "Maks Korzh",
+                "today",
+                contentText = stringResource(
+                    id = R.string.post_text
+                ),
+                contentImageUrl = null,
+                isLiked = Random.nextBoolean(),
+                metrics = listOf(
+                    SocialMetric(MetricsType.LIKES, 2_100),
+                    SocialMetric(MetricsType.VIEWS, 15_000),
+                    SocialMetric(MetricsType.COMMENTS, 7_000),
+                    SocialMetric(MetricsType.SHARES, 5_000),
+                )
+            ),
             onViewsClickListener = {},
             onSharesClickListener = {},
             onCommentsClickListener = {},

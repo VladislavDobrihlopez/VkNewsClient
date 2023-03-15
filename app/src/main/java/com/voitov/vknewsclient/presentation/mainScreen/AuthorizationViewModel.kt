@@ -1,11 +1,10 @@
-package com.voitov.vknewsclient.presentation.authorizationScreen
+package com.voitov.vknewsclient.presentation.mainScreen
 
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.vk.api.sdk.VK
 import com.vk.api.sdk.VKPreferencesKeyValueStorage
 import com.vk.api.sdk.auth.VKAccessToken
 import com.vk.api.sdk.auth.VKAuthenticationResult
@@ -18,6 +17,8 @@ class AuthorizationViewModel(application: Application) : AndroidViewModel(applic
 
     init {
         val token = VKAccessToken.restore(VKPreferencesKeyValueStorage(application))
+
+        Log.d(TAG, "User's token: ${token?.accessToken}")
 
         _authorizationState.value = if (token != null && token.isValid) {
             AuthorizationScreenState.AuthorizationSucceeded

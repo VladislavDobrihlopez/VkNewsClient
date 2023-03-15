@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.domain
+package com.voitov.vknewsclient.domain.entities
 
 import com.voitov.vknewsclient.R
 

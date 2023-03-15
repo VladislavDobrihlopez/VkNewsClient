@@ -1,6 +1,6 @@
 package com.voitov.vknewsclient.presentation.commentsScreen
 
-import com.voitov.vknewsclient.domain.PostCommentItem
+import com.voitov.vknewsclient.domain.entities.PostCommentItem
 
 sealed class CommentsScreenState {
     object InitialState : CommentsScreenState()

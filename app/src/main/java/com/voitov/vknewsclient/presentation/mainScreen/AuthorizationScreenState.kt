@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.presentation.authorizationScreen
+package com.voitov.vknewsclient.presentation.mainScreen
 
 sealed class AuthorizationScreenState {
     object InitialState: AuthorizationScreenState()
