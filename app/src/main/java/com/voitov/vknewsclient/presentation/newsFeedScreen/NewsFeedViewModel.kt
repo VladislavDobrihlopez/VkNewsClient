@@ -5,10 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.vk.api.sdk.VKPreferencesKeyValueStorage
-import com.vk.api.sdk.auth.VKAccessToken
-import com.voitov.vknewsclient.data.mappers.PostMapper
-import com.voitov.vknewsclient.data.network.ApiFactory
+import com.voitov.vknewsclient.data.NewsFeedRepository
 import com.voitov.vknewsclient.domain.SocialMetric
 import com.voitov.vknewsclient.domain.entities.PostItem
 import kotlinx.coroutines.launch
@@ -30,18 +27,30 @@ class NewsFeedViewModel(application: Application) : AndroidViewModel(application
 //        }
     }
 
+    private val repository = NewsFeedRepository(application)
+
     init {
         loadNews()
     }
 
     private fun loadNews() {
         viewModelScope.launch {
-            val sharedPreferencesStorage = VKPreferencesKeyValueStorage(getApplication())
-            val token = VKAccessToken.restore(sharedPreferencesStorage) ?: return@launch
-            val response = ApiFactory.apiService.loadNews(token.accessToken)
-            val mapper = PostMapper()
-            val newsFeedContent = mapper.mapDtoResponseToEntitiesOfPostItem(response)
-            _screenState.value = NewsFeedScreenState.ShowingPostsState(newsFeedContent)
+            val newsFeedContent = repository.loadRecommendations()
+            _screenState.value = NewsFeedScreenState.ShowingPostsState(posts = newsFeedContent)
+        }
+    }
+
+    fun changeLikeStatus(post: PostItem) {
+        if (!post.isLikedByUser) {
+            viewModelScope.launch {
+                repository.changeLikeStatus(post)
+                _screenState.value = NewsFeedScreenState.ShowingPostsState(posts = repository.posts)
+            }
+        } else {
+            viewModelScope.launch {
+                repository.changeLikeStatus(post)
+                _screenState.value = NewsFeedScreenState.ShowingPostsState(posts = repository.posts)
+            }
         }
     }
 

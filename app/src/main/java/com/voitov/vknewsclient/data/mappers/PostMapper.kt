@@ -23,13 +23,14 @@ class PostMapper {
             } ?: break
             entities.add(
                 PostItem(
-                    id = post.id ?: break,
+                    id = post.id,
+                    communityId = post.communityId,
                     communityPhotoUrl = postOwner.photoUrl,
                     authorName = postOwner.name,
                     contentText = post.text,
                     date = mapTimestampToDatePattern(post.secondsSince1970),
                     contentImageUrl = post.attachments?.firstOrNull()?.photo?.photos?.lastOrNull()?.url,
-                    isLiked = post.isFavorite,
+                    isLikedByUser = post.likes.userLikes == 1,
                     metrics = listOf(
                         SocialMetric(MetricsType.LIKES, post.likes.count),
                         SocialMetric(MetricsType.COMMENTS, post.comments.count),

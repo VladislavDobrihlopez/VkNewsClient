@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -27,6 +26,7 @@ import com.voitov.vknewsclient.domain.SocialMetric
 import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.presentation.mainScreen.TAG
 import com.voitov.vknewsclient.ui.theme.IconWithText
+import com.voitov.vknewsclient.ui.theme.TransparentRed
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 import kotlin.random.Random
 
@@ -53,7 +53,7 @@ fun PostCard(
             PostHeader(postItem)
             PostContent(postItem)
             PostFeedback(
-                postItem.isLiked,
+                postItem.isLikedByUser,
                 postItem.metrics,
                 onViewsClickListener = {
                     onViewsClickListener(it)
@@ -180,7 +180,7 @@ private fun PostFeedback(
                     },
                     text = shortenLengthOfMetricsIfPossible(count),
                     iconTint = if (isPostLiked) {
-                        Color.Red
+                        TransparentRed
                     } else {
                         MaterialTheme.colors.onSecondary
                     }
@@ -214,7 +214,8 @@ fun NewsPostLightTheme() {
     VkNewsClientTheme(darkTheme = false) {
         PostCard(
             postItem = PostItem(
-                id = "1",
+                id = 1,
+                communityId = 1,
                 R.drawable.post_community_image.toString(),
                 "Maks Korzh",
                 "today",
@@ -222,7 +223,7 @@ fun NewsPostLightTheme() {
                     id = R.string.post_text
                 ),
                 contentImageUrl = null,
-                isLiked = Random.nextBoolean(),
+                isLikedByUser = Random.nextBoolean(),
                 metrics = listOf(
                     SocialMetric(MetricsType.LIKES, 2_100),
                     SocialMetric(MetricsType.VIEWS, 15_000),
@@ -244,7 +245,8 @@ fun NewsPostLightDark() {
     VkNewsClientTheme(darkTheme = true) {
         PostCard(
             postItem = PostItem(
-                id = "1",
+                id = 1,
+                communityId = 1,
                 R.drawable.post_community_image.toString(),
                 "Maks Korzh",
                 "today",
@@ -252,7 +254,7 @@ fun NewsPostLightDark() {
                     id = R.string.post_text
                 ),
                 contentImageUrl = null,
-                isLiked = Random.nextBoolean(),
+                isLikedByUser = Random.nextBoolean(),
                 metrics = listOf(
                     SocialMetric(MetricsType.LIKES, 2_100),
                     SocialMetric(MetricsType.VIEWS, 15_000),
