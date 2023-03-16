@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.voitov.vknewsclient.data.NewsFeedRepository
 import com.voitov.vknewsclient.domain.SocialMetric
 import com.voitov.vknewsclient.domain.entities.PostItem
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class NewsFeedViewModel(application: Application) : AndroidViewModel(application) {
@@ -33,11 +34,25 @@ class NewsFeedViewModel(application: Application) : AndroidViewModel(application
         loadNews()
     }
 
+    private val initialScreenState = NewsFeedScreenState.InitialState
+
+    private val _screenState = MutableLiveData<NewsFeedScreenState>(initialScreenState)
+    val screenState: LiveData<NewsFeedScreenState>
+        get() = _screenState
+
+    private var savedNewsFeedState: NewsFeedScreenState? = initialScreenState
+
     private fun loadNews() {
         viewModelScope.launch {
+            delay(1500)
             val newsFeedContent = repository.loadRecommendations()
             _screenState.value = NewsFeedScreenState.ShowingPostsState(posts = newsFeedContent)
         }
+    }
+
+    fun loadContinuingPosts() {
+        _screenState.value = NewsFeedScreenState.ShowingPostsState(repository.posts, true)
+        loadNews()
     }
 
     fun changeLikeStatus(post: PostItem) {
@@ -53,14 +68,6 @@ class NewsFeedViewModel(application: Application) : AndroidViewModel(application
             }
         }
     }
-
-    private val initialScreenState = NewsFeedScreenState.InitialState
-
-    private val _screenState = MutableLiveData<NewsFeedScreenState>(initialScreenState)
-    val screenState: LiveData<NewsFeedScreenState>
-        get() = _screenState
-
-    private var savedNewsFeedState: NewsFeedScreenState? = initialScreenState
 
     private fun checkWhetherIdIsValid(id: Int) {
         if (fakePosts.isEmpty() || (id !in 0 until fakePosts.size)) {

@@ -14,7 +14,7 @@ fun HomeScreen(paddingVales: PaddingValues, onCommentsClickListener: (Int) -> Un
     val postsState = viewModel.screenState.observeAsState(NewsFeedScreenState.InitialState)
     when (val currentState = postsState.value) {
         is NewsFeedScreenState.ShowingPostsState -> {
-            NewsFeedScreen(paddingVales, currentState.posts, viewModel) {
+            NewsFeedScreen(paddingVales, currentState.posts, viewModel, currentState.isDataBeingLoaded) {
                 onCommentsClickListener(it)
             }
         }

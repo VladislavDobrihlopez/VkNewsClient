@@ -1,17 +1,13 @@
 package com.voitov.vknewsclient.data
 
 import android.app.Application
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.vk.api.sdk.VKPreferencesKeyValueStorage
 import com.vk.api.sdk.auth.VKAccessToken
 import com.voitov.vknewsclient.data.mappers.PostMapper
 import com.voitov.vknewsclient.data.network.ApiFactory
-import com.voitov.vknewsclient.data.network.models.LikesResponseDto
 import com.voitov.vknewsclient.domain.MetricsType
 import com.voitov.vknewsclient.domain.SocialMetric
 import com.voitov.vknewsclient.domain.entities.PostItem
-import kotlinx.coroutines.delay
 
 class NewsFeedRepository(application: Application) {
     private val storage = VKPreferencesKeyValueStorage(application)
@@ -23,12 +19,30 @@ class NewsFeedRepository(application: Application) {
     val posts: List<PostItem>
         get() = _posts.toList()
 
+    private var nextFrom: String? = null
+
     suspend fun loadRecommendations(): List<PostItem> {
-        val response = apiService.loadNews(getUserToken())
+        val placeToStartLoadingFrom = nextFrom
+
+        if (vkHasNothingToRecommendAnymore()) {
+            return _posts
+        }
+
+        val response = if (placeToStartLoadingFrom == null) {
+            apiService.loadNews(getUserToken())
+        } else {
+            apiService.loadNews(getUserToken(), placeToStartLoadingFrom)
+        }
+
+        nextFrom = response.content.nextFrom
         val mappedPosts = mapper.mapDtoResponseToEntitiesOfPostItem(response)
-        _posts.clear()
         _posts.addAll(mappedPosts)
-        return mappedPosts
+
+        return posts
+    }
+
+    private fun vkHasNothingToRecommendAnymore(): Boolean {
+        return nextFrom == null && _posts.isNotEmpty()
     }
 
     suspend fun changeLikeStatus(post: PostItem) {

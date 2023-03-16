@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -19,6 +20,7 @@ import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.ui.theme.TransparentGreen
 import com.voitov.vknewsclient.ui.theme.TransparentRed
+import com.voitov.vknewsclient.ui.theme.VkBlue
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -26,6 +28,7 @@ fun NewsFeedScreen(
     paddingValues: PaddingValues,
     posts: List<PostItem>,
     viewModel: NewsFeedViewModel,
+    isDataBeingLoaded: Boolean,
     onCommentsClickListener: (Int) -> Unit
 ) {
     val scrollState = rememberLazyListState()
@@ -94,19 +97,34 @@ fun NewsFeedScreen(
                 PostCard(
                     postItem = post,
                     onViewsClickListener = {
-                        viewModel.updateMetric(post.id.toInt(), it)
+                        //viewModel.updateMetric(post.id.toInt(), it)
                     },
                     onSharesClickListener = {
-                        viewModel.updateMetric(post.id.toInt(), it)
+                        //viewModel.updateMetric(post.id.toInt(), it)
                     },
                     onCommentsClickListener = {
                         onCommentsClickListener(post.id.toInt())
                     },
                     onLikesClickListener = {
                         viewModel.changeLikeStatus(post)
-                        //viewModel.updateMetric(post.id.toInt(), it)
                     },
                 )
+            }
+        }
+        item {
+            if (isDataBeingLoaded) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentHeight(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = VkBlue)
+                }
+            } else {
+                SideEffect {
+                    viewModel.loadContinuingPosts()
+                }
             }
         }
     }
