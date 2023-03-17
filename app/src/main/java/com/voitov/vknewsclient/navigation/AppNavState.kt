@@ -5,6 +5,7 @@ import androidx.compose.runtime.remember
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.voitov.vknewsclient.domain.entities.PostItem
 
 class AppNavState(
     val navHostController: NavHostController
@@ -19,8 +20,8 @@ class AppNavState(
         }
     }
 
-    fun navigateToComments(postId: Int) {
-        navHostController.navigate(AppScreen.Comments.passArgs(postId))
+    fun navigateToComments(post: PostItem) {
+        navHostController.navigate(AppNavScreen.Comments.passArgs(post))
     }
 }
 

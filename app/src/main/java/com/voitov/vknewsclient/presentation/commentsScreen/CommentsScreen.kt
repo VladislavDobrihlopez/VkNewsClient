@@ -1,6 +1,8 @@
 package com.voitov.vknewsclient.presentation.commentsScreen
 
+import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -10,26 +12,65 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.voitov.vknewsclient.domain.entities.PostItem
+import com.voitov.vknewsclient.presentation.LoadingGoingOn
 
 @Composable
 fun CommentsScreen(
-    postId: Int,
+    post: PostItem,
     onBackPressed: () -> Unit
 ) {
     val viewModel: CommentsViewModel = viewModel(
-        factory = CommentsViewModelFactory(postId = postId)
+        factory = CommentsViewModelFactory(
+            application = LocalContext.current.applicationContext as Application,
+            post = post
+        )
     )
     val commentsState = viewModel.screenState.observeAsState(CommentsScreenState.InitialState)
-    val currentState = commentsState.value
 
-    if (currentState !is CommentsScreenState.ShowingCommentsState) {
-        return
+    when (val currentState = commentsState.value) {
+        is CommentsScreenState.LoadingState -> {
+            CommentsScreenOnDataBeingLoadedState(currentState, onBackPressed)
+        }
+        is CommentsScreenState.ShowingCommentsState -> {
+            CommentsScreenOnViewState(currentState, onBackPressed)
+        }
+        CommentsScreenState.InitialState -> {
+        }
     }
+}
 
+@Composable
+fun CommentsScreenOnDataBeingLoadedState(
+    currentState: CommentsScreenState.LoadingState,
+    onBackPressed: () -> Unit
+) {
     Scaffold(
-        topBar = { CommentsScreenTopAppBar(currentState.postId, onBackPressed) }
+        topBar = { CommentsScreenTopAppBar(onBackPressed = onBackPressed) }
+    ) {
+        LoadingGoingOn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+        )
+    }
+}
+
+@Composable
+fun CommentsScreenOnViewState(
+    currentState: CommentsScreenState.ShowingCommentsState,
+    onBackPressed: () -> Unit
+) {
+    Scaffold(
+        topBar = {
+            CommentsScreenTopAppBar(
+                commentsState = currentState,
+                onBackPressed = onBackPressed
+            )
+        }
     ) {
         LazyColumn(
             modifier = Modifier
@@ -47,13 +88,13 @@ fun CommentsScreen(
 
 @Composable
 fun CommentsScreenTopAppBar(
-    postId: Int,
-    onBackPressed: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    commentsState: CommentsScreenState.ShowingCommentsState? = null,
+    onBackPressed: () -> Unit
 ) {
     TopAppBar(
         modifier = modifier,
-        title = { Text(text = "Comments for news with id: $postId") },
+        title = { Text(text = "Comments post: ${commentsState?.post?.communityId ?: "..."}") },
         navigationIcon = {
             IconButton(onClick = { onBackPressed() }) {
                 Icon(

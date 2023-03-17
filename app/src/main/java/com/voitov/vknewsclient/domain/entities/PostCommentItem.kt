@@ -1,15 +1,14 @@
 package com.voitov.vknewsclient.domain.entities
 
-import com.voitov.vknewsclient.R
-
 data class PostCommentItem(
-    val id: Int,
-    val authorId: Int,
-    val postId: Int,
-    val authorName: String = "first_name",
-    val authorLastName: String = "last_name",
-    val avatarResId: Int = R.drawable.post_community_image,
-    val publicationTime: String = "8th March, 14:00",
+    val id: Long,
+    val authorId: Long,
+    val postId: Long,
+    val authorName: String,
+    val authorLastName: String,
+    val avatarImageUrl: String,
+    val date: String,
     val text: String,
-    val likes: Int = 100,
+    val likesCount: Int,
+    val isLikedByUser: Boolean
 )

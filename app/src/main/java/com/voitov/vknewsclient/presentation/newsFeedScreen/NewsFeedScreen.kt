@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -17,7 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.entities.PostItem
-import com.voitov.vknewsclient.presentation.homeScreen.LoadingGoingOn
+import com.voitov.vknewsclient.presentation.LoadingGoingOn
 import com.voitov.vknewsclient.ui.theme.TransparentGreen
 import com.voitov.vknewsclient.ui.theme.TransparentRed
 
@@ -28,7 +27,7 @@ fun NewsFeedScreen(
     posts: List<PostItem>,
     viewModel: NewsFeedViewModel,
     isDataBeingLoaded: Boolean,
-    onCommentsClickListener: (Int) -> Unit
+    onCommentsClickListener: (PostItem) -> Unit
 ) {
     val scrollState = rememberLazyListState()
     val alertDialogState = remember {
@@ -103,7 +102,7 @@ fun NewsFeedScreen(
                 PostCard(
                     postItem = post,
                     onCommentsClickListener = {
-                        onCommentsClickListener(post.id.toInt())
+                        onCommentsClickListener(post)
                     },
                     onLikesClickListener = {
                         alertDialogState.value = DialogState.ShownState(post)

@@ -7,10 +7,10 @@ data class PostDto(
     @SerializedName("source_id") val communityId: Long,
     @SerializedName("date") val secondsSince1970: Long,
     @SerializedName("text") val text: String,
-    @SerializedName("likes") val likes: LikesDto,
-    @SerializedName("comments") val comments: CommentsDto,
-    @SerializedName("reposts") val reposts: RepostsDto,
-    @SerializedName("views") val views: ViewsDto,
+    @SerializedName("likes") val likes: LikesInfoHolderDto,
+    @SerializedName("comments") val comments: CommentsCountHolderDto,
+    @SerializedName("reposts") val reposts: RepostsCountHolderDto,
+    @SerializedName("views") val views: ViewsCountHolderDto,
     @SerializedName("attachments") val attachments: List<AttachedPhotoDto>?
 
 

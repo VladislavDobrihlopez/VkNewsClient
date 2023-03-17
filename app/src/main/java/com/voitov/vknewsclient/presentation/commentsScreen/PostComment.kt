@@ -1,33 +1,29 @@
 package com.voitov.vknewsclient.presentation.commentsScreen
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.entities.PostCommentItem
 import com.voitov.vknewsclient.ui.theme.IconWithText
-import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 
 @Composable
 fun Comment(item: PostCommentItem) {
     Row {
-        Image(
+        AsyncImage(
             modifier = Modifier
                 .clip(CircleShape)
                 .size(35.dp),
-            painter = painterResource(id = item.avatarResId),
+            model = item.avatarImageUrl,
             contentDescription = "image"
         )
         Column(
@@ -46,7 +42,7 @@ fun Comment(item: PostCommentItem) {
                 fontWeight = FontWeight.SemiBold
             )
             Text(
-                text = item.publicationTime,
+                text = item.date,
                 fontSize = 14.sp,
                 color = MaterialTheme.colors.onSecondary
             )
@@ -55,43 +51,43 @@ fun Comment(item: PostCommentItem) {
             modifier = Modifier.align(Alignment.Bottom),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconWithText(pictResId = R.drawable.ic_like, text = item.likes.toString()) {
+            IconWithText(pictResId = R.drawable.ic_like, text = item.likesCount.toString()) {
 
             }
         }
     }
 }
 
-@Preview
-@Composable
-private fun PreviewCommentDarkTheme() {
-    VkNewsClientTheme(darkTheme = true) {
-        Card {
-            Comment(
-                item = PostCommentItem(
-                    id = 1,
-                    postId = 1,
-                    authorId = 1,
-                    text = "somethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomething"
-                )
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun PreviewCommentLightTheme() {
-    VkNewsClientTheme(darkTheme = false) {
-        Card {
-            Comment(
-                item = PostCommentItem(
-                    id = 1,
-                    postId = 1,
-                    authorId = 1,
-                    text = "somethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomething"
-                )
-            )
-        }
-    }
-}
+//@Preview
+//@Composable
+//private fun PreviewCommentDarkTheme() {
+//    VkNewsClientTheme(darkTheme = true) {
+//        Card {
+//            Comment(
+//                item = PostCommentItem(
+//                    id = 1,
+//                    postId = 1,
+//                    authorId = 1,
+//                    text = "somethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomething"
+//                )
+//            )
+//        }
+//    }
+//}
+//
+//@Preview
+//@Composable
+//private fun PreviewCommentLightTheme() {
+//    VkNewsClientTheme(darkTheme = false) {
+//        Card {
+//            Comment(
+//                item = PostCommentItem(
+//                    id = 1,
+//                    postId = 1,
+//                    authorId = 1,
+//                    text = "somethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomething"
+//                )
+//            )
+//        }
+//    }
+//}

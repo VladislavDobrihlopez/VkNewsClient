@@ -76,15 +76,15 @@ fun MainScreen() {
             navHostController = navigationState.navHostController,
             newsFeedContent = {
                 HomeScreen(paddingVales = it,
-                    onCommentsClickListener = { clickedPostId ->
-                        navigationState.navigateToComments(clickedPostId)
+                    onCommentsClickListener = { clickedPost ->
+                        navigationState.navigateToComments(clickedPost)
                     }
                 )
             },
             favoritesScreenContent = { TestScreen(screenName = "favorite screen") },
             profileScreenContent = { TestScreen(screenName = "profile screen") },
-            commentsContent = { clickedPostId ->
-                CommentsScreen(postId = clickedPostId) {
+            commentsContent = { clickedPost->
+                CommentsScreen(post = clickedPost) {
                     navigationState.navHostController.popBackStack()
                 }
                 BackHandler {
