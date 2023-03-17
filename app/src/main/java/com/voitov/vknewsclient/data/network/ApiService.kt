@@ -31,6 +31,14 @@ interface ApiService {
         @Query("item_id") itemId: Long
     ): LikesResponseDto
 
+    @GET("newsfeed.ignoreItem?v=${API_VERSION}")
+    suspend fun ignoreItem(
+        @Query("access_token") token: String,
+        @Query("type") type: String = "wall",
+        @Query("owner_id") ownerId: Long,
+        @Query("item_id") ignoredItemId: Long
+    )
+
     companion object {
         private const val API_VERSION = "5.131"
     }

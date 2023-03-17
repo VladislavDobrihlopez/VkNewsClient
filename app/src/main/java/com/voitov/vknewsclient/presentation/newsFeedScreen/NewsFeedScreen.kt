@@ -7,9 +7,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -18,9 +17,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.entities.PostItem
+import com.voitov.vknewsclient.presentation.homeScreen.LoadingGoingOn
 import com.voitov.vknewsclient.ui.theme.TransparentGreen
 import com.voitov.vknewsclient.ui.theme.TransparentRed
-import com.voitov.vknewsclient.ui.theme.VkBlue
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -32,9 +31,16 @@ fun NewsFeedScreen(
     onCommentsClickListener: (Int) -> Unit
 ) {
     val scrollState = rememberLazyListState()
+    val alertDialogState = remember {
+        mutableStateOf(DialogState.HiddenState as DialogState)
+    }
+
+    ConfirmationDialog(alertDialogState, viewModel)
 
     LazyColumn(
-        modifier = Modifier.padding(paddingValues),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues),
         contentPadding = PaddingValues(
             top = 16.dp,
             start = 8.dp,
@@ -49,7 +55,7 @@ fun NewsFeedScreen(
 
             // change in the future
             if (dismiss.isDismissed(DismissDirection.EndToStart)) {
-                //viewModel.remove(post.id.toInt())
+                viewModel.ignoreItem(post)
             } else {
                 //todo implement bookmark page
                 LaunchedEffect(Unit) {
@@ -96,36 +102,66 @@ fun NewsFeedScreen(
             ) {
                 PostCard(
                     postItem = post,
-                    onViewsClickListener = {
-                        //viewModel.updateMetric(post.id.toInt(), it)
-                    },
-                    onSharesClickListener = {
-                        //viewModel.updateMetric(post.id.toInt(), it)
-                    },
                     onCommentsClickListener = {
                         onCommentsClickListener(post.id.toInt())
                     },
                     onLikesClickListener = {
-                        viewModel.changeLikeStatus(post)
+                        alertDialogState.value = DialogState.ShownState(post)
                     },
                 )
+
             }
         }
         item {
             if (isDataBeingLoaded) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .wrapContentHeight(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = VkBlue)
-                }
+                LoadingGoingOn(modifier = Modifier.fillMaxWidth())
             } else {
                 SideEffect {
                     viewModel.loadContinuingPosts()
                 }
             }
+        }
+    }
+}
+
+sealed class DialogState {
+    object HiddenState : DialogState()
+    data class ShownState(val post: PostItem) : DialogState()
+}
+
+@Composable
+fun ConfirmationDialog(dialogState: MutableState<DialogState>, viewModel: NewsFeedViewModel) {
+    when (val state = dialogState.value) {
+        is DialogState.HiddenState -> {
+            return
+        }
+        is DialogState.ShownState -> {
+            AlertDialog(
+                onDismissRequest = {
+                    dialogState.value = DialogState.HiddenState
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        dialogState.value = DialogState.HiddenState
+                        viewModel.changeLikeStatus(state.post)
+                    }) {
+                        Text("Confirm", color = MaterialTheme.colors.onPrimary)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        dialogState.value = DialogState.HiddenState
+                    }) {
+                        Text("Dismiss", color = MaterialTheme.colors.onPrimary)
+                    }
+                },
+                title = {
+                    Text(text = "Changing status of like")
+                },
+                text = {
+                    Text(text = "Do you agree to change the status of like?")
+                }
+            )
         }
     }
 }

@@ -34,10 +34,8 @@ import kotlin.random.Random
 fun PostCard(
     modifier: Modifier = Modifier,
     postItem: PostItem,
-    onSharesClickListener: (SocialMetric) -> Unit,
     onCommentsClickListener: (SocialMetric) -> Unit,
     onLikesClickListener: (SocialMetric) -> Unit,
-    onViewsClickListener: (SocialMetric) -> Unit,
 ) {
     Log.d(TAG, "NewsPost")
 
@@ -55,12 +53,6 @@ fun PostCard(
             PostFeedback(
                 postItem.isLikedByUser,
                 postItem.metrics,
-                onViewsClickListener = {
-                    onViewsClickListener(it)
-                },
-                onSharesClickListener = {
-                    onSharesClickListener(it)
-                },
                 onCommentsClickListener = {
                     onCommentsClickListener(it)
                 },
@@ -131,10 +123,8 @@ private fun PostAdditionalResources(postItem: PostItem) {
 private fun PostFeedback(
     isPostLiked: Boolean,
     metrics: List<SocialMetric>,
-    onSharesClickListener: (SocialMetric) -> Unit,
     onCommentsClickListener: (SocialMetric) -> Unit,
     onLikesClickListener: (SocialMetric) -> Unit,
-    onViewsClickListener: (SocialMetric) -> Unit,
 ) {
     Log.d(TAG, "PostFeedback")
     Row(
@@ -147,9 +137,7 @@ private fun PostFeedback(
             IconWithText(
                 pictResId = R.drawable.ic_views_count,
                 text = shortenLengthOfMetricsIfPossible(views.count)
-            ) {
-                onViewsClickListener(views)
-            }
+            )
         }
         Row(
             modifier = Modifier.weight(0.70f),
@@ -159,9 +147,7 @@ private fun PostFeedback(
                 IconWithText(
                     pictResId = R.drawable.ic_share,
                     text = count.toString(),
-                ) {
-                    onSharesClickListener(this@with)
-                }
+                )
             }
             with(metrics.getMetricByType(MetricsType.COMMENTS)) {
                 IconWithText(
@@ -231,8 +217,6 @@ fun NewsPostLightTheme() {
                     SocialMetric(MetricsType.SHARES, 5_000),
                 ),
             ),
-            onViewsClickListener = {},
-            onSharesClickListener = {},
             onCommentsClickListener = {},
             onLikesClickListener = {}
         )
@@ -262,8 +246,6 @@ fun NewsPostLightDark() {
                     SocialMetric(MetricsType.SHARES, 5_000),
                 )
             ),
-            onViewsClickListener = {},
-            onSharesClickListener = {},
             onCommentsClickListener = {},
             onLikesClickListener = {}
         )

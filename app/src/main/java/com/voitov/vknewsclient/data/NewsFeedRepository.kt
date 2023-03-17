@@ -75,6 +75,15 @@ class NewsFeedRepository(application: Application) {
         _posts[indexOfElementToBeReplaced] = updatedPost
     }
 
+    suspend fun ignoreItem(post: PostItem) {
+        apiService.ignoreItem(
+            token = getUserToken(),
+            ownerId = post.communityId,
+            ignoredItemId = post.id
+        )
+        _posts.remove(post)
+    }
+
     private fun getUserToken(): String {
         return token?.accessToken
             ?: throw IllegalStateException("Token is null. But it is now allowed")
