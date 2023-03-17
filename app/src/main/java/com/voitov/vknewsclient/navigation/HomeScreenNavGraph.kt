@@ -6,26 +6,29 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
+import com.google.gson.Gson
+import com.voitov.vknewsclient.domain.entities.PostItem
 
 fun NavGraphBuilder.homeScreenNavGraph(
     newsFeedContent: @Composable () -> Unit,
-    commentsContent: @Composable (Int) -> Unit
+    commentsContent: @Composable (PostItem) -> Unit
 ) {
     navigation(
-        startDestination = AppScreen.NewsFeed.route,
-        route = AppScreen.Home.route
+        startDestination = AppNavScreen.NewsFeed.route,
+        route = AppNavScreen.Home.route
     ) {
-        composable(AppScreen.NewsFeed.route) {
+        composable(AppNavScreen.NewsFeed.route) {
             newsFeedContent()
         }
-        composable(AppScreen.Comments.route, arguments = listOf(
-            navArgument(AppScreen.Comments.ARGUMENT_KEY_COMMENTS_ID) {
-                type = NavType.IntType
+        composable(AppNavScreen.Comments.route, arguments = listOf(
+            navArgument(AppNavScreen.Comments.ARGUMENT_KEY_POST_ITEM) {
+                type = NavType.StringType
             }
         )) {
-            val postId = it.arguments?.getInt(AppScreen.Comments.ARGUMENT_KEY_COMMENTS_ID)
+            val post = it.arguments?.getString(AppNavScreen.Comments.ARGUMENT_KEY_POST_ITEM)
                 ?: throw NullPointerException()
-            commentsContent(postId)
+            val parsedPost = Gson().fromJson(post.decode(), PostItem::class.java)
+            commentsContent(parsedPost)
         }
     }
 }

@@ -5,8 +5,10 @@
       <map>
         <entry key="..\:/Android/VkNewsClient/app/src/main/res/drawable/ic_comment.xml" value="0.135" />
         <entry key="..\:/Android/VkNewsClient/app/src/main/res/drawable/ic_like.xml" value="0.135" />
+        <entry key="..\:/Android/VkNewsClient/app/src/main/res/drawable/ic_liked.xml" value="0.155" />
         <entry key="..\:/Android/VkNewsClient/app/src/main/res/drawable/ic_recycling_bin.xml" value="0.1" />
         <entry key="..\:/Android/VkNewsClient/app/src/main/res/drawable/ic_share.xml" value="0.135" />
+        <entry key="..\:/Android/VkNewsClient/app/src/main/res/drawable/ic_vk_compact_logo.xml" value="0.155" />
       </map>
     </option>
   </component>
