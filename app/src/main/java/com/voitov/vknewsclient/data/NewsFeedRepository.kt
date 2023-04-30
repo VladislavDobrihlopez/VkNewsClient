@@ -6,6 +6,7 @@ import com.vk.api.sdk.auth.VKAccessToken
 import com.voitov.vknewsclient.data.mappers.CommentMapper
 import com.voitov.vknewsclient.data.mappers.PostMapper
 import com.voitov.vknewsclient.data.network.ApiFactory
+import com.voitov.vknewsclient.domain.AuthorizationStateResult
 import com.voitov.vknewsclient.domain.MetricsType
 import com.voitov.vknewsclient.domain.NewsFeedResult
 import com.voitov.vknewsclient.domain.SocialMetric
@@ -28,7 +29,8 @@ import kotlinx.coroutines.flow.stateIn
 class NewsFeedRepository(application: Application) {
     private val scope = CoroutineScope(Dispatchers.IO)
     private val storage = VKPreferencesKeyValueStorage(application)
-    private val token = VKAccessToken.restore(storage)
+    private val token
+        get() = VKAccessToken.restore(storage)
     private val apiService = ApiFactory.apiService
     private val postMapper = PostMapper()
     private val commentMapper = CommentMapper()
@@ -150,7 +152,29 @@ class NewsFeedRepository(application: Application) {
             delay(RETRY_DELAY_IN_MILLIS)
             true
         }
-        //.stateIn(scope = scope, started = SharingStarted.Lazily, initialValue = listOf())
+    //.stateIn(scope = scope, started = SharingStarted.Lazily, initialValue = listOf())
+
+    private val checkAuthStatusEvent = MutableSharedFlow<Unit>(replay = 1)
+    suspend fun retrySigningIn() {
+        checkAuthStatusEvent.emit(Unit)
+    }
+
+    val authStatus: Flow<AuthorizationStateResult> = flow {
+        checkAuthStatusEvent.emit(Unit)
+        checkAuthStatusEvent.collect {
+            val currentToken = token
+            val authState = if (currentToken != null && currentToken.isValid) {
+                AuthorizationStateResult.AuthorizationStateSuccess
+            } else {
+                AuthorizationStateResult.AuthorizationStateFailure
+            }
+            emit(authState)
+        }
+    }.stateIn(
+        scope = scope,
+        started = SharingStarted.Lazily,
+        initialValue = AuthorizationStateResult.InitialState
+    )
 
     private fun getUserToken(): String {
         return token?.accessToken
