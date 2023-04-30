@@ -1,7 +1,9 @@
 package com.voitov.vknewsclient.presentation.homeScreen
 
+import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
@@ -11,6 +13,7 @@ import com.voitov.vknewsclient.presentation.LoadingGoingOn
 import com.voitov.vknewsclient.presentation.newsFeedScreen.NewsFeedScreen
 import com.voitov.vknewsclient.presentation.newsFeedScreen.NewsFeedScreenState
 import com.voitov.vknewsclient.presentation.newsFeedScreen.NewsFeedViewModel
+import com.voitov.vknewsclient.presentation.newsFeedScreen.NoInternetLabel
 
 @Composable
 fun HomeScreen(paddingVales: PaddingValues, onCommentsClickListener: (PostItem) -> Unit) {
@@ -35,6 +38,11 @@ fun HomeScreen(paddingVales: PaddingValues, onCommentsClickListener: (PostItem) 
 
         is NewsFeedScreenState.InitialState -> {
             //do nothing
+        }
+
+        is NewsFeedScreenState.ErrorState -> {
+            NoInternetLabel()
+            Log.d("ERROR_TEST", "some error occurred")
         }
     }
 }

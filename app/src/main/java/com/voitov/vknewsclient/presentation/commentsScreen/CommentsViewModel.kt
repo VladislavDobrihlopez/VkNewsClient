@@ -7,41 +7,26 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.voitov.vknewsclient.data.NewsFeedRepository
 import com.voitov.vknewsclient.domain.entities.PostItem
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.delayEach
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 class CommentsViewModel(
     application: Application,
     private val post: PostItem
 ) : AndroidViewModel(application) {
-//    private val fakePostComments = mutableListOf<PostCommentItem>().apply {
-//        repeat(25) {
-//            add(
-//                PostCommentItem(id = it, authorId = it, postId = it, text = "Some text")
-//            )
-//        }
-//    }
-
-    private val _screenState =
-        MutableLiveData<CommentsScreenState>(CommentsScreenState.InitialState)
-    val screenState: LiveData<CommentsScreenState>
-        get() = _screenState
-
     private val repository = NewsFeedRepository(application)
-
-    init {
-        _screenState.value = CommentsScreenState.LoadingState
-        viewModelScope.launch {
-            val comments = repository.loadComments(post)
-            //showComments(post)
-            _screenState.value =
-                CommentsScreenState.ShowingCommentsState(post = post, comments = comments)
+    val screenState: Flow<CommentsScreenState> = repository.loadComments(post)
+        .map {
+            CommentsScreenState.ShowingCommentsState(
+                post = post,
+                comments = it
+            ) as CommentsScreenState
         }
-    }
-
-//    private fun showComments(posts: PostItem) {
-//        _screenState.value = CommentsScreenState.ShowingCommentsState(
-//            post = post,
-//            comments = fakePostComments
-//        )
-//    }
+        .onStart { emit(CommentsScreenState.LoadingState) }
+        .onEach { delay(500) }
 }

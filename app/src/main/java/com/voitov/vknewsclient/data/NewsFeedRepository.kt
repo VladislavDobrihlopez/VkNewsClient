@@ -7,16 +7,22 @@ import com.voitov.vknewsclient.data.mappers.CommentMapper
 import com.voitov.vknewsclient.data.mappers.PostMapper
 import com.voitov.vknewsclient.data.network.ApiFactory
 import com.voitov.vknewsclient.domain.MetricsType
+import com.voitov.vknewsclient.domain.NewsFeedResult
 import com.voitov.vknewsclient.domain.SocialMetric
 import com.voitov.vknewsclient.domain.entities.PostCommentItem
 import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.extensions.mergeWith
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.flow.stateIn
 
 class NewsFeedRepository(application: Application) {
@@ -42,7 +48,7 @@ class NewsFeedRepository(application: Application) {
     }
 
     private val needNextDataEvents = MutableSharedFlow<Unit>(replay = 1)
-    val recommendations: StateFlow<List<PostItem>> = flow {
+    val recommendations: StateFlow<NewsFeedResult> = flow {
         needNextDataEvents.emit(Unit)
         needNextDataEvents.collect {
             retrieveData()
@@ -50,10 +56,18 @@ class NewsFeedRepository(application: Application) {
         }
     }
         .mergeWith(updateDataFlow)
+        .map {
+            NewsFeedResult.Success(posts = it) as NewsFeedResult
+        }
+        .retry(10) {
+            delay(RETRY_DELAY_IN_MILLIS)
+            true
+        }
+        .catch { emit(NewsFeedResult.Failure) }
         .stateIn(
             scope = scope,
             started = SharingStarted.Lazily,
-            initialValue = posts
+            initialValue = NewsFeedResult.Success(posts = posts)
         )
 
     suspend fun retrieveNextRecommendations() {
@@ -123,18 +137,27 @@ class NewsFeedRepository(application: Application) {
         updateDataEvent.emit(Unit)
     }
 
-    suspend fun loadComments(post: PostItem): List<PostCommentItem> {
+    fun loadComments(post: PostItem): Flow<List<PostCommentItem>> = flow {
         val res = apiService.getComments(
             token = getUserToken(),
             ownerId = post.communityId,
             postId = post.id,
             startCommentId = 0
         )
-        return commentMapper.mapDtoToEntity(res)
+        emit(commentMapper.mapDtoToEntity(res))
     }
+        .retry(10) {
+            delay(RETRY_DELAY_IN_MILLIS)
+            true
+        }
+        //.stateIn(scope = scope, started = SharingStarted.Lazily, initialValue = listOf())
 
     private fun getUserToken(): String {
         return token?.accessToken
             ?: throw IllegalStateException("Token is null. But it is now allowed")
+    }
+
+    companion object {
+        private const val RETRY_DELAY_IN_MILLIS = 7000L
     }
 }
