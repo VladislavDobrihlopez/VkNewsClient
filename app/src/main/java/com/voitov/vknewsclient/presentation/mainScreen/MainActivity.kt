@@ -1,13 +1,15 @@
 package com.voitov.vknewsclient.presentation.mainScreen
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vk.api.sdk.VK
 import com.vk.api.sdk.auth.VKScope
+import com.voitov.vknewsclient.domain.AuthorizationStateResult
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 
 class MainActivity : ComponentActivity() {
@@ -16,24 +18,31 @@ class MainActivity : ComponentActivity() {
         setContent {
             VkNewsClientTheme {
                 val viewModel: AuthorizationViewModel = viewModel()
-                val authorizationState = viewModel.authorizationState.observeAsState(
-                    AuthorizationScreenState.InitialState
+                val authorizationState = viewModel.authorizationState.collectAsState(
+                    AuthorizationStateResult.InitialState
                 )
                 val loginLauncher = rememberLauncherForActivityResult(
                     contract = VK.getVKAuthActivityResultContract(),
                     onResult = {
-                        viewModel.handleAuthenticationResult(it)
+                        viewModel.handleAuthenticationResult()
                     }
                 )
+
+                Log.d("AUTH_TEST", authorizationState.value.toString())
+
                 when (authorizationState.value) {
-                    AuthorizationScreenState.AuthorizationFailed -> {
+                    AuthorizationStateResult.AuthorizationStateFailure -> {
+                        Log.d("AUTH_TEST", "failure")
+
                         AuthorizationScreen {
                             loginLauncher.launch(listOf(VKScope.WALL, VKScope.FRIENDS))
                         }
                     }
-                    AuthorizationScreenState.AuthorizationSucceeded -> {
+
+                    AuthorizationStateResult.AuthorizationStateSuccess -> {
                         MainScreen()
                     }
+
                     else -> {
 
                     }

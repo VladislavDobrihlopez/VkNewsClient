@@ -1,22 +1,29 @@
 package com.voitov.vknewsclient.presentation.commentsScreen
 
 import android.app.Application
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.presentation.LoadingGoingOn
+import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 
 @Composable
 fun CommentsScreen(
@@ -29,15 +36,20 @@ fun CommentsScreen(
             post = post
         )
     )
-    val commentsState = viewModel.screenState.observeAsState(CommentsScreenState.InitialState)
+    val commentsState =
+        viewModel.screenState.collectAsState(initial = CommentsScreenState.InitialState)
 
     when (val currentState = commentsState.value) {
         is CommentsScreenState.LoadingState -> {
-            CommentsScreenOnDataBeingLoadedState(currentState, onBackPressed)
+            Log.d("COMMENTS_TEST", "loading state")
+            CommentsScreenOnDataBeingLoadedState(onBackPressed)
         }
+
         is CommentsScreenState.ShowingCommentsState -> {
+            Log.d("COMMENTS_TEST", "showing comments state")
             CommentsScreenOnViewState(currentState, onBackPressed)
         }
+
         CommentsScreenState.InitialState -> {
         }
     }
@@ -45,7 +57,6 @@ fun CommentsScreen(
 
 @Composable
 fun CommentsScreenOnDataBeingLoadedState(
-    currentState: CommentsScreenState.LoadingState,
     onBackPressed: () -> Unit
 ) {
     Scaffold(
@@ -56,6 +67,16 @@ fun CommentsScreenOnDataBeingLoadedState(
                 .fillMaxSize()
                 .padding(it)
         )
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewCommentsScreenOnDataBeingLoadedState() {
+    VkNewsClientTheme {
+        CommentsScreenOnDataBeingLoadedState {
+
+        }
     }
 }
 

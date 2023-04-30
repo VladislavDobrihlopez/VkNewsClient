@@ -6,30 +6,81 @@ import com.vk.api.sdk.auth.VKAccessToken
 import com.voitov.vknewsclient.data.mappers.CommentMapper
 import com.voitov.vknewsclient.data.mappers.PostMapper
 import com.voitov.vknewsclient.data.network.ApiFactory
+import com.voitov.vknewsclient.domain.AuthorizationStateResult
 import com.voitov.vknewsclient.domain.MetricsType
+import com.voitov.vknewsclient.domain.NewsFeedResult
 import com.voitov.vknewsclient.domain.SocialMetric
 import com.voitov.vknewsclient.domain.entities.PostCommentItem
 import com.voitov.vknewsclient.domain.entities.PostItem
+import com.voitov.vknewsclient.extensions.mergeWith
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.retry
+import kotlinx.coroutines.flow.stateIn
 
 class NewsFeedRepository(application: Application) {
+    private val scope = CoroutineScope(Dispatchers.IO)
     private val storage = VKPreferencesKeyValueStorage(application)
-    private val token = VKAccessToken.restore(storage)
+    private val token
+        get() = VKAccessToken.restore(storage)
     private val apiService = ApiFactory.apiService
     private val postMapper = PostMapper()
     private val commentMapper = CommentMapper()
 
     private val _posts = mutableListOf<PostItem>()
-    val posts: List<PostItem>
+    private val posts: List<PostItem>
         get() = _posts.toList()
 
     private var nextPostFrom: String? = null
     private var nextCommentFrom: String? = null
 
-    suspend fun loadRecommendations(): List<PostItem> {
+    private val updateDataEvent = MutableSharedFlow<Unit>()
+    private val updateDataFlow = flow {
+        updateDataEvent.collect {
+            emit(posts)
+        }
+    }
+
+    private val needNextDataEvents = MutableSharedFlow<Unit>(replay = 1)
+    val recommendations: StateFlow<NewsFeedResult> = flow {
+        needNextDataEvents.emit(Unit)
+        needNextDataEvents.collect {
+            retrieveData()
+            emit(posts)
+        }
+    }
+        .mergeWith(updateDataFlow)
+        .map {
+            NewsFeedResult.Success(posts = it) as NewsFeedResult
+        }
+        .retry(10) {
+            delay(RETRY_DELAY_IN_MILLIS)
+            true
+        }
+        .catch { emit(NewsFeedResult.Failure) }
+        .stateIn(
+            scope = scope,
+            started = SharingStarted.Lazily,
+            initialValue = NewsFeedResult.Success(posts = posts)
+        )
+
+    suspend fun retrieveNextRecommendations() {
+        needNextDataEvents.emit(Unit)
+    }
+
+    private suspend fun retrieveData() {
         val placeToStartLoadingFrom = nextPostFrom
 
         if (vkHasNothingToRecommendAnymore()) {
-            return _posts
+            return
         }
 
         val response = if (placeToStartLoadingFrom == null) {
@@ -41,8 +92,6 @@ class NewsFeedRepository(application: Application) {
         nextPostFrom = response.content.nextFrom
         val mappedPosts = postMapper.mapDtoResponseToEntitiesOfPostItem(response)
         _posts.addAll(mappedPosts)
-
-        return posts
     }
 
     private fun vkHasNothingToRecommendAnymore(): Boolean {
@@ -77,6 +126,7 @@ class NewsFeedRepository(application: Application) {
         }
 
         _posts[indexOfElementToBeReplaced] = updatedPost
+        updateDataEvent.emit(Unit)
     }
 
     suspend fun ignoreItem(post: PostItem) {
@@ -86,20 +136,52 @@ class NewsFeedRepository(application: Application) {
             ignoredItemId = post.id
         )
         _posts.remove(post)
+        updateDataEvent.emit(Unit)
     }
 
-    suspend fun loadComments(post: PostItem): List<PostCommentItem> {
+    fun loadComments(post: PostItem): Flow<List<PostCommentItem>> = flow {
         val res = apiService.getComments(
             token = getUserToken(),
             ownerId = post.communityId,
             postId = post.id,
             startCommentId = 0
         )
-        return commentMapper.mapDtoToEntity(res)
+        emit(commentMapper.mapDtoToEntity(res))
     }
+        .retry(10) {
+            delay(RETRY_DELAY_IN_MILLIS)
+            true
+        }
+    //.stateIn(scope = scope, started = SharingStarted.Lazily, initialValue = listOf())
+
+    private val checkAuthStatusEvent = MutableSharedFlow<Unit>(replay = 1)
+    suspend fun retrySigningIn() {
+        checkAuthStatusEvent.emit(Unit)
+    }
+
+    val authStatus: Flow<AuthorizationStateResult> = flow {
+        checkAuthStatusEvent.emit(Unit)
+        checkAuthStatusEvent.collect {
+            val currentToken = token
+            val authState = if (currentToken != null && currentToken.isValid) {
+                AuthorizationStateResult.AuthorizationStateSuccess
+            } else {
+                AuthorizationStateResult.AuthorizationStateFailure
+            }
+            emit(authState)
+        }
+    }.stateIn(
+        scope = scope,
+        started = SharingStarted.Lazily,
+        initialValue = AuthorizationStateResult.InitialState
+    )
 
     private fun getUserToken(): String {
         return token?.accessToken
             ?: throw IllegalStateException("Token is null. But it is now allowed")
+    }
+
+    companion object {
+        private const val RETRY_DELAY_IN_MILLIS = 7000L
     }
 }
