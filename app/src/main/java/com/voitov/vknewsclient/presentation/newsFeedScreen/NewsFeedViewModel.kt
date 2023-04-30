@@ -1,52 +1,55 @@
 package com.voitov.vknewsclient.presentation.newsFeedScreen
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.voitov.vknewsclient.data.NewsFeedRepository
 import com.voitov.vknewsclient.domain.entities.PostItem
-import kotlinx.coroutines.delay
+import com.voitov.vknewsclient.extensions.mergeWith
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 class NewsFeedViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = NewsFeedRepository(application)
 
-    private val initialScreenState = NewsFeedScreenState.InitialState
+    private val screenStateFlow: StateFlow<List<PostItem>> = repository.recommendations
 
-    private val _screenState = MutableLiveData<NewsFeedScreenState>(initialScreenState)
-    val screenState: LiveData<NewsFeedScreenState>
-        get() = _screenState
+    private val nextPostsEvent = MutableSharedFlow<Unit>()
 
-    init {
-        _screenState.value = NewsFeedScreenState.LoadingState
-        loadNews()
-    }
-
-    private fun loadNews() {
-        viewModelScope.launch {
-            val newsFeedContent = repository.loadRecommendations()
-            delay(500)
-            _screenState.value = NewsFeedScreenState.ShowingPostsState(posts = newsFeedContent)
+    private val nextPostsFlow = flow<NewsFeedScreenState> {
+        nextPostsEvent.collect {
+            emit(NewsFeedScreenState.ShowingPostsState(screenStateFlow.value, true))
         }
     }
 
+    val screenState: Flow<NewsFeedScreenState> = screenStateFlow
+        .filter { it.isNotEmpty() }
+        .map { NewsFeedScreenState.ShowingPostsState(it, false) as NewsFeedScreenState }
+        .onStart { emit(NewsFeedScreenState.LoadingState) }
+        .mergeWith(nextPostsFlow)
+
     fun loadContinuingPosts() {
-        _screenState.value = NewsFeedScreenState.ShowingPostsState(repository.posts, true)
-        loadNews()
+        viewModelScope.launch {
+            nextPostsEvent.emit(Unit)
+            repository.retrieveNextRecommendations()
+        }
     }
 
     fun changeLikeStatus(post: PostItem) {
         if (!post.isLikedByUser) {
             viewModelScope.launch {
                 repository.changeLikeStatus(post)
-                _screenState.value = NewsFeedScreenState.ShowingPostsState(posts = repository.posts)
             }
         } else {
             viewModelScope.launch {
                 repository.changeLikeStatus(post)
-                _screenState.value = NewsFeedScreenState.ShowingPostsState(posts = repository.posts)
             }
         }
     }
@@ -54,7 +57,6 @@ class NewsFeedViewModel(application: Application) : AndroidViewModel(application
     fun ignoreItem(post: PostItem) {
         viewModelScope.launch {
             repository.ignoreItem(post)
-            _screenState.value = NewsFeedScreenState.ShowingPostsState(repository.posts)
         }
     }
 }
