@@ -12,6 +12,7 @@ import com.voitov.vknewsclient.domain.NewsFeedResult
 import com.voitov.vknewsclient.domain.SocialMetric
 import com.voitov.vknewsclient.domain.entities.PostCommentItem
 import com.voitov.vknewsclient.domain.entities.PostItem
+import com.voitov.vknewsclient.domain.repository.NewsFeedRepository
 import com.voitov.vknewsclient.extensions.mergeWith
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +27,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.flow.stateIn
 
-class NewsFeedRepository(application: Application) {
+class NewsFeedRepositoryImpl(application: Application) : NewsFeedRepository {
     private val scope = CoroutineScope(Dispatchers.IO)
     private val storage = VKPreferencesKeyValueStorage(application)
     private val token
@@ -50,7 +51,7 @@ class NewsFeedRepository(application: Application) {
     }
 
     private val needNextDataEvents = MutableSharedFlow<Unit>(replay = 1)
-    val recommendations: StateFlow<NewsFeedResult> = flow {
+    private val recommendations: StateFlow<NewsFeedResult> = flow {
         needNextDataEvents.emit(Unit)
         needNextDataEvents.collect {
             retrieveData()
@@ -72,7 +73,19 @@ class NewsFeedRepository(application: Application) {
             initialValue = NewsFeedResult.Success(posts = posts)
         )
 
-    suspend fun retrieveNextRecommendations() {
+    override fun getRecommendationsFlow(): StateFlow<NewsFeedResult> {
+        return recommendations
+    }
+
+    override fun getCommentsFlow(post: PostItem): Flow<List<PostCommentItem>> {
+        return loadComments(post)
+    }
+
+    override fun getAuthStatusFlow(): Flow<AuthorizationStateResult> {
+        return authStatus
+    }
+
+    override suspend fun retrieveNextRecommendations() {
         needNextDataEvents.emit(Unit)
     }
 
@@ -98,7 +111,7 @@ class NewsFeedRepository(application: Application) {
         return nextPostFrom == null && _posts.isNotEmpty()
     }
 
-    suspend fun changeLikeStatus(post: PostItem) {
+    override suspend fun changeLikeStatus(post: PostItem) {
         val updatedLikesCount = if (post.isLikedByUser) {
             apiService.removeLike(
                 token = getUserToken(),
@@ -129,7 +142,7 @@ class NewsFeedRepository(application: Application) {
         updateDataEvent.emit(Unit)
     }
 
-    suspend fun ignoreItem(post: PostItem) {
+    override suspend fun ignoreItem(post: PostItem) {
         apiService.ignoreItem(
             token = getUserToken(),
             ownerId = post.communityId,
@@ -139,7 +152,7 @@ class NewsFeedRepository(application: Application) {
         updateDataEvent.emit(Unit)
     }
 
-    fun loadComments(post: PostItem): Flow<List<PostCommentItem>> = flow {
+    private fun loadComments(post: PostItem): Flow<List<PostCommentItem>> = flow {
         val res = apiService.getComments(
             token = getUserToken(),
             ownerId = post.communityId,
@@ -155,11 +168,11 @@ class NewsFeedRepository(application: Application) {
     //.stateIn(scope = scope, started = SharingStarted.Lazily, initialValue = listOf())
 
     private val checkAuthStatusEvent = MutableSharedFlow<Unit>(replay = 1)
-    suspend fun retrySigningIn() {
+    override suspend fun retrySigningIn() {
         checkAuthStatusEvent.emit(Unit)
     }
 
-    val authStatus: Flow<AuthorizationStateResult> = flow {
+    private val authStatus: Flow<AuthorizationStateResult> = flow {
         checkAuthStatusEvent.emit(Unit)
         checkAuthStatusEvent.collect {
             val currentToken = token
