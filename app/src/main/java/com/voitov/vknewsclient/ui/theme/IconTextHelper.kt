@@ -29,6 +29,7 @@ fun IconWithText(
             onItemClickListener()
         }
     }
+
     Row(
         modifier = rowModifier,
         verticalAlignment = Alignment.CenterVertically
@@ -36,7 +37,7 @@ fun IconWithText(
         Icon(
             painter = painterResource(pictResId),
             contentDescription = "",
-            tint = iconTint
+            tint = iconTint,
         )
         Spacer(modifier = Modifier.width(2.dp))
         Text(
