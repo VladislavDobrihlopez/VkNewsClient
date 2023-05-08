@@ -1,16 +1,20 @@
 package com.voitov.vknewsclient.presentation.newsFeedScreen
 
 import android.util.Log
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideIn
-import androidx.compose.animation.with
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
@@ -30,7 +34,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.voitov.vknewsclient.R
@@ -43,13 +46,12 @@ import com.voitov.vknewsclient.ui.theme.TransparentRed
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 import kotlin.random.Random
 
-private const val DELAY_BEFORE_START = 1000
-private const val DELAY_BETWEEN_ANIMATIONS = 1200
-private const val ANIMATION_DURATION = 3000
+private const val DELAY_BEFORE_START = 1200
+private const val DELAY_BETWEEN_ANIMATIONS = 1900
+private const val ANIMATION_DURATION = 1500
 private const val INVISIBLE = 0F
 private const val VISIBLE = 1F
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun PostCard(
     modifier: Modifier = Modifier,
@@ -70,38 +72,16 @@ fun PostCard(
         ) {
             PostHeader(postItem)
             PostContent(postItem)
-
-            val firstTimeFeedback = rememberSaveable {
-                mutableStateOf(true)
-            }
-
-            LaunchedEffect(Unit) {
-                firstTimeFeedback.value = false
-            }
-
-            AnimatedContent(targetState = firstTimeFeedback.value, transitionSpec = {
-                slideIn(
-                    animationSpec = tween(durationMillis = 3000),
-                    initialOffset = { containerSize ->
-                        IntOffset(
-                            -containerSize.width / 15,
-                            -containerSize.height / 3
-                        )
-                    },
-                ) with fadeOut(animationSpec = tween(durationMillis = 500))
-            }
-            ) {
-                PostFeedback(
-                    postItem.isLikedByUser,
-                    postItem.metrics,
-                    onCommentsClickListener = {
-                        onCommentsClickListener(it)
-                    },
-                    onLikesClickListener = {
-                        onLikesClickListener(it)
-                    },
-                )
-            }
+            PostFeedback(
+                postItem.isLikedByUser,
+                postItem.metrics,
+                onCommentsClickListener = {
+                    onCommentsClickListener(it)
+                },
+                onLikesClickListener = {
+                    onLikesClickListener(it)
+                },
+            )
         }
     }
 }
@@ -188,7 +168,7 @@ private fun PostFeedback(
                 animationSpec = tween(
                     ANIMATION_DURATION + DELAY_BETWEEN_ANIMATIONS * 0,
                     delayMillis = DELAY_BEFORE_START,
-                    easing = LinearOutSlowInEasing
+                    easing = FastOutLinearInEasing
                 ),
             )
 
@@ -207,7 +187,7 @@ private fun PostFeedback(
                 animationSpec = tween(
                     ANIMATION_DURATION + DELAY_BETWEEN_ANIMATIONS * 1,
                     delayMillis = DELAY_BEFORE_START,
-                    easing = LinearOutSlowInEasing
+                    easing = FastOutLinearInEasing
                 ),
             )
 
@@ -217,7 +197,7 @@ private fun PostFeedback(
                 animationSpec = tween(
                     ANIMATION_DURATION + DELAY_BETWEEN_ANIMATIONS * 2,
                     delayMillis = DELAY_BEFORE_START,
-                    easing = LinearOutSlowInEasing
+                    easing = FastOutLinearInEasing
                 ),
             )
 
@@ -227,7 +207,7 @@ private fun PostFeedback(
                 animationSpec = tween(
                     ANIMATION_DURATION + DELAY_BETWEEN_ANIMATIONS * 3,
                     delayMillis = DELAY_BEFORE_START,
-                    easing = LinearOutSlowInEasing
+                    easing = FastOutLinearInEasing
                 ),
             )
 
