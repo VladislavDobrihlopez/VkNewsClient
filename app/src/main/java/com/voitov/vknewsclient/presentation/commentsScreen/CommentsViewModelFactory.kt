@@ -10,9 +10,9 @@ class CommentsViewModelFactory(
     private val post: PostItem
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(CommentsViewModel::class.java)) {
-            return CommentsViewModel(application, post) as T
-        }
+//        if (modelClass.isAssignableFrom(CommentsViewModel::class.java)) {
+//            return CommentsViewModel(application, post) as T
+//        }
         throw RuntimeException("Unknown viewModel: $modelClass")
     }
 }

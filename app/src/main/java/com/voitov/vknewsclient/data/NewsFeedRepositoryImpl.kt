@@ -1,11 +1,10 @@
 package com.voitov.vknewsclient.data
 
-import android.app.Application
 import com.vk.api.sdk.VKPreferencesKeyValueStorage
 import com.vk.api.sdk.auth.VKAccessToken
 import com.voitov.vknewsclient.data.mappers.CommentMapper
 import com.voitov.vknewsclient.data.mappers.PostMapper
-import com.voitov.vknewsclient.data.network.ApiFactory
+import com.voitov.vknewsclient.data.network.ApiService
 import com.voitov.vknewsclient.domain.AuthorizationStateResult
 import com.voitov.vknewsclient.domain.MetricsType
 import com.voitov.vknewsclient.domain.NewsFeedResult
@@ -26,15 +25,17 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
-class NewsFeedRepositoryImpl(application: Application) : NewsFeedRepository {
+class NewsFeedRepositoryImpl @Inject constructor(
+    private val storage: VKPreferencesKeyValueStorage,
+    private val apiService: ApiService,
+    private val postMapper: PostMapper,
+    private val commentMapper: CommentMapper
+) : NewsFeedRepository {
     private val scope = CoroutineScope(Dispatchers.IO)
-    private val storage = VKPreferencesKeyValueStorage(application)
     private val token
         get() = VKAccessToken.restore(storage)
-    private val apiService = ApiFactory.apiService
-    private val postMapper = PostMapper()
-    private val commentMapper = CommentMapper()
 
     private val _posts = mutableListOf<PostItem>()
     private val posts: List<PostItem>

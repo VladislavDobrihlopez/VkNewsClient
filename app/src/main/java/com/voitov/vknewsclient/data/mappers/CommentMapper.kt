@@ -3,8 +3,9 @@ package com.voitov.vknewsclient.data.mappers
 import com.voitov.vknewsclient.data.network.models.CommentsContentResponseDto
 import com.voitov.vknewsclient.data.util.mapTimestampToDatePattern
 import com.voitov.vknewsclient.domain.entities.PostCommentItem
+import javax.inject.Inject
 
-class CommentMapper {
+class CommentMapper @Inject constructor() {
     fun mapDtoToEntity(response: CommentsContentResponseDto): List<PostCommentItem> {
         val entities = mutableListOf<PostCommentItem>()
         val items = response.content.items

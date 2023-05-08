@@ -9,12 +9,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.voitov.vknewsclient.NewsFeedApplication
 import com.voitov.vknewsclient.navigation.AppNavGraph
 import com.voitov.vknewsclient.navigation.rememberNavigationState
+import com.voitov.vknewsclient.presentation.ViewModelsFactory
 import com.voitov.vknewsclient.presentation.commentsScreen.CommentsScreen
 import com.voitov.vknewsclient.presentation.homeScreen.HomeScreen
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
@@ -22,7 +25,7 @@ import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 const val TAG = "COMPOSE_TEST"
 
 @Composable
-fun MainScreen() {
+fun MainScreen(viewModelsFactory: ViewModelsFactory) {
     val navigationState = rememberNavigationState()
 
     Log.d(TAG, "MainScreen")
@@ -75,7 +78,9 @@ fun MainScreen() {
         AppNavGraph(
             navHostController = navigationState.navHostController,
             newsFeedContent = {
-                HomeScreen(paddingVales = it,
+                HomeScreen(
+                    viewModelsFactory = viewModelsFactory,
+                    paddingVales = it,
                     onCommentsClickListener = { clickedPost ->
                         navigationState.navigateToComments(clickedPost)
                     }
@@ -83,7 +88,7 @@ fun MainScreen() {
             },
             favoritesScreenContent = { TestScreen(screenName = "favorite screen") },
             profileScreenContent = { TestScreen(screenName = "profile screen") },
-            commentsContent = { clickedPost->
+            commentsContent = { clickedPost ->
                 CommentsScreen(post = clickedPost) {
                     navigationState.navHostController.popBackStack()
                 }
@@ -112,6 +117,6 @@ fun TestScreen(screenName: String) {
 @Composable
 private fun PreviewVkNews() {
     VkNewsClientTheme {
-        MainScreen()
+        //MainScreen()
     }
 }

@@ -10,14 +10,19 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.presentation.LoadingGoingOn
+import com.voitov.vknewsclient.presentation.ViewModelsFactory
 import com.voitov.vknewsclient.presentation.newsFeedScreen.NewsFeedScreen
 import com.voitov.vknewsclient.presentation.newsFeedScreen.NewsFeedScreenState
 import com.voitov.vknewsclient.presentation.newsFeedScreen.NewsFeedViewModel
 import com.voitov.vknewsclient.presentation.newsFeedScreen.NoInternetLabel
 
 @Composable
-fun HomeScreen(paddingVales: PaddingValues, onCommentsClickListener: (PostItem) -> Unit) {
-    val viewModel: NewsFeedViewModel = viewModel()
+fun HomeScreen(
+    viewModelsFactory: ViewModelsFactory,
+    paddingVales: PaddingValues,
+    onCommentsClickListener: (PostItem) -> Unit
+) {
+    val viewModel: NewsFeedViewModel = viewModel(factory = viewModelsFactory)
     val postsState =
         viewModel.screenState.collectAsState(initial = NewsFeedScreenState.InitialState)
     when (val currentState = postsState.value) {

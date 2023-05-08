@@ -1,10 +1,8 @@
 package com.voitov.vknewsclient.presentation.newsFeedScreen
 
-import android.app.Application
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.voitov.vknewsclient.data.NewsFeedRepositoryImpl
 import com.voitov.vknewsclient.domain.NewsFeedResult
 import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.domain.usecases.ChangeLikeStatusUseCase
@@ -21,13 +19,14 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class NewsFeedViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = NewsFeedRepositoryImpl(application)
-    private val changeLikeStatusUseCase = ChangeLikeStatusUseCase(repository)
-    private val ignoreItemUseCase = IgnoreItemUseCase(repository)
-    private val getRecommendationsUseCase = GetRecommendationsUseCase(repository)
-    private val retrieveNextRecommendationsUseCase = RetrieveNextRecommendationsUseCase(repository)
+class NewsFeedViewModel @Inject constructor(
+    private val changeLikeStatusUseCase: ChangeLikeStatusUseCase,
+    private val ignoreItemUseCase: IgnoreItemUseCase,
+    private val getRecommendationsUseCase: GetRecommendationsUseCase,
+    private val retrieveNextRecommendationsUseCase: RetrieveNextRecommendationsUseCase
+) : ViewModel() {
     private val exceptionHandler = CoroutineExceptionHandler { _, _ ->
         Log.d("ERROR_TEST", "exception is caught")
     }
