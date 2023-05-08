@@ -1,6 +1,5 @@
 package com.voitov.vknewsclient.presentation.commentsScreen
 
-import android.app.Application
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,8 +20,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.voitov.vknewsclient.NewsFeedApplication
 import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.presentation.LoadingGoingOn
+import com.voitov.vknewsclient.presentation.ViewModelsFactory
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 
 @Composable
@@ -30,11 +31,17 @@ fun CommentsScreen(
     post: PostItem,
     onBackPressed: () -> Unit
 ) {
+    val applicationComponent =
+        (LocalContext.current.applicationContext as NewsFeedApplication).component
+            .getCommentsScreenComponentFactory()
+            .create(post)
+
     val viewModel: CommentsViewModel = viewModel(
-        factory = CommentsViewModelFactory(
-            application = LocalContext.current.applicationContext as Application,
-            post = post
-        )
+//        factory = CommentsViewModelFactory(
+//            application = LocalContext.current.applicationContext as Application,
+//            post = post
+//        )
+        factory = applicationComponent.getViewModelsFactory()
     )
     val commentsState =
         viewModel.screenState.collectAsState(initial = CommentsScreenState.InitialState)

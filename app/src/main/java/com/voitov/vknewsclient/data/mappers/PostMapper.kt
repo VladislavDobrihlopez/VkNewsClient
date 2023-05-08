@@ -6,11 +6,10 @@ import com.voitov.vknewsclient.data.util.mapTimestampToDatePattern
 import com.voitov.vknewsclient.domain.MetricsType
 import com.voitov.vknewsclient.domain.SocialMetric
 import com.voitov.vknewsclient.domain.entities.PostItem
-import java.text.SimpleDateFormat
-import java.util.*
+import javax.inject.Inject
 import kotlin.math.absoluteValue
 
-class PostMapper {
+class PostMapper @Inject constructor() {
     fun mapDtoResponseToEntitiesOfPostItem(response: NewsFeedContentResponseDto): List<PostItem> {
         val entities = mutableListOf<PostItem>()
         val posts = response.content.posts
