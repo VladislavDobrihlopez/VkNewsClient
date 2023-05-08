@@ -9,36 +9,28 @@ import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vk.api.sdk.VK
 import com.vk.api.sdk.auth.VKScope
-import com.voitov.vknewsclient.NewsFeedApplication
 import com.voitov.vknewsclient.domain.AuthorizationStateResult
-import com.voitov.vknewsclient.presentation.ViewModelsFactory
+import com.voitov.vknewsclient.getApplicationComponent
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
-import javax.inject.Inject
 
 class MainActivity : ComponentActivity() {
-    @Inject
-    lateinit var viewModelsFactory: ViewModelsFactory
-
-    private val component by lazy {
-        (application as NewsFeedApplication).component
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
-        component.inject(this)
         super.onCreate(savedInstanceState)
         setContent {
+            val appComponent = getApplicationComponent()
+            val viewModel: AuthorizationViewModel =
+                viewModel(factory = appComponent.getViewModelsFactory())
+
+            val loginLauncher = rememberLauncherForActivityResult(
+                contract = VK.getVKAuthActivityResultContract(),
+                onResult = {
+                    viewModel.handleAuthenticationResult()
+                }
+            )
             VkNewsClientTheme {
-                val viewModel: AuthorizationViewModel = viewModel(factory = viewModelsFactory)
                 val authorizationState = viewModel.authorizationState.collectAsState(
                     AuthorizationStateResult.InitialState
                 )
-                val loginLauncher = rememberLauncherForActivityResult(
-                    contract = VK.getVKAuthActivityResultContract(),
-                    onResult = {
-                        viewModel.handleAuthenticationResult()
-                    }
-                )
-
                 Log.d("AUTH_TEST", authorizationState.value.toString())
 
                 when (authorizationState.value) {
@@ -51,7 +43,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     AuthorizationStateResult.AuthorizationStateSuccess -> {
-                        MainScreen(viewModelsFactory = viewModelsFactory)
+                        MainScreen()
                     }
 
                     else -> {

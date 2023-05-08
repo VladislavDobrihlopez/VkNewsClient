@@ -14,16 +14,15 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.voitov.vknewsclient.NewsFeedApplication
 import com.voitov.vknewsclient.domain.entities.PostItem
+import com.voitov.vknewsclient.getApplicationComponent
 import com.voitov.vknewsclient.presentation.LoadingGoingOn
-import com.voitov.vknewsclient.presentation.ViewModelsFactory
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 
 @Composable
@@ -31,22 +30,29 @@ fun CommentsScreen(
     post: PostItem,
     onBackPressed: () -> Unit
 ) {
-    val applicationComponent =
-        (LocalContext.current.applicationContext as NewsFeedApplication).component
-            .getCommentsScreenComponentFactory()
-            .create(post)
+    val applicationComponent = getApplicationComponent()
+        .getCommentsScreenComponentFactory()
+        .create(post)
+
+    Log.d("NEWS_FEED_APPLICATION", "recomposition")
 
     val viewModel: CommentsViewModel = viewModel(
-//        factory = CommentsViewModelFactory(
-//            application = LocalContext.current.applicationContext as Application,
-//            post = post
-//        )
         factory = applicationComponent.getViewModelsFactory()
     )
     val commentsState =
         viewModel.screenState.collectAsState(initial = CommentsScreenState.InitialState)
 
-    when (val currentState = commentsState.value) {
+    CommentsScreenContent(state = commentsState) {
+        onBackPressed()
+    }
+}
+
+@Composable
+private fun CommentsScreenContent(
+    state: State<CommentsScreenState>,
+    onBackPressed: () -> Unit
+) {
+    when (val currentState = state.value) {
         is CommentsScreenState.LoadingState -> {
             Log.d("COMMENTS_TEST", "loading state")
             CommentsScreenOnDataBeingLoadedState(onBackPressed)

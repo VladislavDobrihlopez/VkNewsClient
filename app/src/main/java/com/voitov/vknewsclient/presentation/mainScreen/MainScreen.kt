@@ -3,21 +3,23 @@ package com.voitov.vknewsclient.presentation.mainScreen
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
-import androidx.compose.material.*
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.voitov.vknewsclient.NewsFeedApplication
 import com.voitov.vknewsclient.navigation.AppNavGraph
 import com.voitov.vknewsclient.navigation.rememberNavigationState
-import com.voitov.vknewsclient.presentation.ViewModelsFactory
 import com.voitov.vknewsclient.presentation.commentsScreen.CommentsScreen
 import com.voitov.vknewsclient.presentation.homeScreen.HomeScreen
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
@@ -25,7 +27,7 @@ import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 const val TAG = "COMPOSE_TEST"
 
 @Composable
-fun MainScreen(viewModelsFactory: ViewModelsFactory) {
+fun MainScreen() {
     val navigationState = rememberNavigationState()
 
     Log.d(TAG, "MainScreen")
@@ -79,7 +81,6 @@ fun MainScreen(viewModelsFactory: ViewModelsFactory) {
             navHostController = navigationState.navHostController,
             newsFeedContent = {
                 HomeScreen(
-                    viewModelsFactory = viewModelsFactory,
                     paddingVales = it,
                     onCommentsClickListener = { clickedPost ->
                         navigationState.navigateToComments(clickedPost)
