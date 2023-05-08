@@ -1,5 +1,6 @@
 package com.voitov.vknewsclient.data
 
+import android.util.Log
 import com.vk.api.sdk.VKPreferencesKeyValueStorage
 import com.vk.api.sdk.auth.VKAccessToken
 import com.voitov.vknewsclient.data.mappers.CommentMapper
@@ -55,7 +56,9 @@ class NewsFeedRepositoryImpl @Inject constructor(
     private val recommendations: StateFlow<NewsFeedResult> = flow {
         needNextDataEvents.emit(Unit)
         needNextDataEvents.collect {
+            Log.d("INTERNET_TEST", "collect")
             retrieveData()
+
             emit(posts)
         }
     }
@@ -63,11 +66,15 @@ class NewsFeedRepositoryImpl @Inject constructor(
         .map {
             NewsFeedResult.Success(posts = it) as NewsFeedResult
         }
-        .retry(10) {
+        .retry(1) {
             delay(RETRY_DELAY_IN_MILLIS)
+            Log.d("INTERNET_TEST", "retry")
             true
         }
-        .catch { emit(NewsFeedResult.Failure) }
+        .catch {
+            Log.d("INTERNET_TEST", "catch")
+            emit(NewsFeedResult.Failure)
+        }
         .stateIn(
             scope = scope,
             started = SharingStarted.Lazily,
@@ -87,6 +94,7 @@ class NewsFeedRepositoryImpl @Inject constructor(
     }
 
     override suspend fun retrieveNextRecommendations() {
+        Log.d("INTERNET_TEST", "ask for next recommendations")
         needNextDataEvents.emit(Unit)
     }
 

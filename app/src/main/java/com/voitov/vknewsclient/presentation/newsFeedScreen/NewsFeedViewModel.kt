@@ -44,13 +44,14 @@ class NewsFeedViewModel @Inject constructor(
 
     val screenState: Flow<NewsFeedScreenState> = screenStateFlow
         .map {
+            Log.d("INTERNET_TEST", "viewmodel map")
+
             when (val feedLoadResult = screenStateFlow.value) {
                 is NewsFeedResult.Failure -> NewsFeedScreenState.ErrorState
                 is NewsFeedResult.Success -> NewsFeedScreenState.ShowingPostsState(
                     posts = feedLoadResult.posts,
                     isDataBeingLoaded = false
                 )
-
                 else -> throw IllegalStateException("Unexpected type: $feedLoadResult")
             } as NewsFeedScreenState
         }
@@ -72,9 +73,9 @@ class NewsFeedViewModel @Inject constructor(
 
     fun loadContinuingPosts() {
         viewModelScope.launch {
-            nextPostsEvent.emit(Unit)
-            Log.d("ERROR_TEST", "trying loading new data")
+            Log.d("INTERNET_TEST", "trying loading new data")
             retrieveNextRecommendationsUseCase()
+            nextPostsEvent.emit(Unit)
         }
     }
 
