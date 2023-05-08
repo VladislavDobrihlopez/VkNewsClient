@@ -1,7 +1,9 @@
 package com.voitov.vknewsclient.domain.entities
 
+import androidx.compose.runtime.Immutable
 import com.voitov.vknewsclient.domain.SocialMetric
 
+@Immutable
 data class PostItem(
     val id: Long,
     val communityId: Long,

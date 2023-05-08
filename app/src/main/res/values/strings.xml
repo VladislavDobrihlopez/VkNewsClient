@@ -7,4 +7,5 @@
     <string name="bottom_navigation_item_profile" translatable="false">Profile</string>
     <string name="bookmark" translatable="false">add this post to your bookmark</string>
     <string name="trash_post" translatable="false">Do not show me this piece of shit again!</string>
+    <string name="troubles_with_the_internet">Troubles with the internet</string>
 </resources>

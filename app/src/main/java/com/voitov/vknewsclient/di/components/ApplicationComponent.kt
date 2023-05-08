@@ -4,7 +4,7 @@ import android.content.Context
 import com.voitov.vknewsclient.di.modules.DataModule
 import com.voitov.vknewsclient.di.modules.ViewModelsModule
 import com.voitov.vknewsclient.di.scopes.ApplicationScope
-import com.voitov.vknewsclient.presentation.mainScreen.MainActivity
+import com.voitov.vknewsclient.presentation.ViewModelsFactory
 import dagger.BindsInstance
 import dagger.Component
 
@@ -16,7 +16,7 @@ import dagger.Component
     ]
 )
 interface ApplicationComponent {
-    fun inject(activity: MainActivity)
+    fun getViewModelsFactory(): ViewModelsFactory
 
     fun getCommentsScreenComponentFactory(): CommentsScreenComponent.Factory
 
