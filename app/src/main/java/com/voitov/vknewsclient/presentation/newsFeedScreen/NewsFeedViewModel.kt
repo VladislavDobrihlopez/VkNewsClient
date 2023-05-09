@@ -44,7 +44,7 @@ class NewsFeedViewModel @Inject constructor(
 
     val screenState: Flow<NewsFeedScreenState> = screenStateFlow
         .map {
-            Log.d("INTERNET_TEST", "viewmodel map")
+            Log.d("INTERNET_TEST", "viewmodel map ${it::class.simpleName}")
 
             when (val feedLoadResult = screenStateFlow.value) {
                 is NewsFeedResult.Failure -> NewsFeedScreenState.ErrorState
