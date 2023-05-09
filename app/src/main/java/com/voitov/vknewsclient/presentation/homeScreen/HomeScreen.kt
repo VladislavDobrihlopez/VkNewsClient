@@ -28,10 +28,14 @@ fun HomeScreen(
     ScreenContent(
         newsFeedScreenState = postsState,
         paddingVales = paddingVales,
-        viewModel = viewModel
-    ) { post ->
-        onCommentsClickListener(post)
-    }
+        viewModel = viewModel,
+        clickListener = { post ->
+            onCommentsClickListener(post)
+        },
+        onReconnect = {
+            viewModel.loadContinuingPosts()
+        }
+    )
 }
 
 @Composable
@@ -39,7 +43,8 @@ private fun ScreenContent(
     newsFeedScreenState: State<NewsFeedScreenState>,
     paddingVales: PaddingValues,
     viewModel: NewsFeedViewModel,
-    clickListener: (PostItem) -> Unit
+    clickListener: (PostItem) -> Unit,
+    onReconnect: () -> Unit
 ) {
     when (val currentState = newsFeedScreenState.value) {
         is NewsFeedScreenState.ShowingPostsState -> {
@@ -62,7 +67,9 @@ private fun ScreenContent(
         }
 
         is NewsFeedScreenState.ErrorState -> {
-            NoInternetLabel()
+            NoInternetLabel() {
+                onReconnect()
+            }
             Log.d("ERROR_TEST", "some error occurred")
         }
     }

@@ -1,10 +1,12 @@
 package com.voitov.vknewsclient.data
 
+import android.util.Log
 import com.vk.api.sdk.VKPreferencesKeyValueStorage
 import com.vk.api.sdk.auth.VKAccessToken
 import com.voitov.vknewsclient.data.mappers.CommentMapper
 import com.voitov.vknewsclient.data.mappers.PostMapper
 import com.voitov.vknewsclient.data.network.ApiService
+import com.voitov.vknewsclient.data.network.models.NewsFeedContentResponseDto
 import com.voitov.vknewsclient.domain.AuthorizationStateResult
 import com.voitov.vknewsclient.domain.MetricsType
 import com.voitov.vknewsclient.domain.NewsFeedResult
@@ -15,13 +17,16 @@ import com.voitov.vknewsclient.domain.repository.NewsFeedRepository
 import com.voitov.vknewsclient.extensions.mergeWith
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.flow.stateIn
@@ -52,30 +57,54 @@ class NewsFeedRepositoryImpl @Inject constructor(
     }
 
     private val needNextDataEvents = MutableSharedFlow<Unit>(replay = 1)
-    private val recommendations: StateFlow<NewsFeedResult> = flow {
+    private val recommendations: Flow<NewsFeedResult> = flow {
         needNextDataEvents.emit(Unit)
         needNextDataEvents.collect {
-            retrieveData()
-            emit(posts)
+            Log.d("INTERNET_TEST", "collect")
+            val result = retrieveData()
+
+            if (result is Result.Success) {
+                emit(NewsFeedResult.Success(posts))
+            } else if (result is Result.Failure) {
+                emit(NewsFeedResult.Failure)
+            } else {
+                emit(NewsFeedResult.EndOfNewsFeed)
+            }
         }
     }
-        .mergeWith(updateDataFlow)
-        .map {
-            NewsFeedResult.Success(posts = it) as NewsFeedResult
-        }
-        .retry(10) {
+        .retry(1) {
             delay(RETRY_DELAY_IN_MILLIS)
+            Log.d("INTERNET_TEST", "retry")
             true
         }
-        .catch { emit(NewsFeedResult.Failure) }
-        .stateIn(
-            scope = scope,
-            started = SharingStarted.Lazily,
-            initialValue = NewsFeedResult.Success(posts = posts)
-        )
+        .catch {
+            Log.d("INTERNET_TEST", "catch")
+            emit(NewsFeedResult.Failure)
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val combinedFlow = recommendations.flatMapLatest { result ->
+        if (result is NewsFeedResult.Success) {
+            flow {
+                updateDataFlow.collect {
+                    emit(it)
+                }
+            }
+                .mergeWith(flowOf(result.posts))
+                .map {
+                    NewsFeedResult.Success(it)
+                }
+        } else {
+            flowOf(result)
+        }
+    }.stateIn(
+        scope = scope,
+        started = SharingStarted.Lazily,
+        initialValue = NewsFeedResult.Success(posts = posts)
+    )
 
     override fun getRecommendationsFlow(): StateFlow<NewsFeedResult> {
-        return recommendations
+        return combinedFlow
     }
 
     override fun getCommentsFlow(post: PostItem): Flow<List<PostCommentItem>> {
@@ -87,25 +116,41 @@ class NewsFeedRepositoryImpl @Inject constructor(
     }
 
     override suspend fun retrieveNextRecommendations() {
+        Log.d("INTERNET_TEST", "ask for next recommendations")
         needNextDataEvents.emit(Unit)
     }
 
-    private suspend fun retrieveData() {
+    private sealed class Result {
+        class Success(val newsFeedContentResponseDto: NewsFeedContentResponseDto) : Result()
+        object Failure : Result()
+        object EndOfNewsFeed : Result()
+    }
+
+    private suspend fun retrieveData(): Result {
         val placeToStartLoadingFrom = nextPostFrom
 
         if (vkHasNothingToRecommendAnymore()) {
-            return
+            return Result.EndOfNewsFeed
         }
 
-        val response = if (placeToStartLoadingFrom == null) {
-            apiService.loadNews(getUserToken())
-        } else {
-            apiService.loadNews(getUserToken(), placeToStartLoadingFrom)
+        val result = try {
+            val response = if (placeToStartLoadingFrom == null) {
+                apiService.loadNews(getUserToken())
+            } else {
+                apiService.loadNews(getUserToken(), placeToStartLoadingFrom)
+            }
+            Result.Success(response)
+        } catch (_: Exception) {
+            Result.Failure
         }
 
-        nextPostFrom = response.content.nextFrom
-        val mappedPosts = postMapper.mapDtoResponseToEntitiesOfPostItem(response)
-        _posts.addAll(mappedPosts)
+        if (result is Result.Success) {
+            nextPostFrom = result.newsFeedContentResponseDto.content.nextFrom
+            val mappedPosts =
+                postMapper.mapDtoResponseToEntitiesOfPostItem(result.newsFeedContentResponseDto)
+            _posts.addAll(mappedPosts)
+        }
+        return result
     }
 
     private fun vkHasNothingToRecommendAnymore(): Boolean {

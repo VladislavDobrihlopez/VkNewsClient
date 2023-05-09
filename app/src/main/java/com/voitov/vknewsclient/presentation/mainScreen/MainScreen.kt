@@ -118,6 +118,6 @@ fun TestScreen(screenName: String) {
 @Composable
 private fun PreviewVkNews() {
     VkNewsClientTheme {
-        //MainScreen()
+        MainScreen()
     }
 }
