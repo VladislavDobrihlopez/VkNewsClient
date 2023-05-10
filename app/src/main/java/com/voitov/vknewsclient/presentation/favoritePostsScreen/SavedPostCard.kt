@@ -1,11 +1,8 @@
-package com.voitov.vknewsclient.presentation.newsFeedScreen
+package com.voitov.vknewsclient.presentation.favoritePostsScreen
 
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,7 +24,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
@@ -47,14 +43,8 @@ import com.voitov.vknewsclient.ui.theme.TransparentRed
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 import kotlin.random.Random
 
-private const val DELAY_BEFORE_START = 1200
-private const val DELAY_BETWEEN_ANIMATIONS = 1900
-private const val ANIMATION_DURATION = 1500
-private const val INVISIBLE = 0F
-private const val VISIBLE = 1F
-
 @Composable
-fun PostCard(
+fun SavedPostCard(
     modifier: Modifier = Modifier,
     postItem: PostItem,
     onCommentsClickListener: ((SocialMetric) -> Unit)? = null,
@@ -163,54 +153,13 @@ private fun PostFeedback(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        val animatedFadeInViewsCount =
-            animateFloatAsState(
-                targetValue = if (firstTimeShownInNewsFeed.value) INVISIBLE else VISIBLE,
-                animationSpec = tween(
-                    ANIMATION_DURATION + DELAY_BETWEEN_ANIMATIONS * 0,
-                    delayMillis = DELAY_BEFORE_START,
-                    easing = FastOutLinearInEasing
-                ),
-            )
-
         Row(modifier = Modifier.weight(0.3f)) {
             val views = metrics.getMetricByType(MetricsType.VIEWS)
             IconWithText(
                 pictResId = R.drawable.ic_views_count,
-                text = shortenLengthOfMetricsIfPossible(views.count),
-                modifier = Modifier.alpha(animatedFadeInViewsCount.value)
+                text = shortenLengthOfMetricsIfPossible(views.count)
             )
         }
-
-        val animatedFadeInShares =
-            animateFloatAsState(
-                targetValue = if (firstTimeShownInNewsFeed.value) INVISIBLE else VISIBLE,
-                animationSpec = tween(
-                    ANIMATION_DURATION + DELAY_BETWEEN_ANIMATIONS * 1,
-                    delayMillis = DELAY_BEFORE_START,
-                    easing = FastOutLinearInEasing
-                ),
-            )
-
-        val animatedFadeInComments =
-            animateFloatAsState(
-                targetValue = if (firstTimeShownInNewsFeed.value) INVISIBLE else VISIBLE,
-                animationSpec = tween(
-                    ANIMATION_DURATION + DELAY_BETWEEN_ANIMATIONS * 2,
-                    delayMillis = DELAY_BEFORE_START,
-                    easing = FastOutLinearInEasing
-                ),
-            )
-
-        val animatedFadeInLikes =
-            animateFloatAsState(
-                targetValue = if (firstTimeShownInNewsFeed.value) INVISIBLE else VISIBLE,
-                animationSpec = tween(
-                    ANIMATION_DURATION + DELAY_BETWEEN_ANIMATIONS * 3,
-                    delayMillis = DELAY_BEFORE_START,
-                    easing = FastOutLinearInEasing
-                ),
-            )
 
         Row(
             modifier = Modifier.weight(0.70f),
@@ -220,14 +169,12 @@ private fun PostFeedback(
                 IconWithText(
                     pictResId = R.drawable.ic_share,
                     text = count.toString(),
-                    modifier = Modifier.alpha(animatedFadeInShares.value)
                 )
             }
             with(metrics.getMetricByType(MetricsType.COMMENTS)) {
                 IconWithText(
                     pictResId = R.drawable.ic_comment,
                     text = count.toString(),
-                    modifier = Modifier.alpha(animatedFadeInComments.value)
                 ) {
                     onCommentsClickListener?.invoke(this@with)
                 }
@@ -245,7 +192,6 @@ private fun PostFeedback(
                     } else {
                         MaterialTheme.colors.onSecondary
                     },
-                    modifier = Modifier.alpha(animatedFadeInLikes.value)
                 ) {
                     onLikesClickListener?.invoke(this@with)
                 }
@@ -263,7 +209,7 @@ fun List<SocialMetric>.getMetricByType(type: MetricsType): SocialMetric {
 @Composable
 fun NewsPostLightTheme() {
     VkNewsClientTheme(darkTheme = false) {
-        PostCard(
+        SavedPostCard(
             postItem = PostItem(
                 id = 1,
                 communityId = 1,
@@ -293,7 +239,7 @@ fun NewsPostLightTheme() {
 @Composable
 fun NewsPostLightDark() {
     VkNewsClientTheme(darkTheme = true) {
-        PostCard(
+        SavedPostCard(
             postItem = PostItem(
                 id = 1,
                 communityId = 1,
