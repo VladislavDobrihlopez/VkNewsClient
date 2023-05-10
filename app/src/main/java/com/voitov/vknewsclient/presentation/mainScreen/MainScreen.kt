@@ -77,27 +77,31 @@ fun MainScreen() {
         ) {
         Log.d(TAG, "VkNews")
 
-        AppNavGraph(
-            navHostController = navigationState.navHostController,
-            newsFeedContent = {
-                HomeScreen(
-                    paddingVales = it,
-                    onCommentsClickListener = { clickedPost ->
-                        navigationState.navigateToComments(clickedPost)
+        VkNewsClientTheme {
+
+
+            AppNavGraph(
+                navHostController = navigationState.navHostController,
+                newsFeedContent = {
+                    HomeScreen(
+                        paddingVales = it,
+                        onCommentsClickListener = { clickedPost ->
+                            navigationState.navigateToComments(clickedPost)
+                        }
+                    )
+                },
+                favoritesScreenContent = { TestScreen(screenName = "favorite screen") },
+                profileScreenContent = { TestScreen(screenName = "profile screen") },
+                commentsContent = { clickedPost ->
+                    CommentsScreen(post = clickedPost) {
+                        navigationState.navHostController.popBackStack()
                     }
-                )
-            },
-            favoritesScreenContent = { TestScreen(screenName = "favorite screen") },
-            profileScreenContent = { TestScreen(screenName = "profile screen") },
-            commentsContent = { clickedPost ->
-                CommentsScreen(post = clickedPost) {
-                    navigationState.navHostController.popBackStack()
+                    BackHandler {
+                        navigationState.navHostController.popBackStack()
+                    }
                 }
-                BackHandler {
-                    navigationState.navHostController.popBackStack()
-                }
-            }
-        )
+            )
+        }
     }
 }
 

@@ -1,17 +1,21 @@
 package com.voitov.vknewsclient.ui.theme
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @SuppressLint("ConflictingOnColor")
 private val DarkColorPalette = darkColors(
     primary = CoolBlack,
-    primaryVariant = CoolBlack,
+    primaryVariant = Color.Black,
     secondary = CoolBlack,
     background = Color.Black,
     surface = CoolBlack,
@@ -24,7 +28,7 @@ private val DarkColorPalette = darkColors(
 @SuppressLint("ConflictingOnColor")
 private val LightColorPalette = lightColors(
     primary = Color.White,
-    primaryVariant = Color.White,
+    primaryVariant = Color(237, 238, 240),
     secondary = Color.White,
     background = Color(237, 238, 240),
     surface = Color.White,
@@ -34,6 +38,7 @@ private val LightColorPalette = lightColors(
     onSurface = Color.Black,
 )
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun VkNewsClientTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val colors = if (darkTheme) {
@@ -48,4 +53,18 @@ fun VkNewsClientTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Comp
         shapes = Shapes,
         content = content
     )
+
+    val systemUiController = rememberSystemUiController()
+
+    SideEffect {
+        systemUiController.setStatusBarColor(
+            color = colors.primaryVariant,
+            darkIcons = !darkTheme
+        )
+
+        systemUiController.setNavigationBarColor(
+            color = colors.primaryVariant,
+            darkIcons = !darkTheme
+        )
+    }
 }
