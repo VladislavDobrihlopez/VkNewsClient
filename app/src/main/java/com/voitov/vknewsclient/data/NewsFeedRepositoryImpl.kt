@@ -61,14 +61,19 @@ class NewsFeedRepositoryImpl @Inject constructor(
         needNextDataEvents.emit(Unit)
         needNextDataEvents.collect {
             Log.d("INTERNET_TEST", "collect")
-            val result = retrieveData()
 
-            if (result is Result.Success) {
-                emit(NewsFeedResult.Success(posts))
-            } else if (result is Result.Failure) {
-                emit(NewsFeedResult.Failure)
-            } else {
-                emit(NewsFeedResult.EndOfNewsFeed)
+            when (retrieveData()) {
+                is Result.Success -> {
+                    emit(NewsFeedResult.Success(posts))
+                }
+
+                is Result.Failure -> {
+                    emit(NewsFeedResult.Failure)
+                }
+
+                else -> {
+                    emit(NewsFeedResult.EndOfNewsFeed)
+                }
             }
         }
     }
