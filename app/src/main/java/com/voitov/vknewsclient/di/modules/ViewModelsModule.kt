@@ -1,6 +1,7 @@
 package com.voitov.vknewsclient.di.modules
 
 import androidx.lifecycle.ViewModel
+import com.voitov.vknewsclient.presentation.favoritePostsScreen.FavoritesViewModel
 import com.voitov.vknewsclient.presentation.mainScreen.AuthorizationViewModel
 import com.voitov.vknewsclient.presentation.newsFeedScreen.NewsFeedScreenViewModel
 import dagger.Binds
@@ -19,4 +20,9 @@ interface ViewModelsModule {
     @StringKey("NewsFeedScreenViewModel")
     @Binds
     fun provideNewsFeedViewModel(viewModel: NewsFeedScreenViewModel): ViewModel
+
+    @IntoMap
+    @StringKey("FavoritesViewModel")
+    @Binds
+    fun provideFavoritesViewModel(viewModel: FavoritesViewModel): ViewModel
 }

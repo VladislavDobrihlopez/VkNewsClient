@@ -1,22 +1,29 @@
 package com.voitov.vknewsclient.presentation.newsFeedScreen
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
 import androidx.compose.material.DismissDirection
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -27,15 +34,24 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
+import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.getApplicationComponent
 import com.voitov.vknewsclient.presentation.LoadingGoingOn
+import com.voitov.vknewsclient.presentation.favoritePostsScreen.Tags
 import com.voitov.vknewsclient.ui.theme.TransparentGreen
 import com.voitov.vknewsclient.ui.theme.TransparentRed
 import kotlinx.coroutines.delay
@@ -64,7 +80,7 @@ fun NewsFeedScreen(
         }
 
         is NewsFeedScreenContentState.OnStartToEndActionConfirmation -> {
-
+            CachePostIncludingTagPopUp(post = state.post, viewModel = viewModel)
         }
 
         else -> {}
@@ -81,6 +97,9 @@ fun NewsFeedScreen(
         },
         onIgnorePostSwipeEndToStart = { post ->
             viewModel.confirmActionOnSwipeEndToStart(post)
+        },
+        onCachePostSwipeStartToEnd = { post ->
+            viewModel.confirmActionOnSwipeStartToEnd(post)
         }
     )
 }
@@ -94,7 +113,8 @@ private fun NewsFeedScreenContent(
     isDataBeingLoaded: Boolean,
     onCommentsClickListener: (PostItem) -> Unit,
     onLikesClickListener: (PostItem) -> Unit,
-    onIgnorePostSwipeEndToStart: (PostItem) -> Unit
+    onIgnorePostSwipeEndToStart: (PostItem) -> Unit,
+    onCachePostSwipeStartToEnd: (PostItem) -> Unit
 ) {
     val scrollState = rememberLazyListState()
 
@@ -122,6 +142,7 @@ private fun NewsFeedScreenContent(
                     dismiss.reset()
                 }
             } else if (dismiss.isDismissed(DismissDirection.StartToEnd)) {
+                onCachePostSwipeStartToEnd(post)
                 LaunchedEffect(Unit) {
                     delay(500)
                     dismiss.reset()
@@ -250,4 +271,53 @@ private fun IgnoreConfirmationDialog(post: PostItem, viewModel: NewsFeedScreenVi
             Text(text = "Do you agree to ignore the post?")
         }
     )
+}
+
+@Composable
+fun CachePostIncludingTagPopUp(post: PostItem, viewModel: NewsFeedScreenViewModel) {
+    val tagsState = viewModel.tagsFlow.collectAsState(initial = listOf())
+
+    Popup(
+        popupPositionProvider = WindowCenterOffsetPositionProvider(),
+        properties = PopupProperties(focusable = true, dismissOnClickOutside = true),
+        onDismissRequest = { viewModel.dismiss() },
+    ) {
+        Surface(
+            border = BorderStroke(1.dp, MaterialTheme.colors.secondary),
+            shape = RoundedCornerShape(8.dp),
+            color = Color(0xCCEEEEEE),
+        ) {
+            Column(
+                modifier = Modifier.padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "Select tags you want to associate to this post")
+                Spacer(modifier = Modifier.height(16.dp))
+                Tags(state = tagsState, modifier = Modifier.weight(weight = 1f, fill = false))
+                Spacer(modifier = Modifier.height(32.dp))
+                Button(onClick = {
+
+                }) {
+                    Text(text = "Cache the post")
+                }
+            }
+        }
+    }
+}
+
+private class WindowCenterOffsetPositionProvider(
+    private val x: Int = 0,
+    private val y: Int = 0
+) : PopupPositionProvider {
+    override fun calculatePosition(
+        anchorBounds: IntRect,
+        windowSize: IntSize,
+        layoutDirection: LayoutDirection,
+        popupContentSize: IntSize
+    ): IntOffset {
+        return IntOffset(
+            (windowSize.width - popupContentSize.width) / 2 + x,
+            (windowSize.height - popupContentSize.height) / 2 + y
+        )
+    }
 }

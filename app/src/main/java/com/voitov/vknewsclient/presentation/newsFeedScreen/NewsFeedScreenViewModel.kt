@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.voitov.vknewsclient.domain.NewsFeedResult
 import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.domain.usecases.ChangeLikeStatusUseCase
+import com.voitov.vknewsclient.domain.usecases.GetPostItemTagsUseCase
 import com.voitov.vknewsclient.domain.usecases.GetRecommendationsUseCase
 import com.voitov.vknewsclient.domain.usecases.IgnoreItemUseCase
 import com.voitov.vknewsclient.domain.usecases.RetrieveNextRecommendationsUseCase
@@ -26,11 +27,14 @@ class NewsFeedScreenViewModel @Inject constructor(
     private val changeLikeStatusUseCase: ChangeLikeStatusUseCase,
     private val ignoreItemUseCase: IgnoreItemUseCase,
     private val getRecommendationsUseCase: GetRecommendationsUseCase,
-    private val retrieveNextRecommendationsUseCase: RetrieveNextRecommendationsUseCase
+    private val retrieveNextRecommendationsUseCase: RetrieveNextRecommendationsUseCase,
+    private val getPostItemTagsUseCase: GetPostItemTagsUseCase
 ) : ViewModel() {
     private val exceptionHandler = CoroutineExceptionHandler { _, _ ->
         Log.d("ERROR_TEST", "exception is caught")
     }
+
+    val tagsFlow = getPostItemTagsUseCase.invoke()
 
     private var previousPosts: List<PostItem> = listOf()
     private val screenStateFlow: StateFlow<NewsFeedResult> = getRecommendationsUseCase()
@@ -42,7 +46,6 @@ class NewsFeedScreenViewModel @Inject constructor(
             emit(NewsFeedScreenState.ShowingPostsState(previousPosts, true))
         }
     }
-
 
     val screenState: Flow<NewsFeedScreenState> = screenStateFlow
         .map {
@@ -95,6 +98,12 @@ class NewsFeedScreenViewModel @Inject constructor(
     fun confirmActionOnSwipeEndToStart(post: PostItem) {
         viewModelScope.launch {
             confirmationEvents.emit(NewsFeedScreenContentState.OnEndToStartActionConfirmation(post = post))
+        }
+    }
+
+    fun confirmActionOnSwipeStartToEnd(post: PostItem) {
+        viewModelScope.launch {
+            confirmationEvents.emit(NewsFeedScreenContentState.OnStartToEndActionConfirmation(post = post))
         }
     }
 

@@ -13,6 +13,7 @@ import com.voitov.vknewsclient.domain.NewsFeedResult
 import com.voitov.vknewsclient.domain.SocialMetric
 import com.voitov.vknewsclient.domain.entities.PostCommentItem
 import com.voitov.vknewsclient.domain.entities.PostItem
+import com.voitov.vknewsclient.domain.entities.PostItemTag
 import com.voitov.vknewsclient.domain.repository.NewsFeedRepository
 import com.voitov.vknewsclient.extensions.mergeWith
 import kotlinx.coroutines.CoroutineScope
@@ -217,6 +218,16 @@ class NewsFeedRepositoryImpl @Inject constructor(
             true
         }
     //.stateIn(scope = scope, started = SharingStarted.Lazily, initialValue = listOf())
+
+    override fun getPostTags(): Flow<List<PostItemTag>> {
+        return flow {
+            val tags = mutableListOf<PostItemTag>()
+            for (i in 1..10) {
+                tags.add(PostItemTag("tag $i"))
+            }
+            emit(tags)
+        }
+    }
 
     private val checkAuthStatusEvent = MutableSharedFlow<Unit>(replay = 1)
     override suspend fun retrySigningIn() {
