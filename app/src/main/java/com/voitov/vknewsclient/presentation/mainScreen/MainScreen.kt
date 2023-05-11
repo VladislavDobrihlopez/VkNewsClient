@@ -1,7 +1,9 @@
 package com.voitov.vknewsclient.presentation.mainScreen
 
+import android.os.Build
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
@@ -21,7 +23,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.voitov.vknewsclient.navigation.AppNavGraph
 import com.voitov.vknewsclient.navigation.rememberNavigationState
 import com.voitov.vknewsclient.presentation.commentsScreen.CommentsScreen
-import com.voitov.vknewsclient.presentation.homeScreen.HomeScreen
+import com.voitov.vknewsclient.presentation.favoritePostsScreen.FavoritePostsScreen
+import com.voitov.vknewsclient.presentation.newsFeedScreen.HomeScreen
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 
 const val TAG = "COMPOSE_TEST"
@@ -77,31 +80,30 @@ fun MainScreen() {
         ) {
         Log.d(TAG, "VkNews")
 
-        VkNewsClientTheme {
-
-
-            AppNavGraph(
-                navHostController = navigationState.navHostController,
-                newsFeedContent = {
-                    HomeScreen(
-                        paddingVales = it,
-                        onCommentsClickListener = { clickedPost ->
-                            navigationState.navigateToComments(clickedPost)
-                        }
-                    )
-                },
-                favoritesScreenContent = { TestScreen(screenName = "favorite screen") },
-                profileScreenContent = { TestScreen(screenName = "profile screen") },
-                commentsContent = { clickedPost ->
-                    CommentsScreen(post = clickedPost) {
-                        navigationState.navHostController.popBackStack()
+        AppNavGraph(
+            navHostController = navigationState.navHostController,
+            newsFeedContent = {
+                HomeScreen(
+                    paddingVales = it,
+                    onCommentsClickListener = { clickedPost ->
+                        navigationState.navigateToComments(clickedPost)
                     }
-                    BackHandler {
-                        navigationState.navHostController.popBackStack()
-                    }
+                )
+            },
+            favoritesScreenContent = {
+                //TestScreen(screenName = "favorite screen")
+                FavoritePostsScreen()
+                                     },
+            profileScreenContent = { TestScreen(screenName = "profile screen") },
+            commentsContent = { clickedPost ->
+                CommentsScreen(post = clickedPost) {
+                    navigationState.navHostController.popBackStack()
                 }
-            )
-        }
+                BackHandler {
+                    navigationState.navHostController.popBackStack()
+                }
+            }
+        )
     }
 }
 
@@ -118,6 +120,7 @@ fun TestScreen(screenName: String) {
         })
 }
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Preview
 @Composable
 private fun PreviewVkNews() {
