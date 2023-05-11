@@ -2,7 +2,7 @@ package com.voitov.vknewsclient.di.modules
 
 import androidx.lifecycle.ViewModel
 import com.voitov.vknewsclient.presentation.mainScreen.AuthorizationViewModel
-import com.voitov.vknewsclient.presentation.newsFeedScreen.NewsFeedViewModel
+import com.voitov.vknewsclient.presentation.newsFeedScreen.NewsFeedScreenViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
@@ -16,7 +16,7 @@ interface ViewModelsModule {
     fun provideAuthorizationViewModel(viewModel: AuthorizationViewModel): ViewModel
 
     @IntoMap
-    @StringKey("NewsFeedViewModel")
+    @StringKey("NewsFeedScreenViewModel")
     @Binds
-    fun provideNewsFeedViewModel(viewModel: NewsFeedViewModel): ViewModel
+    fun provideNewsFeedViewModel(viewModel: NewsFeedScreenViewModel): ViewModel
 }

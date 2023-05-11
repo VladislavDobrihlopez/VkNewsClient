@@ -13,6 +13,7 @@ import com.voitov.vknewsclient.extensions.mergeWith
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
@@ -21,7 +22,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class NewsFeedViewModel @Inject constructor(
+class NewsFeedScreenViewModel @Inject constructor(
     private val changeLikeStatusUseCase: ChangeLikeStatusUseCase,
     private val ignoreItemUseCase: IgnoreItemUseCase,
     private val getRecommendationsUseCase: GetRecommendationsUseCase,
@@ -42,6 +43,7 @@ class NewsFeedViewModel @Inject constructor(
         }
     }
 
+
     val screenState: Flow<NewsFeedScreenState> = screenStateFlow
         .map {
             Log.d("INTERNET_TEST", "viewmodel map ${it::class.simpleName}")
@@ -52,6 +54,7 @@ class NewsFeedViewModel @Inject constructor(
                     posts = feedLoadResult.posts,
                     isDataBeingLoaded = false
                 )
+
                 else -> throw IllegalStateException("Unexpected type: $feedLoadResult")
             } as NewsFeedScreenState
         }
@@ -71,6 +74,36 @@ class NewsFeedViewModel @Inject constructor(
         .onStart { emit(NewsFeedScreenState.LoadingState) }
         .mergeWith(nextPostsFlow)
 
+    private val confirmationEvents = MutableSharedFlow<NewsFeedScreenContentState>()
+
+    private val confirmationFlow = flow<NewsFeedScreenContentState> {
+        confirmationEvents.collect {
+            emit(it)
+        }
+    }
+
+    val screenContentStateFlow: Flow<NewsFeedScreenContentState> =
+        MutableStateFlow<NewsFeedScreenContentState>(NewsFeedScreenContentState.Content)
+            .mergeWith(confirmationFlow)
+
+    fun confirmLikeAction(post: PostItem) {
+        viewModelScope.launch {
+            confirmationEvents.emit(NewsFeedScreenContentState.OnPostLikeActionConfirmation(post))
+        }
+    }
+
+    fun confirmActionOnSwipeEndToStart(post: PostItem) {
+        viewModelScope.launch {
+            confirmationEvents.emit(NewsFeedScreenContentState.OnEndToStartActionConfirmation(post = post))
+        }
+    }
+
+    fun dismiss() {
+        viewModelScope.launch {
+            confirmationEvents.emit(NewsFeedScreenContentState.Content)
+        }
+    }
+
     fun loadContinuingPosts() {
         viewModelScope.launch {
             Log.d("INTERNET_TEST", "trying loading new data")
@@ -83,10 +116,12 @@ class NewsFeedViewModel @Inject constructor(
         if (!post.isLikedByUser) {
             viewModelScope.launch(exceptionHandler) {
                 changeLikeStatusUseCase(post)
+                confirmationEvents.emit(NewsFeedScreenContentState.Content)
             }
         } else {
             viewModelScope.launch(exceptionHandler) {
                 changeLikeStatusUseCase(post)
+                confirmationEvents.emit(NewsFeedScreenContentState.Content)
             }
         }
     }
@@ -94,6 +129,7 @@ class NewsFeedViewModel @Inject constructor(
     fun ignoreItem(post: PostItem) {
         viewModelScope.launch(exceptionHandler) {
             ignoreItemUseCase(post)
+            confirmationEvents.emit(NewsFeedScreenContentState.Content)
         }
     }
 }

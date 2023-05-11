@@ -59,6 +59,7 @@ fun PostCard(
     postItem: PostItem,
     onCommentsClickListener: ((SocialMetric) -> Unit)? = null,
     onLikesClickListener: ((SocialMetric) -> Unit)? = null,
+    onSharesClickListener: ((SocialMetric) -> Unit)? = null
 ) {
     Log.d(TAG, "NewsPost")
 
@@ -82,6 +83,9 @@ fun PostCard(
                 onLikesClickListener = {
                     onLikesClickListener?.invoke(it)
                 },
+                onSharesClickListener = {
+                    onSharesClickListener?.invoke(it)
+                }
             )
         }
     }
@@ -148,6 +152,7 @@ private fun PostFeedback(
     metrics: List<SocialMetric>,
     onCommentsClickListener: ((SocialMetric) -> Unit)? = null,
     onLikesClickListener: ((SocialMetric) -> Unit)? = null,
+    onSharesClickListener: ((SocialMetric) -> Unit)? = null
 ) {
     Log.d(TAG, "PostFeedback")
 
@@ -221,7 +226,9 @@ private fun PostFeedback(
                     pictResId = R.drawable.ic_share,
                     text = count.toString(),
                     modifier = Modifier.alpha(animatedFadeInShares.value)
-                )
+                ) {
+                    onSharesClickListener?.invoke(this)
+                }
             }
             with(metrics.getMetricByType(MetricsType.COMMENTS)) {
                 IconWithText(

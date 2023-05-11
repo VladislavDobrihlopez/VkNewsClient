@@ -24,7 +24,7 @@ import com.voitov.vknewsclient.navigation.AppNavGraph
 import com.voitov.vknewsclient.navigation.rememberNavigationState
 import com.voitov.vknewsclient.presentation.commentsScreen.CommentsScreen
 import com.voitov.vknewsclient.presentation.favoritePostsScreen.FavoritePostsScreen
-import com.voitov.vknewsclient.presentation.homeScreen.HomeScreen
+import com.voitov.vknewsclient.presentation.newsFeedScreen.HomeScreen
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 
 const val TAG = "COMPOSE_TEST"

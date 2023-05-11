@@ -18,7 +18,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -35,7 +34,9 @@ import kotlin.random.Random
 
 @Composable
 fun FavoritePostsScreen() {
-    Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(8.dp)) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             backgroundColor = MaterialTheme.colors.primary,
@@ -87,13 +88,26 @@ private fun Tags(modifier: Modifier = Modifier) {
             val selected = remember { mutableStateOf(false) }
             Box(modifier = Modifier.padding(vertical = 4.dp)) {
                 IconedChip(
-                    isSelected = selected.value,
+                    isSelected = !selected.value,
                     onClick = { selected.value = !selected.value },
                     painter = if (isSystemInDarkTheme())
                         painterResource(id = R.drawable.ic_check_white)
                     else
                         painterResource(
                             id = R.drawable.ic_check_black
+                        ),
+                    text = it
+                )
+                IconedChip(
+                    isSelected = !selected.value,
+                    onClick = { selected.value = !selected.value },
+                    painter = if (isSystemInDarkTheme())
+                        painterResource(
+                            id = R.drawable.ic_check_black
+                        )
+                    else
+                        painterResource(
+                            id = R.drawable.ic_check_white
                         ),
                     text = it
                 )
