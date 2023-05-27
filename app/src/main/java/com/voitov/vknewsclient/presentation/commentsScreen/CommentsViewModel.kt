@@ -2,7 +2,7 @@ package com.voitov.vknewsclient.presentation.commentsScreen
 
 import androidx.lifecycle.ViewModel
 import com.voitov.vknewsclient.domain.entities.PostItem
-import com.voitov.vknewsclient.domain.usecases.GetCommentsUseCase
+import com.voitov.vknewsclient.domain.usecases.newsFeed.GetCommentsUseCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

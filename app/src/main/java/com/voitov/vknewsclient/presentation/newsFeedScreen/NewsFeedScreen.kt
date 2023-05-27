@@ -32,6 +32,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,7 +50,9 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.voitov.vknewsclient.R
+import com.voitov.vknewsclient.domain.entities.ItemTag
 import com.voitov.vknewsclient.domain.entities.PostItem
+import com.voitov.vknewsclient.domain.entities.TaggedPostItem
 import com.voitov.vknewsclient.getApplicationComponent
 import com.voitov.vknewsclient.presentation.LoadingGoingOn
 import com.voitov.vknewsclient.presentation.favoritePostsScreen.Tags
@@ -80,7 +84,9 @@ fun NewsFeedScreen(
         }
 
         is NewsFeedScreenContentState.OnStartToEndActionConfirmation -> {
-            CachePostIncludingTagPopUp(post = state.post, viewModel = viewModel)
+            CachePostIncludingTagPopUp(post = state.post, viewModel = viewModel) { tag ->
+                viewModel.cachePost(state.post, tag)
+            }
         }
 
         else -> {}
@@ -274,14 +280,23 @@ private fun IgnoreConfirmationDialog(post: PostItem, viewModel: NewsFeedScreenVi
 }
 
 @Composable
-fun CachePostIncludingTagPopUp(post: PostItem, viewModel: NewsFeedScreenViewModel) {
+fun CachePostIncludingTagPopUp(
+    post: PostItem,
+    viewModel: NewsFeedScreenViewModel,
+    onButtonClickListener: (ItemTag) -> Unit
+) {
     val tagsState = viewModel.tagsFlow.collectAsState(initial = listOf())
+
+    val selectedTag = remember {
+        mutableStateOf<ItemTag?>(null)
+    }
 
     Popup(
         popupPositionProvider = WindowCenterOffsetPositionProvider(),
         properties = PopupProperties(focusable = true, dismissOnClickOutside = true),
         onDismissRequest = { viewModel.dismiss() },
     ) {
+
         Surface(
             border = BorderStroke(1.dp, MaterialTheme.colors.secondary),
             shape = RoundedCornerShape(8.dp),
@@ -293,10 +308,15 @@ fun CachePostIncludingTagPopUp(post: PostItem, viewModel: NewsFeedScreenViewMode
             ) {
                 Text(text = "Select tags you want to associate to this post")
                 Spacer(modifier = Modifier.height(16.dp))
-                Tags(state = tagsState, modifier = Modifier.weight(weight = 1f, fill = false))
+                Tags(state = tagsState, modifier = Modifier.weight(weight = 1f, fill = false)) {
+                    selectedTag.value = it
+                }
                 Spacer(modifier = Modifier.height(32.dp))
                 Button(onClick = {
-
+                    selectedTag.value?.let {
+                        onButtonClickListener(it)
+                        viewModel.dismiss()
+                    }
                 }) {
                     Text(text = "Cache the post")
                 }

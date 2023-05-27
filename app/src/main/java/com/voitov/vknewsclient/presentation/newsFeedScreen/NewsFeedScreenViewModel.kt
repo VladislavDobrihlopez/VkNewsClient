@@ -4,12 +4,15 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.voitov.vknewsclient.domain.NewsFeedResult
+import com.voitov.vknewsclient.domain.entities.ItemTag
 import com.voitov.vknewsclient.domain.entities.PostItem
-import com.voitov.vknewsclient.domain.usecases.ChangeLikeStatusUseCase
-import com.voitov.vknewsclient.domain.usecases.GetPostItemTagsUseCase
-import com.voitov.vknewsclient.domain.usecases.GetRecommendationsUseCase
-import com.voitov.vknewsclient.domain.usecases.IgnoreItemUseCase
-import com.voitov.vknewsclient.domain.usecases.RetrieveNextRecommendationsUseCase
+import com.voitov.vknewsclient.domain.entities.TaggedPostItem
+import com.voitov.vknewsclient.domain.usecases.newsFeed.ChangeLikeStatusUseCase
+import com.voitov.vknewsclient.domain.usecases.newsFeed.GetRecommendationsUseCase
+import com.voitov.vknewsclient.domain.usecases.newsFeed.IgnoreItemUseCase
+import com.voitov.vknewsclient.domain.usecases.newsFeed.RetrieveNextRecommendationsUseCase
+import com.voitov.vknewsclient.domain.usecases.storedPosts.CacheNewsUseCase
+import com.voitov.vknewsclient.domain.usecases.storedPosts.GetTagsUseCase
 import com.voitov.vknewsclient.extensions.mergeWith
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.Flow
@@ -28,13 +31,14 @@ class NewsFeedScreenViewModel @Inject constructor(
     private val ignoreItemUseCase: IgnoreItemUseCase,
     private val getRecommendationsUseCase: GetRecommendationsUseCase,
     private val retrieveNextRecommendationsUseCase: RetrieveNextRecommendationsUseCase,
-    private val getPostItemTagsUseCase: GetPostItemTagsUseCase
+    private val getTagsUseCase: GetTagsUseCase,
+    private val cacheNewsUseCase: CacheNewsUseCase
 ) : ViewModel() {
     private val exceptionHandler = CoroutineExceptionHandler { _, _ ->
         Log.d("ERROR_TEST", "exception is caught")
     }
 
-    val tagsFlow = getPostItemTagsUseCase.invoke()
+    val tagsFlow = getTagsUseCase.invoke()
 
     private var previousPosts: List<PostItem> = listOf()
     private val screenStateFlow: StateFlow<NewsFeedResult> = getRecommendationsUseCase()
@@ -139,6 +143,12 @@ class NewsFeedScreenViewModel @Inject constructor(
         viewModelScope.launch(exceptionHandler) {
             ignoreItemUseCase(post)
             confirmationEvents.emit(NewsFeedScreenContentState.Content)
+        }
+    }
+
+    fun cachePost(post: PostItem, tag: ItemTag) {
+        viewModelScope.launch {
+            cacheNewsUseCase.invoke(TaggedPostItem(tag, post))
         }
     }
 }

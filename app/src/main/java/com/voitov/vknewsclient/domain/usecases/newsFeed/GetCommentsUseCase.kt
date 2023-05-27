@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.domain.usecases
+package com.voitov.vknewsclient.domain.usecases.newsFeed
 
 import com.voitov.vknewsclient.domain.entities.PostCommentItem
 import com.voitov.vknewsclient.domain.entities.PostItem

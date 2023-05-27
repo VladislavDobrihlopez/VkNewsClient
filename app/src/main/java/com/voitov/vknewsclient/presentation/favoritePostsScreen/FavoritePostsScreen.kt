@@ -30,8 +30,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.MetricsType
 import com.voitov.vknewsclient.domain.SocialMetric
+import com.voitov.vknewsclient.domain.entities.ItemTag
 import com.voitov.vknewsclient.domain.entities.PostItem
-import com.voitov.vknewsclient.domain.entities.PostItemTag
 import com.voitov.vknewsclient.getApplicationComponent
 import com.voitov.vknewsclient.presentation.reusableUIs.IconedChip
 import com.voitov.vknewsclient.ui.theme.Shapes
@@ -43,7 +43,7 @@ fun FavoritePostsScreen() {
     val viewModel: FavoritesViewModel =
         viewModel(factory = getApplicationComponent().getViewModelsFactory())
 
-    val state = viewModel.tagsFlow.collectAsState(initial = listOf())
+    val state = viewModel.tagsFlow().collectAsState(initial = listOf())
 
     Column(
         modifier = Modifier
@@ -55,7 +55,9 @@ fun FavoritePostsScreen() {
             backgroundColor = MaterialTheme.colors.primary,
             shape = Shapes.medium
         ) {
-            Tags(state = state, modifier = Modifier.padding(4.dp))
+            Tags(state = state, modifier = Modifier.padding(4.dp)) {
+
+            }
         }
 
         Spacer(modifier = Modifier.padding(vertical = 8.dp))
@@ -95,43 +97,51 @@ fun FavoritePostsScreen() {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun Tags(
-    state: State<List<PostItemTag>>,
-    modifier: Modifier = Modifier
+    state: State<List<ItemTag>>,
+    modifier: Modifier = Modifier,
+    onTagClickedListener: (ItemTag) -> Unit
 ) {
-    val filters =
-        listOf("Washer/Dryer", "Ramp access", "Garden", "Cats OK", "Dogs OK", "Smoke-free")
     FlowRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.SpaceEvenly,
         maxItemsInEachRow = 7
     ) {
-        state.value.forEach {
-            val selected = remember { mutableStateOf(false) }
+        val currentlySelectedTag = remember {
+            mutableStateOf(ItemTag("default"))
+        }
+
+        state.value.forEach { itemTag ->
+            //val selected = remember { mutableStateOf(false) }
             Box(modifier = Modifier.padding(vertical = 4.dp)) {
                 IconedChip(
-                    isSelected = !selected.value,
-                    onClick = { selected.value = !selected.value },
+                    isSelected = itemTag == currentlySelectedTag.value,
+                    onClick = {
+                        currentlySelectedTag.value = itemTag
+                        onTagClickedListener.invoke(itemTag)
+                    },
                     painter = if (isSystemInDarkTheme())
                         painterResource(id = R.drawable.ic_check_white)
                     else
                         painterResource(
                             id = R.drawable.ic_check_black
                         ),
-                    text = it.name
+                    text = itemTag.name
                 )
-                IconedChip(
-                    isSelected = !selected.value,
-                    onClick = { selected.value = !selected.value },
-                    painter = if (isSystemInDarkTheme())
-                        painterResource(
-                            id = R.drawable.ic_check_black
-                        )
-                    else
-                        painterResource(
-                            id = R.drawable.ic_check_white
-                        ),
-                    text = it.name
-                )
+//                IconedChip(
+//                    isSelected = itemTag == currentlySelectedTag.value,
+//                    onClick = {
+//                        currentlySelectedTag.value = itemTag
+//                    },
+//                    painter = if (isSystemInDarkTheme())
+//                        painterResource(
+//                            id = R.drawable.ic_check_black
+//                        )
+//                    else
+//                        painterResource(
+//                            id = R.drawable.ic_check_white
+//                        ),
+//                    text = itemTag.name
+//                )
             }
             Spacer(modifier = Modifier.padding(horizontal = 2.dp))
         }

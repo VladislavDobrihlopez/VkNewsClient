@@ -1,12 +1,12 @@
-package com.voitov.vknewsclient.domain.usecases
+package com.voitov.vknewsclient.domain.usecases.newsFeed
 
 import com.voitov.vknewsclient.domain.repository.NewsFeedRepository
 import javax.inject.Inject
 
-class RetrySigningInUseCase @Inject constructor(
+class RetrieveNextRecommendationsUseCase @Inject constructor(
     private val repository: NewsFeedRepository
 ) {
     suspend operator fun invoke() {
-        repository.retrySigningIn()
+        repository.retrieveNextRecommendations()
     }
 }

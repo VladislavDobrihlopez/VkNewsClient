@@ -1,6 +1,6 @@
 package com.voitov.vknewsclient.di.modules
 
-import com.voitov.vknewsclient.data.NewsFeedRepositoryImpl
+import com.voitov.vknewsclient.data.repositoriesImpl.NewsFeedRepositoryImpl
 import com.voitov.vknewsclient.di.scopes.ApplicationScope
 import com.voitov.vknewsclient.domain.repository.NewsFeedRepository
 import dagger.Binds

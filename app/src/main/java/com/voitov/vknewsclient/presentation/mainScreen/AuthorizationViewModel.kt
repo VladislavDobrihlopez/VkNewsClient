@@ -3,8 +3,8 @@ package com.voitov.vknewsclient.presentation.mainScreen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.voitov.vknewsclient.domain.AuthorizationStateResult
-import com.voitov.vknewsclient.domain.usecases.GetAuthStatusUseCase
-import com.voitov.vknewsclient.domain.usecases.RetrySigningInUseCase
+import com.voitov.vknewsclient.domain.usecases.newsFeed.GetAuthStatusUseCase
+import com.voitov.vknewsclient.domain.usecases.newsFeed.RetrySigningInUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
