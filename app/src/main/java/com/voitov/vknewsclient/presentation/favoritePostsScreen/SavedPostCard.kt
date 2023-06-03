@@ -3,7 +3,9 @@ package com.voitov.vknewsclient.presentation.favoritePostsScreen
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
+import androidx.compose.material.Chip
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -27,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,8 +38,11 @@ import coil.compose.AsyncImage
 import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.MetricsType
 import com.voitov.vknewsclient.domain.SocialMetric
+import com.voitov.vknewsclient.domain.entities.ItemTag
 import com.voitov.vknewsclient.domain.entities.PostItem
+import com.voitov.vknewsclient.domain.entities.TaggedPostItem
 import com.voitov.vknewsclient.presentation.mainScreen.TAG
+import com.voitov.vknewsclient.presentation.reusableUIs.IconedChip
 import com.voitov.vknewsclient.presentation.util.shortenLengthOfMetricsIfPossible
 import com.voitov.vknewsclient.ui.theme.IconWithText
 import com.voitov.vknewsclient.ui.theme.Shapes
@@ -46,7 +53,7 @@ import kotlin.random.Random
 @Composable
 fun SavedPostCard(
     modifier: Modifier = Modifier,
-    postItem: PostItem,
+    taggedPost: TaggedPostItem,
     onCommentsClickListener: ((SocialMetric) -> Unit)? = null,
     onLikesClickListener: ((SocialMetric) -> Unit)? = null,
 ) {
@@ -61,11 +68,12 @@ fun SavedPostCard(
             modifier = Modifier
                 .padding(all = 8.dp)
         ) {
-            PostHeader(postItem)
-            PostContent(postItem)
+            PostHeader(taggedPost.postItem)
+            PostContent(taggedPost.postItem)
+            PostTagsAssociatedByUser(taggedPost)
             PostFeedback(
-                postItem.isLikedByUser,
-                postItem.metrics,
+                taggedPost.postItem.isLikedByUser,
+                taggedPost.postItem.metrics,
                 onCommentsClickListener = {
                     onCommentsClickListener?.invoke(it)
                 },
@@ -130,6 +138,21 @@ private fun PostAdditionalResources(postItem: PostItem) {
         contentDescription = "",
         contentScale = ContentScale.FillWidth,
     )
+}
+
+@Composable
+private fun PostTagsAssociatedByUser(taggedPost: TaggedPostItem) {
+    Row {
+        IconedChip(
+            borderWidth = 1.dp,
+            enabled = false,
+            painter = if (isSystemInDarkTheme())
+                painterResource(id = R.drawable.ic_check_white)
+            else
+                painterResource(id = R.drawable.ic_check_black),
+            text = taggedPost.tag.name,
+        )
+    }
 }
 
 @Composable
@@ -210,23 +233,26 @@ fun List<SocialMetric>.getMetricByType(type: MetricsType): SocialMetric {
 fun NewsPostLightTheme() {
     VkNewsClientTheme(darkTheme = false) {
         SavedPostCard(
-            postItem = PostItem(
-                id = 1,
-                communityId = 1,
-                R.drawable.post_community_image.toString(),
-                "Maks Korzh",
-                "today",
-                contentText = stringResource(
-                    id = R.string.post_text
-                ),
-                contentImageUrl = null,
-                isLikedByUser = Random.nextBoolean(),
-                metrics = listOf(
-                    SocialMetric(MetricsType.LIKES, 2_100),
-                    SocialMetric(MetricsType.VIEWS, 15_000),
-                    SocialMetric(MetricsType.COMMENTS, 7_000),
-                    SocialMetric(MetricsType.SHARES, 5_000),
-                ),
+            taggedPost = TaggedPostItem(
+                tag = ItemTag("read later"),
+                postItem = PostItem(
+                    id = 1,
+                    communityId = 1,
+                    R.drawable.post_community_image.toString(),
+                    "Maks Korzh",
+                    "today",
+                    contentText = stringResource(
+                        id = R.string.post_text
+                    ),
+                    contentImageUrl = null,
+                    isLikedByUser = Random.nextBoolean(),
+                    metrics = listOf(
+                        SocialMetric(MetricsType.LIKES, 2_100),
+                        SocialMetric(MetricsType.VIEWS, 15_000),
+                        SocialMetric(MetricsType.COMMENTS, 7_000),
+                        SocialMetric(MetricsType.SHARES, 5_000),
+                    ),
+                )
             ),
             onCommentsClickListener = {},
             onLikesClickListener = {}
@@ -240,22 +266,25 @@ fun NewsPostLightTheme() {
 fun NewsPostLightDark() {
     VkNewsClientTheme(darkTheme = true) {
         SavedPostCard(
-            postItem = PostItem(
-                id = 1,
-                communityId = 1,
-                R.drawable.post_community_image.toString(),
-                "Maks Korzh",
-                "today",
-                contentText = stringResource(
-                    id = R.string.post_text
-                ),
-                contentImageUrl = null,
-                isLikedByUser = Random.nextBoolean(),
-                metrics = listOf(
-                    SocialMetric(MetricsType.LIKES, 2_100),
-                    SocialMetric(MetricsType.VIEWS, 15_000),
-                    SocialMetric(MetricsType.COMMENTS, 7_000),
-                    SocialMetric(MetricsType.SHARES, 5_000),
+            taggedPost = TaggedPostItem(
+                tag = ItemTag("read later"),
+                postItem = PostItem(
+                    id = 1,
+                    communityId = 1,
+                    R.drawable.post_community_image.toString(),
+                    "Maks Korzh",
+                    "today",
+                    contentText = stringResource(
+                        id = R.string.post_text
+                    ),
+                    contentImageUrl = null,
+                    isLikedByUser = Random.nextBoolean(),
+                    metrics = listOf(
+                        SocialMetric(MetricsType.LIKES, 2_100),
+                        SocialMetric(MetricsType.VIEWS, 15_000),
+                        SocialMetric(MetricsType.COMMENTS, 7_000),
+                        SocialMetric(MetricsType.SHARES, 5_000),
+                    ),
                 )
             ),
             onCommentsClickListener = {},

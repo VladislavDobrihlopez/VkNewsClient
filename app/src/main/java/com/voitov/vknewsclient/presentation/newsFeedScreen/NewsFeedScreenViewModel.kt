@@ -11,18 +11,21 @@ import com.voitov.vknewsclient.domain.usecases.newsFeed.ChangeLikeStatusUseCase
 import com.voitov.vknewsclient.domain.usecases.newsFeed.GetRecommendationsUseCase
 import com.voitov.vknewsclient.domain.usecases.newsFeed.IgnoreItemUseCase
 import com.voitov.vknewsclient.domain.usecases.newsFeed.RetrieveNextRecommendationsUseCase
-import com.voitov.vknewsclient.domain.usecases.storedPosts.CacheNewsUseCase
+import com.voitov.vknewsclient.domain.usecases.storedPosts.CachePostUseCase
 import com.voitov.vknewsclient.domain.usecases.storedPosts.GetTagsUseCase
 import com.voitov.vknewsclient.extensions.mergeWith
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,13 +35,17 @@ class NewsFeedScreenViewModel @Inject constructor(
     private val getRecommendationsUseCase: GetRecommendationsUseCase,
     private val retrieveNextRecommendationsUseCase: RetrieveNextRecommendationsUseCase,
     private val getTagsUseCase: GetTagsUseCase,
-    private val cacheNewsUseCase: CacheNewsUseCase
+    private val cachePostUseCase: CachePostUseCase
 ) : ViewModel() {
     private val exceptionHandler = CoroutineExceptionHandler { _, _ ->
         Log.d("ERROR_TEST", "exception is caught")
     }
 
-    val tagsFlow = getTagsUseCase.invoke()
+    val tagsFlow: SharedFlow<TagsTabState> = getTagsUseCase()
+        .map {
+            Log.d("TEST_POSTS_FLOW", "[newsFeedViewModel] tags flow onEach ${it.toString()}")
+            TagsTabState.Success(it) as TagsTabState
+        }.stateIn(viewModelScope, SharingStarted.Lazily, TagsTabState.Loading)
 
     private var previousPosts: List<PostItem> = listOf()
     private val screenStateFlow: StateFlow<NewsFeedResult> = getRecommendationsUseCase()
@@ -148,7 +155,7 @@ class NewsFeedScreenViewModel @Inject constructor(
 
     fun cachePost(post: PostItem, tag: ItemTag) {
         viewModelScope.launch {
-            cacheNewsUseCase.invoke(TaggedPostItem(tag, post))
+            cachePostUseCase(TaggedPostItem(tag, post))
         }
     }
 }

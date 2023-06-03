@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.getApplicationComponent
-import com.voitov.vknewsclient.presentation.LoadingGoingOn
+import com.voitov.vknewsclient.presentation.reusableUIs.LoadingGoingOn
 
 @Composable
 fun HomeScreen(

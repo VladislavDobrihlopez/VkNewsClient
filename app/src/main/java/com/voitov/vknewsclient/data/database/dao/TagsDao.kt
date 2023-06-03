@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TagsDao {
     @Query("SELECT * FROM feed_tags")
-    fun getAllTags(): Flow<List<TagDbModel>>
+    fun getAllTags(): List<TagDbModel>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveTag(tag: TagDbModel)

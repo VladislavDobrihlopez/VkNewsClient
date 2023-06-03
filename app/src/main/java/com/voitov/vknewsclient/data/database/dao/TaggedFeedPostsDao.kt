@@ -12,9 +12,9 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TaggedFeedPostsDao {
     @Query("SELECT * FROM news_feed_articles")
-    fun getAllNews(): Flow<List<TaggedPostItemDbModel>>
-    @Query("SELECT * FROM news_feed_articles WHERE authorName=:itemTag")
-    fun getNewsWithSpecifiedTag(itemTag: String): Flow<List<TaggedPostItemDbModel>>
+    suspend fun getAllNews(): List<TaggedPostItemDbModel>
+//    @Query("SELECT * FROM news_feed_articles WHERE authorName=:itemTag")
+//    fun getNewsWithSpecifiedTag(itemTag: String): Flow<List<TaggedPostItemDbModel>>
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun cacheNews(news: TaggedPostItemDbModel)
 }

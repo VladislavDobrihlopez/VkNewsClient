@@ -3,9 +3,12 @@ package com.voitov.vknewsclient.presentation.newsFeedScreen
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -52,10 +55,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.entities.ItemTag
 import com.voitov.vknewsclient.domain.entities.PostItem
-import com.voitov.vknewsclient.domain.entities.TaggedPostItem
 import com.voitov.vknewsclient.getApplicationComponent
-import com.voitov.vknewsclient.presentation.LoadingGoingOn
-import com.voitov.vknewsclient.presentation.favoritePostsScreen.Tags
+import com.voitov.vknewsclient.presentation.reusableUIs.IconedChip
+import com.voitov.vknewsclient.presentation.reusableUIs.LoadingGoingOn
 import com.voitov.vknewsclient.ui.theme.TransparentGreen
 import com.voitov.vknewsclient.ui.theme.TransparentRed
 import kotlinx.coroutines.delay
@@ -285,8 +287,6 @@ fun CachePostIncludingTagPopUp(
     viewModel: NewsFeedScreenViewModel,
     onButtonClickListener: (ItemTag) -> Unit
 ) {
-    val tagsState = viewModel.tagsFlow.collectAsState(initial = listOf())
-
     val selectedTag = remember {
         mutableStateOf<ItemTag?>(null)
     }
@@ -308,8 +308,21 @@ fun CachePostIncludingTagPopUp(
             ) {
                 Text(text = "Select tags you want to associate to this post")
                 Spacer(modifier = Modifier.height(16.dp))
-                Tags(state = tagsState, modifier = Modifier.weight(weight = 1f, fill = false)) {
-                    selectedTag.value = it
+                val tagsState = viewModel.tagsFlow.collectAsState(initial = TagsTabState.Loading)
+
+                when (val state = tagsState.value) {
+                    TagsTabState.Loading -> {
+                        LoadingGoingOn()
+                    }
+
+                    is TagsTabState.Success -> {
+                        Tags(
+                            state = state.tags,
+                            modifier = Modifier.weight(weight = 1f, fill = false)
+                        ) {
+                            selectedTag.value = it
+                        }
+                    }
                 }
                 Spacer(modifier = Modifier.height(32.dp))
                 Button(onClick = {
@@ -321,6 +334,44 @@ fun CachePostIncludingTagPopUp(
                     Text(text = "Cache the post")
                 }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun Tags(
+    state: List<ItemTag>,
+    modifier: Modifier = Modifier,
+    onTagClickedListener: (ItemTag) -> Unit
+) {
+    FlowRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        maxItemsInEachRow = 7
+    ) {
+        val currentlySelectedTag = remember {
+            mutableStateOf(ItemTag("default"))
+        }
+
+        state.forEach { itemTag ->
+            //val selected = remember { mutableStateOf(false) }
+            Box(modifier = Modifier.padding(vertical = 4.dp)) {
+                IconedChip(
+                    enabled = true,
+                    isSelected = itemTag == currentlySelectedTag.value,
+                    onClick = {
+                        currentlySelectedTag.value = itemTag
+                        onTagClickedListener.invoke(itemTag)
+                    },
+                    painter = if (isSystemInDarkTheme())
+                        painterResource(id = R.drawable.ic_check_white)
+                    else
+                        painterResource(id = R.drawable.ic_check_black),
+                    text = itemTag.name
+                )
+            }
+            Spacer(modifier = Modifier.padding(horizontal = 2.dp))
         }
     }
 }
