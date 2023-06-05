@@ -3,7 +3,6 @@ package com.voitov.vknewsclient.data.repositoriesImpl
 import android.util.Log
 import com.voitov.vknewsclient.data.database.dao.TaggedFeedPostsDao
 import com.voitov.vknewsclient.data.database.dao.TagsDao
-import com.voitov.vknewsclient.data.database.models.TagDbModel
 import com.voitov.vknewsclient.data.mappers.TaggedPostMapper
 import com.voitov.vknewsclient.data.mappers.TagsMapper
 import com.voitov.vknewsclient.domain.entities.ItemTag
@@ -18,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -116,7 +116,8 @@ class StoredNewsFeedRepositoryImpl @Inject constructor(
                 tagsMapper.mapDbModelToEntity(dbModel)
             })
         }
-    }.onCompletion { Log.d("TEST_POSTS_FLOW", "[repository] onCompletion") }
+    }.onEach { tagsForPostFiltering = it.toList() }
+        .onCompletion { Log.d("TEST_POSTS_FLOW", "[repository] onCompletion") }
         .shareIn(scope, SharingStarted.Lazily, replay = 1)
 
     override fun getAllTags(): Flow<List<ItemTag>> {
@@ -125,10 +126,13 @@ class StoredNewsFeedRepositoryImpl @Inject constructor(
 
     override suspend fun saveTag(tag: ItemTag) {
         tagsDao.saveTag(tagsMapper.mapEntityToDbModel(tag))
+        shouldLoadAvailableTags.emit(Any())
     }
 
     override suspend fun removeTag(tag: ItemTag) {
-        //tagsDao.removeTag(tag.name)
-        TODO("Not yet implemented")
+        tagsDao.removeTag(tag.name)
+        shouldLoadAvailableTags.emit(Any())
+        neededToBeLoaded = true
+        shouldLoadDataEvent.emit(Unit)
     }
 }

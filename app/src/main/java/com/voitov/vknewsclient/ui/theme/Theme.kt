@@ -28,9 +28,9 @@ private val DarkColorPalette = darkColors(
 @SuppressLint("ConflictingOnColor")
 private val LightColorPalette = lightColors(
     primary = Color.White,
-    primaryVariant = Color(237, 238, 240),
+    primaryVariant = CoolWhite,
     secondary = Color.White,
-    background = Color(237, 238, 240),
+    background = CoolWhite,
     surface = Color.White,
     onPrimary = CoolBlack,
     onSecondary = CoolGray,
