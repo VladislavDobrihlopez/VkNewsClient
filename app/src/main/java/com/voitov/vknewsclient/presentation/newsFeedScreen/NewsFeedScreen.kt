@@ -39,7 +39,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -86,7 +85,7 @@ fun NewsFeedScreen(
         }
 
         is NewsFeedScreenContentState.OnStartToEndActionConfirmation -> {
-            CachePostIncludingTagPopUp(post = state.post, viewModel = viewModel) { tag ->
+            CachePostIncludingTagPopUp(viewModel = viewModel) { tag ->
                 viewModel.cachePost(state.post, tag)
             }
         }
@@ -283,7 +282,6 @@ private fun IgnoreConfirmationDialog(post: PostItem, viewModel: NewsFeedScreenVi
 
 @Composable
 fun CachePostIncludingTagPopUp(
-    post: PostItem,
     viewModel: NewsFeedScreenViewModel,
     onButtonClickListener: (ItemTag) -> Unit
 ) {
@@ -300,7 +298,7 @@ fun CachePostIncludingTagPopUp(
         Surface(
             border = BorderStroke(1.dp, MaterialTheme.colors.secondary),
             shape = RoundedCornerShape(8.dp),
-            color = Color(0xCCEEEEEE),
+            color = MaterialTheme.colors.surface.copy(alpha = 0.75f),
         ) {
             Column(
                 modifier = Modifier.padding(32.dp),

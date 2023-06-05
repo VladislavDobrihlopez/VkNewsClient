@@ -84,7 +84,7 @@ fun MainScreen() {
             navHostController = navigationState.navHostController,
             newsFeedContent = {
                 HomeScreen(
-                    paddingVales = it,
+                    paddingValues = it,
                     onCommentsClickListener = { clickedPost ->
                         navigationState.navigateToComments(clickedPost)
                     }

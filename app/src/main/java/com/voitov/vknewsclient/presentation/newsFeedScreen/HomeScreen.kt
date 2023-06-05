@@ -14,7 +14,7 @@ import com.voitov.vknewsclient.presentation.reusableUIs.LoadingGoingOn
 
 @Composable
 fun HomeScreen(
-    paddingVales: PaddingValues,
+    paddingValues: PaddingValues,
     onCommentsClickListener: (PostItem) -> Unit
 ) {
     val viewModel: NewsFeedScreenViewModel =
@@ -23,7 +23,7 @@ fun HomeScreen(
         viewModel.screenState.collectAsState(initial = NewsFeedScreenState.InitialState)
     ScreenContent(
         newsFeedScreenState = postsState,
-        paddingVales = paddingVales,
+        paddingValues = paddingValues,
         clickListener = { post ->
             onCommentsClickListener(post)
         },
@@ -36,14 +36,14 @@ fun HomeScreen(
 @Composable
 private fun ScreenContent(
     newsFeedScreenState: State<NewsFeedScreenState>,
-    paddingVales: PaddingValues,
+    paddingValues: PaddingValues,
     clickListener: (PostItem) -> Unit,
     onReconnect: () -> Unit
 ) {
     when (val currentState = newsFeedScreenState.value) {
         is NewsFeedScreenState.ShowingPostsState -> {
             NewsFeedScreen(
-                paddingVales,
+                paddingValues,
                 currentState.posts,
                 currentState.isDataBeingLoaded,
                 onCommentsClickListener = { post ->
