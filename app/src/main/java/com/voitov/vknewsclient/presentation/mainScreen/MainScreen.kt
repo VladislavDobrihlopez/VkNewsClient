@@ -25,6 +25,7 @@ import com.voitov.vknewsclient.navigation.rememberNavigationState
 import com.voitov.vknewsclient.presentation.commentsScreen.CommentsScreen
 import com.voitov.vknewsclient.presentation.favoritePostsScreen.FavoritePostsScreen
 import com.voitov.vknewsclient.presentation.newsFeedScreen.HomeScreen
+import com.voitov.vknewsclient.presentation.profileScreen.ProfileScreen
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 
 const val TAG = "COMPOSE_TEST"
@@ -93,8 +94,10 @@ fun MainScreen() {
             favoritesScreenContent = {
                 //TestScreen(screenName = "favorite screen")
                 FavoritePostsScreen()
-                                     },
-            profileScreenContent = { TestScreen(screenName = "profile screen") },
+            },
+            profileScreenContent = {
+                ProfileScreen()
+            },
             commentsContent = { clickedPost ->
                 CommentsScreen(post = clickedPost) {
                     navigationState.navHostController.popBackStack()
@@ -105,19 +108,6 @@ fun MainScreen() {
             }
         )
     }
-}
-
-@Composable
-fun TestScreen(screenName: String) {
-    val touches = rememberSaveable {
-        mutableStateOf(0)
-    }
-    Text(
-        text = "$screenName ${touches.value}",
-        color = Color.DarkGray,
-        modifier = Modifier.clickable {
-            touches.value = touches.value + 1
-        })
 }
 
 @RequiresApi(Build.VERSION_CODES.P)
