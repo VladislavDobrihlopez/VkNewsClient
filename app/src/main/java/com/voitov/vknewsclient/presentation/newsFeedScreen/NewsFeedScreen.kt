@@ -3,9 +3,12 @@ package com.voitov.vknewsclient.presentation.newsFeedScreen
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,9 +35,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -48,10 +52,11 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.voitov.vknewsclient.R
+import com.voitov.vknewsclient.domain.entities.ItemTag
 import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.getApplicationComponent
-import com.voitov.vknewsclient.presentation.LoadingGoingOn
-import com.voitov.vknewsclient.presentation.favoritePostsScreen.Tags
+import com.voitov.vknewsclient.presentation.reusableUIs.IconedChip
+import com.voitov.vknewsclient.presentation.reusableUIs.LoadingGoingOn
 import com.voitov.vknewsclient.ui.theme.TransparentGreen
 import com.voitov.vknewsclient.ui.theme.TransparentRed
 import kotlinx.coroutines.delay
@@ -80,7 +85,9 @@ fun NewsFeedScreen(
         }
 
         is NewsFeedScreenContentState.OnStartToEndActionConfirmation -> {
-            CachePostIncludingTagPopUp(post = state.post, viewModel = viewModel)
+            CachePostIncludingTagPopUp(viewModel = viewModel) { tag ->
+                viewModel.cachePost(state.post, tag)
+            }
         }
 
         else -> {}
@@ -134,7 +141,6 @@ private fun NewsFeedScreenContent(
         items(items = posts, key = { it.id }) { post ->
             val dismiss = rememberDismissState()
 
-            // change in the future
             if (dismiss.isDismissed(DismissDirection.EndToStart)) {
                 onIgnorePostSwipeEndToStart(post)
                 LaunchedEffect(Unit) {
@@ -148,7 +154,6 @@ private fun NewsFeedScreenContent(
                     dismiss.reset()
                 }
             } else {
-                //todo implement bookmark page
                 LaunchedEffect(Unit) {
                     dismiss.reset()
                 }
@@ -165,8 +170,7 @@ private fun NewsFeedScreenContent(
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         Box(
-                            modifier = Modifier
-                                .weight(1f)
+                            modifier = Modifier.weight(1f)
                         ) {
                             Image(
                                 painter = painterResource(id = R.drawable.ic_bookmark),
@@ -274,18 +278,24 @@ private fun IgnoreConfirmationDialog(post: PostItem, viewModel: NewsFeedScreenVi
 }
 
 @Composable
-fun CachePostIncludingTagPopUp(post: PostItem, viewModel: NewsFeedScreenViewModel) {
-    val tagsState = viewModel.tagsFlow.collectAsState(initial = listOf())
+fun CachePostIncludingTagPopUp(
+    viewModel: NewsFeedScreenViewModel,
+    onButtonClickListener: (ItemTag) -> Unit
+) {
+    val selectedTag = remember {
+        mutableStateOf<ItemTag?>(null)
+    }
 
     Popup(
         popupPositionProvider = WindowCenterOffsetPositionProvider(),
         properties = PopupProperties(focusable = true, dismissOnClickOutside = true),
         onDismissRequest = { viewModel.dismiss() },
     ) {
+
         Surface(
             border = BorderStroke(1.dp, MaterialTheme.colors.secondary),
             shape = RoundedCornerShape(8.dp),
-            color = Color(0xCCEEEEEE),
+            color = MaterialTheme.colors.surface.copy(alpha = 0.75f),
         ) {
             Column(
                 modifier = Modifier.padding(32.dp),
@@ -293,14 +303,70 @@ fun CachePostIncludingTagPopUp(post: PostItem, viewModel: NewsFeedScreenViewMode
             ) {
                 Text(text = "Select tags you want to associate to this post")
                 Spacer(modifier = Modifier.height(16.dp))
-                Tags(state = tagsState, modifier = Modifier.weight(weight = 1f, fill = false))
+                val tagsState = viewModel.tagsFlow.collectAsState(initial = TagsTabState.Loading)
+
+                when (val state = tagsState.value) {
+                    TagsTabState.Loading -> {
+                        LoadingGoingOn()
+                    }
+
+                    is TagsTabState.Success -> {
+                        Tags(
+                            state = state.tags,
+                            modifier = Modifier.weight(weight = 1f, fill = false)
+                        ) {
+                            selectedTag.value = it
+                        }
+                    }
+                }
                 Spacer(modifier = Modifier.height(32.dp))
                 Button(onClick = {
-
+                    selectedTag.value?.let {
+                        onButtonClickListener(it)
+                        viewModel.dismiss()
+                    }
                 }) {
                     Text(text = "Cache the post")
                 }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun Tags(
+    state: List<ItemTag>,
+    modifier: Modifier = Modifier,
+    onTagClickedListener: (ItemTag) -> Unit
+) {
+    FlowRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        maxItemsInEachRow = 7
+    ) {
+        val currentlySelectedTag = remember {
+            mutableStateOf(ItemTag("default"))
+        }
+
+        state.forEach { itemTag ->
+            //val selected = remember { mutableStateOf(false) }
+            Box(modifier = Modifier.padding(vertical = 4.dp)) {
+                IconedChip(
+                    enabled = true,
+                    isSelected = itemTag == currentlySelectedTag.value,
+                    onClick = {
+                        currentlySelectedTag.value = itemTag
+                        onTagClickedListener.invoke(itemTag)
+                    },
+                    painter = if (isSystemInDarkTheme())
+                        painterResource(id = R.drawable.ic_check_white)
+                    else
+                        painterResource(id = R.drawable.ic_check_black),
+                    text = itemTag.name
+                )
+            }
+            Spacer(modifier = Modifier.padding(horizontal = 2.dp))
         }
     }
 }

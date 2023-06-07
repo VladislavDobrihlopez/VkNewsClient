@@ -1,6 +1,7 @@
 package com.voitov.vknewsclient.domain.entities
 
 import androidx.compose.runtime.Immutable
+import androidx.room.Embedded
 import com.voitov.vknewsclient.domain.SocialMetric
 
 @Immutable

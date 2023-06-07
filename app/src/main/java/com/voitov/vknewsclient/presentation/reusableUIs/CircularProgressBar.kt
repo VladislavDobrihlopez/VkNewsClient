@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.presentation
+package com.voitov.vknewsclient.presentation.reusableUIs
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.CircularProgressIndicator
