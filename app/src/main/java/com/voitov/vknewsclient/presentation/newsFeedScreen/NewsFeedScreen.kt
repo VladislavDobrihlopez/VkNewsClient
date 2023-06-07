@@ -141,7 +141,6 @@ private fun NewsFeedScreenContent(
         items(items = posts, key = { it.id }) { post ->
             val dismiss = rememberDismissState()
 
-            // change in the future
             if (dismiss.isDismissed(DismissDirection.EndToStart)) {
                 onIgnorePostSwipeEndToStart(post)
                 LaunchedEffect(Unit) {
@@ -155,7 +154,6 @@ private fun NewsFeedScreenContent(
                     dismiss.reset()
                 }
             } else {
-                //todo implement bookmark page
                 LaunchedEffect(Unit) {
                     dismiss.reset()
                 }
@@ -172,8 +170,7 @@ private fun NewsFeedScreenContent(
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         Box(
-                            modifier = Modifier
-                                .weight(1f)
+                            modifier = Modifier.weight(1f)
                         ) {
                             Image(
                                 painter = painterResource(id = R.drawable.ic_bookmark),

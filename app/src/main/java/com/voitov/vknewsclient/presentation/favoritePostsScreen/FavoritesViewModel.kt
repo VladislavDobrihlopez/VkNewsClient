@@ -9,6 +9,7 @@ import com.voitov.vknewsclient.domain.usecases.storedPosts.CachePostUseCase
 import com.voitov.vknewsclient.domain.usecases.storedPosts.GetAllPostsUseCase
 import com.voitov.vknewsclient.domain.usecases.storedPosts.GetPostsWithSpecificTagUseCase
 import com.voitov.vknewsclient.domain.usecases.storedPosts.GetTagsUseCase
+import com.voitov.vknewsclient.domain.usecases.storedPosts.RemoveCachedPostUseCase
 import com.voitov.vknewsclient.domain.usecases.storedPosts.RemoveTagUseCase
 import com.voitov.vknewsclient.domain.usecases.storedPosts.SaveTagUseCase
 import com.voitov.vknewsclient.extensions.mergeWith
@@ -30,13 +31,22 @@ class FavoritesViewModel @Inject constructor(
     private val saveTagUseCase: SaveTagUseCase,
     private val removeTagUseCase: RemoveTagUseCase,
     private val cachePostUseCase: CachePostUseCase,
-    private val getAllPostsUseCase: GetAllPostsUseCase
+    private val getAllPostsUseCase: GetAllPostsUseCase,
+    private val removeCachedPostUseCase: RemoveCachedPostUseCase
 ) : ViewModel() {
     private var cachedTags = listOf<ItemTag>()
+    private var cachedPosts = listOf<TaggedPostItem>()
 
-    private val confirmationEvents = MutableSharedFlow<TagsTabState>()
-    private val changeStateFlow = flow {
-        confirmationEvents.collect {
+    private val confirmationTagStateEvents = MutableSharedFlow<TagsTabState>()
+    private val confirmationTagStateFlow = flow {
+        confirmationTagStateEvents.collect {
+            emit(it)
+        }
+    }
+
+    private val confirmationSwipesEvents = MutableSharedFlow<FavoritePostsFeedState>()
+    private val confirmationSwipeFlow = flow {
+        confirmationSwipesEvents.collect {
             emit(it)
         }
     }
@@ -50,7 +60,7 @@ class FavoritesViewModel @Inject constructor(
             viewModelScope,
             started = SharingStarted.Lazily,
             initialValue = TagsTabState.Loading
-        ).mergeWith(changeStateFlow)
+        ).mergeWith(confirmationTagStateFlow)
         .onEach {
             if (it is TagsTabState.Success) {
                 cachedTags = it.tags.toList()
@@ -65,11 +75,17 @@ class FavoritesViewModel @Inject constructor(
             viewModelScope,
             started = SharingStarted.Lazily,
             initialValue = FavoritePostsFeedState.Loading
-        )
+        ).mergeWith(confirmationSwipeFlow)
+        .onEach {
+            //Log.d("FAVORITE_STATE", (it is FavoritePostsFeedState.Loading).toString())
+            if (it is FavoritePostsFeedState.Success) {
+                cachedPosts = it.posts.toList()
+            }
+        }
 
-    fun cacheNews(news: TaggedPostItem) {
+    fun removeCachedPost(post: TaggedPostItem) {
         viewModelScope.launch {
-            cachePostUseCase.invoke(news)
+            removeCachedPostUseCase(post.postItem.id)
         }
     }
 
@@ -99,19 +115,41 @@ class FavoritesViewModel @Inject constructor(
 
     fun confirmAddTagAction() {
         viewModelScope.launch {
-            confirmationEvents.emit(TagsTabState.OnAddNewTagConfirmation)
+            confirmationTagStateEvents.emit(TagsTabState.OnAddNewTagConfirmation)
         }
     }
 
     fun confirmRemoveTagAction() {
         viewModelScope.launch {
-            confirmationEvents.emit(TagsTabState.OnRemoveTagConfirmation(cachedTags))
+            confirmationTagStateEvents.emit(TagsTabState.OnRemoveTagConfirmation(cachedTags))
         }
     }
 
-    fun dismiss() {
+    fun confirmActionOnSwipeEndToStart(post: TaggedPostItem) {
         viewModelScope.launch {
-            confirmationEvents.emit(TagsTabState.Success(cachedTags))
+            confirmationSwipesEvents.emit(
+                FavoritePostsFeedState.Success(
+                    cachedPosts,
+                    FavoritePostsFeedState.DialogData(true, post)
+                )
+            )
+        }
+    }
+
+    fun dismissToRemovePost() {
+        viewModelScope.launch {
+            confirmationSwipesEvents.emit(
+                FavoritePostsFeedState.Success(
+                    cachedPosts,
+                    FavoritePostsFeedState.DialogData(false)
+                )
+            )
+        }
+    }
+
+    fun dismissToAddNewTags() {
+        viewModelScope.launch {
+            confirmationTagStateEvents.emit(TagsTabState.Success(cachedTags))
         }
     }
 }

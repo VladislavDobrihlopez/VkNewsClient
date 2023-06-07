@@ -30,11 +30,17 @@ import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
+import androidx.compose.material.DismissDirection
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
+import androidx.compose.material.rememberDismissState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,6 +66,7 @@ import com.voitov.vknewsclient.ui.theme.Shapes
 import com.voitov.vknewsclient.ui.theme.TransparentGreen
 import com.voitov.vknewsclient.ui.theme.TransparentRed
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
+import kotlinx.coroutines.delay
 
 private const val TAGS_MENU_PAGES_COUNT = 2
 
@@ -74,21 +81,36 @@ fun FavoritePostsScreen() {
             .padding(8.dp)
     ) {
         TagsMenu(viewModel = viewModel)
-
         Spacer(modifier = Modifier.padding(vertical = 8.dp))
+        PostsContent(viewModel = viewModel)
+    }
+}
 
-        when (val feedPostsState =
-            viewModel.postsFlow.collectAsState(initial = FavoritePostsFeedState.Loading).value) {
-            is FavoritePostsFeedState.Loading -> {
-                LoadingGoingOn()
-            }
-
-            is FavoritePostsFeedState.Success -> {
-                FeedPosts(posts = feedPostsState.posts)
-            }
-
-            else -> {}
+@Composable
+private fun PostsContent(viewModel: FavoritesViewModel) {
+    when (val feedPostsState =
+        viewModel.postsFlow.collectAsState(initial = FavoritePostsFeedState.Loading).value) {
+        is FavoritePostsFeedState.Loading -> {
+            LoadingGoingOn()
         }
+
+        is FavoritePostsFeedState.Success -> {
+            FeedPosts(posts = feedPostsState.posts) { post ->
+                viewModel.confirmActionOnSwipeEndToStart(post)
+            }
+
+            if (feedPostsState.dialogData.showDialog) {
+                if (feedPostsState.dialogData.chosenPost == null) {
+                    throw IllegalStateException()
+                }
+                RemoveFromCacheConfirmationDialog(
+                    taggedPost = feedPostsState.dialogData.chosenPost,
+                    viewModel = viewModel
+                )
+            }
+        }
+
+        else -> {}
     }
 }
 
@@ -217,7 +239,7 @@ private fun NewTagAdditionDialog(viewModel: FavoritesViewModel) {
 
     AlertDialog(
         onDismissRequest = {
-            viewModel.dismiss()
+            viewModel.dismissToAddNewTags()
         },
         confirmButton = {
             TextButton(onClick = {
@@ -228,7 +250,7 @@ private fun NewTagAdditionDialog(viewModel: FavoritesViewModel) {
         },
         dismissButton = {
             TextButton(onClick = {
-                viewModel.dismiss()
+                viewModel.dismissToAddNewTags()
             }) {
                 Text("Dismiss", color = MaterialTheme.colors.onPrimary)
             }
@@ -253,7 +275,7 @@ private fun RemoveTagDialog(itemTags: List<ItemTag>, viewModel: FavoritesViewMod
 
     AlertDialog(
         onDismissRequest = {
-            viewModel.dismiss()
+            viewModel.dismissToAddNewTags()
         },
         confirmButton = {
             TextButton(onClick = {
@@ -264,7 +286,7 @@ private fun RemoveTagDialog(itemTags: List<ItemTag>, viewModel: FavoritesViewMod
         },
         dismissButton = {
             TextButton(onClick = {
-                viewModel.dismiss()
+                viewModel.dismissToAddNewTags()
             }) {
                 Text("Dismiss", color = MaterialTheme.colors.onPrimary)
             }
@@ -322,24 +344,96 @@ private fun TagsList(
     }
 }
 
-
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
-private fun FeedPosts(posts: List<TaggedPostItem>) {
+private fun FeedPosts(
+    posts: List<TaggedPostItem>,
+    onRemoveFromCachePostSwipeEndToStart: (TaggedPostItem) -> Unit
+) {
     val scrollState = rememberLazyListState()
 
     LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(
             top = 16.dp,
             start = 8.dp,
             end = 8.dp,
-            bottom = 54.dp
+            bottom = 56.dp
         ),
         state = scrollState
     ) {
-        items(posts) { post ->
-            SavedPostCard(taggedPost = post)
+        items(posts, key = { it.postItem.id }) { post ->
+            val dismissState = rememberDismissState()
+            if (dismissState.isDismissed(DismissDirection.EndToStart)) {
+                onRemoveFromCachePostSwipeEndToStart(post)
+                LaunchedEffect(Unit) {
+                    delay(500)
+                    dismissState.reset()
+                }
+            }
+            SwipeToDismiss(
+                modifier = Modifier.animateItemPlacement(),
+                state = dismissState,
+                background = {
+                    DismissedPostBackground()
+                },
+                directions = setOf(DismissDirection.EndToStart),
+                dismissThresholds = {
+                    FractionalThreshold(0.6f)
+                }
+            ) {
+                SavedPostCard(modifier = Modifier, taggedPost = post) {
+
+                }
+            }
         }
+    }
+}
+
+@Composable
+private fun RemoveFromCacheConfirmationDialog(
+    taggedPost: TaggedPostItem,
+    viewModel: FavoritesViewModel
+) {
+    AlertDialog(
+        onDismissRequest = {
+            viewModel.dismissToRemovePost()
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                viewModel.removeCachedPost(taggedPost)
+            }) {
+                Text("Confirm", color = MaterialTheme.colors.onPrimary)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = {
+                viewModel.dismissToRemovePost()
+            }) {
+                Text("Dismiss", color = MaterialTheme.colors.onPrimary)
+            }
+        },
+        title = {
+            Text(text = "Removing cached post ${taggedPost.postItem.id}")
+        },
+        text = {
+            Text(text = "Do you agree to remove the post from cache?")
+        }
+    )
+}
+
+@Preview
+@Composable
+private fun DismissedPostBackground() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(all = 16.dp)
+            .background(TransparentRed)
+            .padding(all = 16.dp),
+        contentAlignment = Alignment.CenterEnd
+    ) {
+        Text(text = "Delete item", color = Color.White, fontSize = 16.sp)
     }
 }
 

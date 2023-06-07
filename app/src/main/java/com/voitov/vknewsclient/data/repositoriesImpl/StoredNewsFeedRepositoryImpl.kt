@@ -105,6 +105,14 @@ class StoredNewsFeedRepositoryImpl @Inject constructor(
         shouldLoadDataEvent.emit(Unit)
     }
 
+    override suspend fun removeCachedPost(postId: Long) {
+        taggedFeedPostsDao.removeCachedPost(postId)
+        cachedPosts.removeAll {
+            it.postItem.id == postId
+        }
+        shouldLoadDataEvent.emit(Any())
+    }
+
     private val allTagsFlow = flow<List<ItemTag>> {
         emit(tagsDao.getAllTags().map { dbModel ->
             Log.d("TEST_POSTS_FLOW", "[repository] emit tags")
