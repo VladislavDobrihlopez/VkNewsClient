@@ -66,13 +66,14 @@ private fun ProfileHeader(progress: Float) {
     MotionLayout(
         motionScene = MotionScene(content = motionSceneData),
         progress = progress,
-        modifier = Modifier.fillMaxWidth().background(Color.DarkGray)
+        modifier = Modifier.fillMaxWidth()
 
     ) {
         val profilePictureCustomProperties = motionProperties("profile_picture")
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(Color.DarkGray)
                 .layoutId("background")
         )
         Image(

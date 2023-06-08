@@ -5,7 +5,7 @@
         width: 48,
         height: 48,
         start: ['parent', 'start', 16],
-        top: ['parent', 'top', 16],
+        top: ['parent', 'top', 8],
         custom: {
           border_color: '#0FF0077FF'
         }
@@ -17,7 +17,7 @@
       },
       background: {
         width: 'spread',
-        heihgt: 'spread',
+        height: 'spread',
         start: ['parent', 'start'],
         end: ['parent', 'end'],
         top: ['parent', 'top'],
@@ -42,11 +42,11 @@
       },
       background: {
         width: 'spread',
-        heihgt: 'spread',
+        height: 'spread',
         start: ['parent', 'start'],
         end: ['parent', 'end'],
         top: ['parent', 'top'],
-        bottom: ['parent', 'bottom', -16]
+        bottom: ['parent', 'bottom', -8]
       }
     }
   },
