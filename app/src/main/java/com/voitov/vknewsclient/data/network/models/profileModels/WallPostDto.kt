@@ -1,10 +1,10 @@
-package com.voitov.vknewsclient.data.network.models.postsFeedModels
+package com.voitov.vknewsclient.data.network.models.profileModels
 
 import com.google.gson.annotations.SerializedName
 
-data class PostDto(
+data class WallPostDto(
     @SerializedName("id") val id: Long,
-    @SerializedName("source_id") val communityId: Long,
+    @SerializedName("owner_id") val ownerId: Long,
     @SerializedName("date") val secondsSince1970: Long,
     @SerializedName("text") val text: String,
     @SerializedName("likes") val likes: LikesInfoHolderDto,
@@ -14,6 +14,6 @@ data class PostDto(
     @SerializedName("attachments") val attachments: List<AttachedPhotoDto>?
 ) {
     override fun toString(): String {
-        return "PostDto(id='$id', communityId=$communityId, date=$secondsSince1970, likes=$likes, comments=$comments, reposts=$reposts, views=$views, attachments=$attachments)"
+        return "WallPostDto(id='$id', communityId=$ownerId, date=$secondsSince1970, likes=$likes, comments=$comments, reposts=$reposts, views=$views, attachments=$attachments)"
     }
 }

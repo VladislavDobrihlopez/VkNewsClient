@@ -9,12 +9,12 @@ data class ProfileDataDto(
     @SerializedName("deactivated") val deactivated: String?,
     @SerializedName("is_closed") val isClosed: Boolean,
     @SerializedName("can_access_closed") val canAccessClosed: Boolean,
-    @SerializedName("bdate") val birthday: String,
+    @SerializedName("bdate") val birthday: String?,
     @SerializedName("photo_max") val photoMaxUrl: String,
-    @SerializedName("about") val about: String,
+    @SerializedName("about") val about: String?,
     @SerializedName("followers_count") val followersCount: Int,
     @SerializedName("online") val isOnline: Int,
     @SerializedName("city") val city: CityDto?,
-    @SerializedName("country") val country: CountryDto?
-
+    @SerializedName("country") val country: CountryDto?,
+    @SerializedName("cover") val cover: CoverDto
 )

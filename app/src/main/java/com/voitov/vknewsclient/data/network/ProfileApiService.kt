@@ -1,16 +1,23 @@
 package com.voitov.vknewsclient.data.network
 
 import com.voitov.vknewsclient.data.network.models.profileModels.ProfileResponseDto
+import com.voitov.vknewsclient.data.network.models.profileModels.ProfileWallContentResponseDto
 import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface ProfileApiService {
     @GET("users.get?v=${API_VERSION}")
     suspend fun getProfileInfo(
-        @Query("user_ids") userIds: String,
         @Query("access_token") token: String,
+        @Query("user_ids") userIds: String,
         @Query("fields") fields: String = FIELDS
     ): ProfileResponseDto
+
+    @GET("wall.get?v=${API_VERSION}&count=10")
+    suspend fun getWallContent(
+        @Query("access_token") token: String,
+        @Query("domain") domain: String,
+    ): ProfileWallContentResponseDto
 
     companion object {
         private const val API_VERSION = "5.131"
@@ -24,7 +31,8 @@ interface ProfileApiService {
             "photo_max",
             "online",
             "followers_count",
-            "deactivated"
+            "deactivated",
+            "cover"
         ).joinToString(",")
     }
 }

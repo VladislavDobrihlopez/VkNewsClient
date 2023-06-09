@@ -1,8 +1,6 @@
 package com.voitov.vknewsclient.presentation.profileScreen
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
@@ -13,14 +11,15 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
@@ -46,12 +45,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -71,9 +68,14 @@ import androidx.constraintlayout.compose.MotionScene
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.voitov.vknewsclient.R
+import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.domain.entities.Profile
+import com.voitov.vknewsclient.domain.entities.WallPost
 import com.voitov.vknewsclient.getApplicationComponent
+import com.voitov.vknewsclient.presentation.newsFeedScreen.PostCard
+import com.voitov.vknewsclient.presentation.reusableUIs.LoadingGoingOn
 import com.voitov.vknewsclient.ui.theme.CoolBlack
+import com.voitov.vknewsclient.ui.theme.CoolGray
 import com.voitov.vknewsclient.ui.theme.CoolWhite
 import com.voitov.vknewsclient.ui.theme.Shapes
 import kotlinx.coroutines.launch
@@ -84,33 +86,25 @@ private enum class SwipingStates {
     COLLAPSED
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ProfileScreen() {
     val viewModel: ProfileViewModel =
         viewModel(factory = getApplicationComponent().getViewModelsFactory())
 
     val state = viewModel.profileFlow.collectAsState(
-        initial = Profile(
-            "",
-            "",
-            "",
-            "",
-            true,
-            true,
-            "",
-            "",
-            "",
-            0,
-            1,
-            cityName = null,
-            null
-        )
+        initial = ProfileScreenState.Initial
     )
 
     when (val screenState = state.value) {
-        is ProfileScreenState.Success -> Profile(profileInfo = screenState.profileInfo)
-        is ProfileScreenState.Failure -> Failure(errorMessage = screenState.errorMessage)
+        is ProfileScreenState.Success -> Profile(
+            profileInfo = screenState.profileDetails,
+            content = screenState.wallContent
+        )
+
+        is ProfileScreenState.Failure -> Failure(errorMessage = screenState.error)
+        is ProfileScreenState.Initial -> {
+            LoadingGoingOn()
+        }
     }
 }
 
@@ -125,7 +119,7 @@ private fun Failure(errorMessage: String) {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun Profile(profileInfo: Profile) {
+private fun Profile(profileInfo: Profile, content: List<WallPost>) {
     val scope = rememberCoroutineScope()
     val modalWindowState =
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
@@ -219,14 +213,11 @@ private fun Profile(profileInfo: Profile) {
                 }
                 val startHeightNum = 238
 
-                ProfileHeader(
-                    progress = computedProgress, profileInfo, onDetailsClicked = {
+                UserProfile(
+                    progress = computedProgress, profileInfo, content, onDetailsClicked = {
                         scope.launch {
                             modalWindowState.show()
                         }
-                    },
-                    onProgressChange = {
-                        progress.value = it
                     })
             }
         }
@@ -235,11 +226,11 @@ private fun Profile(profileInfo: Profile) {
 
 @OptIn(ExperimentalMotionApi::class)
 @Composable
-private fun ProfileHeader(
+private fun UserProfile(
     progress: Float,
     profileInfo: Profile,
+    content: List<WallPost>,
     onDetailsClicked: () -> Unit,
-    onProgressChange: (Float) -> Unit
 ) {
     val context = LocalContext.current
     val motionSceneData = remember {
@@ -262,13 +253,13 @@ private fun ProfileHeader(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.DarkGray)
+                .background(if (isSystemInDarkTheme()) CoolBlack else CoolWhite)
                 .layoutId("background")
         )
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(CoolBlack)
+                .background(color = if (isSystemInDarkTheme()) CoolBlack else CoolWhite)
                 .padding(top = 12.dp)
                 .layoutId("wall_content")
         ) {
@@ -278,26 +269,30 @@ private fun ProfileHeader(
                     .fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(50, key = { it }) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                Color.White,
-                                RoundedCornerShape(12.dp)
-                            )
-                            .padding(50.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(color = Color.Black, text = it.toString())
-                    }
+                items(items = content, key = { it.id }) {
+                    PostCard(
+                        postItem = PostItem(
+                            id = it.id,
+                            communityPhotoUrl = "",
+                            communityId = 123,
+                            authorName = "",
+                            date = it.date,
+                            contentText = it.contentText,
+                            isLikedByUser = it.isLikedByUser,
+                            contentImageUrl = it.contentImageUrl,
+                            metrics = it.metrics
+                        )
+                    )
                 }
             }
         }
-        Image(
-            modifier = Modifier.layoutId("cover"),//.aspectRatio(3f/1f),
-            contentScale = ContentScale.Fit,
-            painter = painterResource(id = R.drawable.test_cover),
+        AsyncImage(
+            model = profileInfo.coverPhotoUrl,
+            modifier = Modifier
+                .layoutId("cover")
+                .aspectRatio(3f / 1f),
+            contentScale = ContentScale.FillBounds,
+            //placeholder = painterResource(id = R.drawable.test_cover),
             contentDescription = null
         )
         Divider(
@@ -318,21 +313,10 @@ private fun ProfileHeader(
                 .layoutId("profile_picture"),
             contentDescription = null
         )
-//        Image(
-//            painter = painterResource(id = R.drawable.post_content_image),
-//            modifier = Modifier
-//                .size(36.dp)
-//                .clip(CircleShape)
-//                .border(
-//                    width = 2.dp,
-//                    color = profilePictureCustomProperties.value.color("border_color"),
-//                    shape = CircleShape
-//                )
-//                .layoutId("profile_picture"),
-//            contentDescription = "picture"
-//        )
+
         Text(
             text = "${profileInfo.firstName} ${profileInfo.lastName}",
+            color = if (isSystemInDarkTheme()) CoolWhite else CoolBlack,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -348,11 +332,13 @@ private fun ProfileHeader(
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = "Friends: 150",
+                    color = if (isSystemInDarkTheme()) CoolWhite else CoolBlack,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = "Followers: ${profileInfo.followersCount}",
+                    color = if (isSystemInDarkTheme()) CoolWhite else CoolBlack,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
                 )
@@ -362,8 +348,12 @@ private fun ProfileHeader(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(shape = Shapes.medium),
+
                 onClick = { onDetailsClicked() }) {
-                Text(text = "See details")
+                Text(
+                    text = "See details",
+                    color = if (isSystemInDarkTheme()) CoolWhite else CoolBlack,
+                )
             }
         }
     }
