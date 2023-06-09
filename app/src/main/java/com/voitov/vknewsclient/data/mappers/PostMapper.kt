@@ -1,7 +1,7 @@
 package com.voitov.vknewsclient.data.mappers
 
 import android.util.Log
-import com.voitov.vknewsclient.data.network.models.NewsFeedContentResponseDto
+import com.voitov.vknewsclient.data.network.models.postsFeedModels.NewsFeedContentResponseDto
 import com.voitov.vknewsclient.data.util.mapTimestampToDatePattern
 import com.voitov.vknewsclient.domain.MetricsType
 import com.voitov.vknewsclient.domain.SocialMetric

@@ -44,6 +44,11 @@
         end: ['parent', 'end'],
         top: ['username', 'bottom', 8]
       },
+      wall_content: {
+        width: 'parent',
+        height: 'spread',
+        top: ['social_metrics', 'bottom', 8],
+      }
     },
     end: {
       profile_picture: {
@@ -87,6 +92,11 @@
         end: ['parent', 'end'],
         top: ['username', 'bottom', 8]
       },
+      wall_content: {
+        width: 'parent',
+        height: 'spread',
+        top: ['social_metrics', 'bottom', 12],
+      }
     }
   },
   Transitions: {
@@ -103,7 +113,8 @@
           {
             target: ['username'],
             frames: [0, 45, 100],
-            translationX: [0, 120, 0],
+            translationX: [0, 30, 0],
+
           },
           {
             target: ['divider'],

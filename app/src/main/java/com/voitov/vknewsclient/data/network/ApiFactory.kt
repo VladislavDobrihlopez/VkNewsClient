@@ -17,5 +17,6 @@ object ApiFactory {
         .client(okHttpClient)
         .build()
 
-    val apiService: ApiService = retrofit.create(ApiService::class.java)
+    val postsFeedApiService: PostsFeedApiService = retrofit.create(PostsFeedApiService::class.java)
+    val profileApiService: ProfileApiService = retrofit.create(ProfileApiService::class.java)
 }

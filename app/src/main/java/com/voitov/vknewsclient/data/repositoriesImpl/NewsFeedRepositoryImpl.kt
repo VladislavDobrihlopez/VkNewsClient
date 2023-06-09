@@ -5,15 +5,14 @@ import com.vk.api.sdk.VKPreferencesKeyValueStorage
 import com.vk.api.sdk.auth.VKAccessToken
 import com.voitov.vknewsclient.data.mappers.CommentMapper
 import com.voitov.vknewsclient.data.mappers.PostMapper
-import com.voitov.vknewsclient.data.network.ApiService
-import com.voitov.vknewsclient.data.network.models.NewsFeedContentResponseDto
+import com.voitov.vknewsclient.data.network.PostsFeedApiService
+import com.voitov.vknewsclient.data.network.models.postsFeedModels.NewsFeedContentResponseDto
 import com.voitov.vknewsclient.domain.AuthorizationStateResult
 import com.voitov.vknewsclient.domain.MetricsType
 import com.voitov.vknewsclient.domain.NewsFeedResult
 import com.voitov.vknewsclient.domain.SocialMetric
 import com.voitov.vknewsclient.domain.entities.PostCommentItem
 import com.voitov.vknewsclient.domain.entities.PostItem
-import com.voitov.vknewsclient.domain.entities.ItemTag
 import com.voitov.vknewsclient.domain.repository.NewsFeedRepository
 import com.voitov.vknewsclient.extensions.mergeWith
 import kotlinx.coroutines.CoroutineScope
@@ -35,7 +34,7 @@ import javax.inject.Inject
 
 class NewsFeedRepositoryImpl @Inject constructor(
     private val storage: VKPreferencesKeyValueStorage,
-    private val apiService: ApiService,
+    private val postsFeedApiService: PostsFeedApiService,
     private val postMapper: PostMapper,
     private val commentMapper: CommentMapper
 ) : NewsFeedRepository {
@@ -141,9 +140,9 @@ class NewsFeedRepositoryImpl @Inject constructor(
 
         val result = try {
             val response = if (placeToStartLoadingFrom == null) {
-                apiService.loadNews(getUserToken())
+                postsFeedApiService.loadNews(getUserToken())
             } else {
-                apiService.loadNews(getUserToken(), placeToStartLoadingFrom)
+                postsFeedApiService.loadNews(getUserToken(), placeToStartLoadingFrom)
             }
             Result.Success(response)
         } catch (_: Exception) {
@@ -165,14 +164,14 @@ class NewsFeedRepositoryImpl @Inject constructor(
 
     override suspend fun changeLikeStatus(post: PostItem) {
         val updatedLikesCount = if (post.isLikedByUser) {
-            apiService.removeLike(
+            postsFeedApiService.removeLike(
                 token = getUserToken(),
                 type = PostItem.TYPE,
                 ownerId = post.communityId,
                 itemId = post.id
             ).likes.count
         } else {
-            apiService.addLike(
+            postsFeedApiService.addLike(
                 token = getUserToken(),
                 type = PostItem.TYPE,
                 ownerId = post.communityId,
@@ -195,7 +194,7 @@ class NewsFeedRepositoryImpl @Inject constructor(
     }
 
     override suspend fun ignoreItem(post: PostItem) {
-        apiService.ignoreItem(
+        postsFeedApiService.ignoreItem(
             token = getUserToken(),
             ownerId = post.communityId,
             ignoredItemId = post.id
@@ -205,7 +204,7 @@ class NewsFeedRepositoryImpl @Inject constructor(
     }
 
     private fun loadComments(post: PostItem): Flow<List<PostCommentItem>> = flow {
-        val res = apiService.getComments(
+        val res = postsFeedApiService.getComments(
             token = getUserToken(),
             ownerId = post.communityId,
             postId = post.id,

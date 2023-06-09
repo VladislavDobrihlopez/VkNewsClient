@@ -6,11 +6,14 @@ import com.voitov.vknewsclient.data.database.dao.TaggedFeedPostsDao
 import com.voitov.vknewsclient.data.database.dao.TagsDao
 import com.voitov.vknewsclient.data.database.factories.PostsDatabase
 import com.voitov.vknewsclient.data.network.ApiFactory
-import com.voitov.vknewsclient.data.network.ApiService
+import com.voitov.vknewsclient.data.network.PostsFeedApiService
+import com.voitov.vknewsclient.data.network.ProfileApiService
 import com.voitov.vknewsclient.data.repositoriesImpl.NewsFeedRepositoryImpl
+import com.voitov.vknewsclient.data.repositoriesImpl.ProfileRepositoryImpl
 import com.voitov.vknewsclient.data.repositoriesImpl.StoredNewsFeedRepositoryImpl
 import com.voitov.vknewsclient.di.scopes.ApplicationScope
 import com.voitov.vknewsclient.domain.repository.NewsFeedRepository
+import com.voitov.vknewsclient.domain.repository.ProfileRepository
 import com.voitov.vknewsclient.domain.repository.StoredNewsFeedRepository
 import dagger.Binds
 import dagger.Module
@@ -30,11 +33,23 @@ interface DataModule {
         repository: StoredNewsFeedRepositoryImpl
     ): StoredNewsFeedRepository
 
+    @ApplicationScope
+    @Binds
+    fun provideProfileRepository(
+        repository: ProfileRepositoryImpl
+    ): ProfileRepository
+
     companion object {
         @ApplicationScope
         @Provides
-        fun provideApiService(): ApiService {
-            return ApiFactory.apiService
+        fun providePostFeedApiService(): PostsFeedApiService {
+            return ApiFactory.postsFeedApiService
+        }
+
+        @ApplicationScope
+        @Provides
+        fun provideProfileApiService(): ProfileApiService {
+            return ApiFactory.profileApiService
         }
 
         @ApplicationScope

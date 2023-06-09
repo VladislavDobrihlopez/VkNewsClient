@@ -1,12 +1,12 @@
 package com.voitov.vknewsclient.data.network
 
-import com.voitov.vknewsclient.data.network.models.CommentsContentResponseDto
-import com.voitov.vknewsclient.data.network.models.LikesResponseDto
-import com.voitov.vknewsclient.data.network.models.NewsFeedContentResponseDto
+import com.voitov.vknewsclient.data.network.models.postsFeedModels.CommentsContentResponseDto
+import com.voitov.vknewsclient.data.network.models.postsFeedModels.LikesResponseDto
+import com.voitov.vknewsclient.data.network.models.postsFeedModels.NewsFeedContentResponseDto
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface ApiService {
+interface PostsFeedApiService {
     @GET("newsfeed.getRecommended?v=${API_VERSION}")
     suspend fun loadNews(@Query("access_token") token: String): NewsFeedContentResponseDto
 

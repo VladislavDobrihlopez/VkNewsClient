@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.presentation.mainScreen
+package com.voitov.vknewsclient.presentation
 
 import android.os.Build
 import android.os.Bundle
@@ -15,6 +15,9 @@ import com.vk.api.sdk.VK
 import com.vk.api.sdk.auth.VKScope
 import com.voitov.vknewsclient.domain.AuthorizationStateResult
 import com.voitov.vknewsclient.getApplicationComponent
+import com.voitov.vknewsclient.presentation.mainScreen.AuthorizationScreen
+import com.voitov.vknewsclient.presentation.mainScreen.AuthorizationViewModel
+import com.voitov.vknewsclient.presentation.mainScreen.MainScreen
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 
 class MainActivity : ComponentActivity() {
