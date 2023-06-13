@@ -26,7 +26,7 @@ fun NavGraphBuilder.homeScreenNavGraph(
             }
         )) {
             val post = it.arguments?.getString(AppNavScreen.Comments.ARGUMENT_KEY_POST_ITEM)
-                ?: throw NullPointerException()
+                ?: throw NullPointerException("ID wasn't provided for the comments screen")
             val parsedPost = Gson().fromJson(post.decode(), PostItem::class.java)
             commentsContent(parsedPost)
         }

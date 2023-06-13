@@ -9,6 +9,7 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,9 +19,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
@@ -35,6 +39,7 @@ import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationCity
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.rememberModalBottomSheetState
@@ -73,6 +78,7 @@ import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.domain.entities.Profile
 import com.voitov.vknewsclient.domain.entities.WallPost
+import com.voitov.vknewsclient.domain.usecases.profile.ProfileAuthor
 import com.voitov.vknewsclient.getApplicationComponent
 import com.voitov.vknewsclient.presentation.reusableUIs.LoadingGoingOn
 import com.voitov.vknewsclient.presentation.reusableUIs.PostAdditionalPhotos
@@ -90,9 +96,19 @@ private enum class SwipingStates {
 }
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(authorId: Long?) {
+    val component =
+        if (authorId != null) {
+            getApplicationComponent()
+                .getProfileScreenComponentFactory()
+                .create(ProfileAuthor.OTHERS(authorId))
+        } else {
+            getApplicationComponent()
+                .getProfileScreenComponentFactory()
+                .create(ProfileAuthor.MINE)
+        }
     val viewModel: ProfileViewModel =
-        viewModel(factory = getApplicationComponent().getViewModelsFactory())
+        viewModel(factory = component.getViewModelsFactory())
 
     val state = viewModel.profileFlow.collectAsState(
         initial = ProfileScreenState.Initial
@@ -107,14 +123,21 @@ private fun ProfileScreenContent(state: State<ProfileScreenState>) {
     Log.d("Profile_screen", "recomposed handle")
 
     when (val screenState = state.value) {
-        is ProfileScreenState.Success -> Profile(
+        is ProfileScreenState.Success.FreeProfile -> Profile(
             profileInfo = screenState.profileDetails,
-            content = screenState.wallContent
-        )
+        ) {
+            PostFeed(content = screenState.wallContent)
+        }
+
+        is ProfileScreenState.Success.PrivateProfile -> Profile(
+            profileInfo = screenState.profileDetails,
+        ) {
+            UnavailableAsNoAccess(modifier = Modifier.fillMaxSize())
+        }
 
         is ProfileScreenState.Failure -> Failure(errorMessage = screenState.error)
         is ProfileScreenState.Initial -> {
-            LoadingGoingOn(modifier = Modifier.fillMaxSize())
+            LoadingGoingOn(modifier = Modifier.padding(8.dp))
         }
     }
 }
@@ -128,9 +151,34 @@ private fun Failure(errorMessage: String) {
     )
 }
 
+@Composable
+private fun UnavailableAsNoAccess(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                textAlign = TextAlign.Center,
+                text = "This profile is private. Add them as a friend to see their posts, photos and other content"
+            )
+            Spacer(modifier = Modifier.padding(vertical = 8.dp))
+            Icon(
+                modifier = Modifier.size(36.dp),
+                imageVector = Icons.Default.Lock,
+                contentDescription = null
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun Profile(profileInfo: Profile, content: List<WallPost>) {
+private fun Profile(
+    profileInfo: Profile,
+    WallContent: @Composable BoxScope.() -> Unit
+) {
     val scope = rememberCoroutineScope()
     val modalWindowState =
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
@@ -215,12 +263,99 @@ private fun Profile(profileInfo: Profile, content: List<WallPost>) {
                     }
                 }
                 UserProfile(
-                    progress = computedProgress, profileInfo, content, onDetailsClicked = {
+                    progress = computedProgress, profileInfo, onDetailsClicked = {
                         scope.launch {
                             modalWindowState.show()
                         }
-                    })
+                    }) {
+                    WallContent(this)
+                }
             }
+        }
+    }
+}
+
+@Composable
+private fun PostFeed(content: List<WallPost>) {
+    LazyColumn(
+        modifier = Modifier
+            .padding(bottom = 136.dp)
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(items = content, key = { it.id }) { wallPost ->
+            val postItem = PostItem(
+                id = wallPost.id,
+                communityPhotoUrl = wallPost.producerPhotoUrl,
+                communityId = wallPost.producerId,
+                authorName = wallPost.producerName,
+                date = wallPost.date,
+                contentText = wallPost.contentText,
+                isLikedByUser = wallPost.isLikedByUser,
+                contentImageUrl = wallPost.contentImageUrl,
+                metrics = wallPost.metrics,
+                dateInMillis = 0,
+            )
+            PostCard(
+                postItem = postItem,
+                PostContent = {
+                    PostText(text = postItem.contentText)
+                    wallPost.postLifecycleHierarchy.forEach { innerPost ->
+                        PostCard(
+                            modifier = Modifier.padding(horizontal = 4.dp),
+                            postItem = PostItem(
+                                id = innerPost.id,
+                                communityPhotoUrl = innerPost.producerPhotoUrl,
+                                communityId = innerPost.producerId,
+                                authorName = innerPost.producerName,
+                                date = innerPost.date,
+                                contentText = innerPost.contentText,
+                                isLikedByUser = false,
+                                contentImageUrl = listOf(innerPost.contentImageUrl ?: ""),
+                                metrics = listOf(),
+                                dateInMillis = 0,
+                            ),
+                            PostFeedbackContent = {
+
+                            },
+                            PostHeaderContent = {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Repeat,
+                                        contentDescription = null
+                                    )
+                                    Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                                    AsyncImage(
+                                        model = innerPost.producerPhotoUrl,
+                                        modifier = Modifier
+                                            .clip(CircleShape)
+                                            .size(25.dp),
+                                        contentDescription = "community thumbnail"
+                                    )
+                                    Spacer(modifier = Modifier.padding(all = 4.dp))
+                                    Column(
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Text(
+                                            innerPost.producerName,
+                                            color = MaterialTheme.colors.onPrimary
+                                        )
+                                        Spacer(modifier = Modifier.padding(vertical = 2.dp))
+                                        Text(
+                                            innerPost.date,
+                                            color = MaterialTheme.colors.onSecondary
+                                        )
+                                    }
+                                }
+                            }
+                        )
+                    }
+
+                    PostAdditionalPhotos(contentImgUrls = wallPost.contentImageUrl)
+                }
+            )
         }
     }
 }
@@ -230,8 +365,8 @@ private fun Profile(profileInfo: Profile, content: List<WallPost>) {
 private fun UserProfile(
     progress: State<Float>,
     profileInfo: Profile,
-    content: List<WallPost>,
     onDetailsClicked: () -> Unit,
+    WallContent: @Composable BoxScope.() -> Unit
 ) {
     Log.d("TEST_MOTION", "user profile recomposition")
 
@@ -261,111 +396,12 @@ private fun UserProfile(
         )
         Box(
             modifier = Modifier
-                .fillMaxSize()
+                //.fillMaxSize()
                 .background(color = if (isSystemInDarkTheme()) CoolBlack else CoolWhite)
                 .padding(top = 12.dp)
                 .layoutId("wall_content")
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .padding(bottom = 120.dp)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(items = content, key = { it.id }) { wallPost ->
-                    val postItem = PostItem(
-                        id = wallPost.id,
-                        communityPhotoUrl = wallPost.producerPhotoUrl,
-                        communityId = wallPost.producerId,
-                        authorName = wallPost.producerName,
-                        date = wallPost.date,
-                        contentText = wallPost.contentText,
-                        isLikedByUser = wallPost.isLikedByUser,
-                        contentImageUrl = wallPost.contentImageUrl,
-                        metrics = wallPost.metrics,
-                        dateInMillis = 0,
-                    )
-                    PostCard(
-                        postItem = postItem,
-                        PostContent = {
-                            PostText(text = postItem.contentText)
-                            wallPost.postLifecycleHierarchy.forEach { innerPost ->
-//                                Spacer(modifier = Modifier.padding(vertical = 2.dp))
-//                                Row {
-//                                    Icon(
-//                                        imageVector = Icons.Default.Repeat,
-//                                        contentDescription = null
-//                                    )
-//                                    Spacer(modifier = Modifier.padding(vertical = 4.dp))
-//                                    AsyncImage(
-//                                        model = innerPost.producerPhotoUrl,
-//                                        modifier = Modifier
-//                                            .clip(CircleShape)
-//                                            .size(50.dp),
-//                                        contentDescription = "community thumbnail"
-//                                    )
-//                                    Spacer(modifier = Modifier.padding(vertical = 4.dp))
-//                                    Text(text = innerPost.producerName)
-//                                    Spacer(modifier = Modifier.padding(vertical = 4.dp))
-//                                    Text(text = innerPost.date)
-//                                }
-                                PostCard(
-                                    modifier = Modifier.padding(horizontal = 4.dp),
-                                    postItem = PostItem(
-                                        id = innerPost.id,
-                                        communityPhotoUrl = innerPost.producerPhotoUrl,
-                                        communityId = innerPost.producerId,
-                                        authorName = innerPost.producerName,
-                                        date = innerPost.date,
-                                        contentText = innerPost.contentText,
-                                        isLikedByUser = false,
-                                        contentImageUrl = listOf(innerPost.contentImageUrl ?: ""),
-                                        metrics = listOf(),
-                                        dateInMillis = 0,
-                                    ),
-                                    PostFeedbackContent = {
-
-                                    },
-                                    PostHeaderContent = {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Repeat,
-                                                contentDescription = null
-                                            )
-                                            Spacer(modifier = Modifier.padding(horizontal = 4.dp))
-                                            AsyncImage(
-                                                model = innerPost.producerPhotoUrl,
-                                                modifier = Modifier
-                                                    .clip(CircleShape)
-                                                    .size(25.dp),
-                                                contentDescription = "community thumbnail"
-                                            )
-                                            Spacer(modifier = Modifier.padding(all = 4.dp))
-                                            Column(
-                                                modifier = Modifier.weight(1f)
-                                            ) {
-                                                Text(
-                                                    innerPost.producerName,
-                                                    color = MaterialTheme.colors.onPrimary
-                                                )
-                                                Spacer(modifier = Modifier.padding(vertical = 2.dp))
-                                                Text(
-                                                    innerPost.date,
-                                                    color = MaterialTheme.colors.onSecondary
-                                                )
-                                            }
-                                        }
-                                    }
-                                )
-                            }
-
-                            PostAdditionalPhotos(contentImgUrls = wallPost.contentImageUrl)
-                        }
-                    )
-                }
-            }
+            WallContent(this)
         }
         AsyncImage(
             model = profileInfo.coverPhotoUrl,
@@ -378,7 +414,7 @@ private fun UserProfile(
         )
         Divider(
             modifier = Modifier.layoutId("divider"),
-            color = if (isSystemInDarkTheme()) CoolWhite else CoolBlack
+            color = Color.White
         )
         AsyncImage(
             placeholder = painterResource(id = R.drawable.profile_placeholder),
@@ -460,7 +496,7 @@ private fun ProfileDetails(profileInfo: Profile) {
         ) {
             Icon(imageVector = Icons.Default.Search, contentDescription = null)
             Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-            Text(modifier = Modifier.weight(1f), text = "Short_link: ${profileInfo.shortenedLink}")
+            Text(modifier = Modifier.weight(1f), text = "Short_link: @${profileInfo.shortenedLink}")
         }
         Row(
             modifier = Modifier

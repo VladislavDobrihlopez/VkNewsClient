@@ -4,5 +4,5 @@ import com.google.gson.annotations.SerializedName
 
 data class CoverDto(
     @SerializedName("enabled") val enabled: Int,
-    @SerializedName("images") val images: List<CoverImageDto>
+    @SerializedName("images") val images: List<CoverImageDto>?
 )

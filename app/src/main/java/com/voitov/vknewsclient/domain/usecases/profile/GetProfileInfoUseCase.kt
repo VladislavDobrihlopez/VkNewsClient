@@ -8,7 +8,7 @@ import javax.inject.Inject
 class GetProfileInfoUseCase @Inject constructor(
     private val repository: ProfileRepository
 ) {
-    operator fun invoke(userId: String): Flow<ProfileResult> {
-        return repository.getProfileDataFlow(userId)
+    operator fun invoke(author: ProfileAuthor): Flow<ProfileResult> {
+        return repository.getProfileDataFlow(author)
     }
 }

@@ -31,7 +31,7 @@ class ProfileMapper @Inject constructor() {
             isOnline = dto.isOnline,
             cityName = dto.city?.name,
             countryName = dto.country?.title,
-            coverPhotoUrl = if (dto.cover.enabled == ENABLED) dto.cover.images[0].url else null
+            coverPhotoUrl = if (dto.cover?.enabled == ENABLED) dto.cover.images?.get(0)?.url else null
         )
     }
 
@@ -63,7 +63,7 @@ class ProfileMapper @Inject constructor() {
                 postType = post.type,
                 contentText = post.text,
                 date = mapTimestampToDatePattern(post.secondsSince1970),
-                contentImageUrl = post.attachments?.map { it.photo.photos.lastOrNull()?.url ?: "" }
+                contentImageUrl = post.attachments?.map { it.photo?.photos?.lastOrNull()?.url ?: "" }
                     ?: listOf(),
                 isLikedByUser = post.likes.userLikes == LIKED,
                 metrics = listOf(

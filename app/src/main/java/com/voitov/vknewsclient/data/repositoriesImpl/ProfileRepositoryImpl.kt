@@ -5,8 +5,12 @@ import com.vk.api.sdk.VKPreferencesKeyValueStorage
 import com.vk.api.sdk.auth.VKAccessToken
 import com.voitov.vknewsclient.data.mappers.ProfileMapper
 import com.voitov.vknewsclient.data.network.ProfileApiService
+import com.voitov.vknewsclient.data.network.models.profileModels.details.ProfileDataDto
 import com.voitov.vknewsclient.domain.ProfileResult
 import com.voitov.vknewsclient.domain.repository.ProfileRepository
+import com.voitov.vknewsclient.domain.usecases.profile.ProfileAuthor
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
@@ -16,23 +20,46 @@ class ProfileRepositoryImpl @Inject constructor(
     private val mapper: ProfileMapper,
     private val storage: VKPreferencesKeyValueStorage,
     private val apiService: ProfileApiService,
-    private val profileMapper: ProfileMapper
 ) : ProfileRepository {
-    private lateinit var userId: String
+    private val repositoryScope = CoroutineScope(Dispatchers.Default)
+    private var currentUser: ProfileAuthor = ProfileAuthor.MINE
+    private var signedInUserProfileInfo: ProfileDataDto? = null
+
     private val token
         get() = VKAccessToken.restore(storage)
 
     private val profileDetailsFlow = flow {
         val profileDetailsDto =
-            apiService.getProfileInfo(userIds = userId, token = getUserToken()).response[0]
-        Log.d("TEST_PROFILE_WALL", "profile details")
+            when (val user = currentUser) {
+                is ProfileAuthor.OTHERS ->
+                    apiService.getProfileInfo(
+                        userIds = user.authorId.toString(),
+                        token = getUserToken()
+                    ).response[0]
 
+                is ProfileAuthor.MINE -> signedInUserProfileInfo ?: apiService.getProfileInfo(
+                    getUserToken()
+                ).response[0]
+
+            }
+        Log.d("TEST_PROFILE_WALL", "profile details")
         emit(profileDetailsDto)
     }
 
     private val wallContentFlow = flow {
-        val profileDto =
-            apiService.getWallContent(token = getUserToken(), domain = userId).content
+        val profileDto = when (val user = currentUser) {
+            is ProfileAuthor.OTHERS ->
+                apiService.getWallContent(token = getUserToken(), ownerId = user.authorId.toString()).content
+
+            is ProfileAuthor.MINE ->
+                apiService.getWallContent(
+                    token = getUserToken(),
+                    ownerId = signedInUserProfileInfo?.id?.toString() ?: apiService.getProfileInfo(
+                        getUserToken()
+                    ).response[0].id.toString()
+                ).content
+        }
+
         // val mappedProfile = mapper.mapDtoToEntity(profileDto)
         Log.d("TEST_PROFILE_WALL", "wall")
 
@@ -42,16 +69,17 @@ class ProfileRepositoryImpl @Inject constructor(
     private val profileDataFlow = combine(wallContentFlow, profileDetailsFlow) { content, profile ->
         Log.d("TEST_PROFILE_WALL", "successfully mapped")
         ProfileResult.Success(
-            profileDetails = profileMapper.mapDtoToEntities(profile),
-            wallContent = profileMapper.mapDtoToEntities(content)
+            profileDetails = mapper.mapDtoToEntities(profile),
+            wallContent = if (content != null) {
+                mapper.mapDtoToEntities(content)
+            } else {
+                null
+            }
         )
     }
-//        .catch {
-//        ProfileResult.Failure(it.message ?: "Unexpected error")
-//    }
 
-    override fun getProfileDataFlow(userId: String): Flow<ProfileResult> {
-        this.userId = userId
+    override fun getProfileDataFlow(author: ProfileAuthor): Flow<ProfileResult> {
+        currentUser = author//"423328"//userId//"270815158"////"137554875"
         return profileDataFlow
     }
 

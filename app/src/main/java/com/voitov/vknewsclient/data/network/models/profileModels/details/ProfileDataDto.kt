@@ -3,6 +3,7 @@ package com.voitov.vknewsclient.data.network.models.profileModels.details
 import com.google.gson.annotations.SerializedName
 
 data class ProfileDataDto(
+    @SerializedName("id") val id: Int,
     @SerializedName("domain") val shortenedLink: String,
     @SerializedName("first_name") val firstName: String,
     @SerializedName("last_name") val lastName: String,
@@ -16,5 +17,5 @@ data class ProfileDataDto(
     @SerializedName("online") val isOnline: Int,
     @SerializedName("city") val city: CityDto?,
     @SerializedName("country") val country: CountryDto?,
-    @SerializedName("cover") val cover: CoverDto
+    @SerializedName("cover") val cover: CoverDto?
 )

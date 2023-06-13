@@ -27,8 +27,8 @@ interface ViewModelsModule {
     @Binds
     fun provideFavoritesViewModel(viewModel: FavoritesViewModel): ViewModel
 
-    @IntoMap
-    @StringKey("ProfileViewModel")
-    @Binds
-    fun provideProfileViewModel(viewModel: ProfileViewModel): ViewModel
+//    @IntoMap
+//    @StringKey("ProfileViewModel")
+//    @Binds
+//    fun provideProfileViewModel(viewModel: ProfileViewModel): ViewModel
 }

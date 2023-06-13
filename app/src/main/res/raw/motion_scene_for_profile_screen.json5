@@ -18,7 +18,7 @@
         bottom: ['divider', 'top', 24]
       },
       divider: {
-        height: 4,
+        height: 3,
         start: ['parent', 'start'],
         end: ['parent', 'end'],
         top: ['profile_picture', 'top', 24],

@@ -20,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.voitov.vknewsclient.domain.usecases.profile.ProfileAuthor
 import com.voitov.vknewsclient.navigation.AppNavGraph
 import com.voitov.vknewsclient.navigation.rememberNavigationState
 import com.voitov.vknewsclient.presentation.commentsScreen.CommentsScreen
@@ -34,15 +35,12 @@ const val TAG = "COMPOSE_TEST"
 fun MainScreen() {
     val navigationState = rememberNavigationState()
 
-    Log.d(TAG, "MainScreen")
-
     Scaffold(
         bottomBar = {
             BottomNavigation {
                 val navBackStackEntry =
                     navigationState.navHostController.currentBackStackEntryAsState()
 
-                Log.d(TAG, "recomposed")
                 val items = listOf(
                     NavigationItem.Profile,
                     NavigationItem.Home,
@@ -58,7 +56,11 @@ fun MainScreen() {
                     BottomNavigationItem(
                         onClick = {
                             if (!bottomItemIsSelected) {
-                                navigationState.navigateTo(navigationItem.screen.route)
+                                if (navigationItem == NavigationItem.Profile) {
+                                    navigationState.navigateToProfile(ProfileAuthor.MINE)
+                                } else {
+                                    navigationState.navigateTo(navigationItem.screen.route)
+                                }
                             }
                         },
                         icon = {
@@ -79,8 +81,6 @@ fun MainScreen() {
         },
 
         ) {
-        Log.d(TAG, "VkNews")
-
         AppNavGraph(
             navHostController = navigationState.navHostController,
             newsFeedContent = {
@@ -92,16 +92,19 @@ fun MainScreen() {
                 )
             },
             favoritesScreenContent = {
-                //TestScreen(screenName = "favorite screen")
                 FavoritePostsScreen()
             },
-            profileScreenContent = {
-                ProfileScreen()
+            profileScreenContent = { authorId ->
+                ProfileScreen(authorId)
             },
             commentsContent = { clickedPost ->
-                CommentsScreen(post = clickedPost) {
-                    navigationState.navHostController.popBackStack()
-                }
+                CommentsScreen(post = clickedPost,
+                    onAuthorPhotoClickListener = {
+                        navigationState.navigateToProfile(ProfileAuthor.OTHERS(it.authorId))
+                    },
+                    onBackPressed = {
+                        navigationState.navHostController.popBackStack()
+                    })
                 BackHandler {
                     navigationState.navHostController.popBackStack()
                 }

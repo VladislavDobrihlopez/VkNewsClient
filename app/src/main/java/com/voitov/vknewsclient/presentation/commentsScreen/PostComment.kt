@@ -1,5 +1,6 @@
 package com.voitov.vknewsclient.presentation.commentsScreen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
@@ -17,10 +18,16 @@ import com.voitov.vknewsclient.domain.entities.PostCommentItem
 import com.voitov.vknewsclient.presentation.reusableUIs.IconFollowedByText
 
 @Composable
-fun Comment(item: PostCommentItem) {
+fun Comment(
+    item: PostCommentItem,
+    onAuthorPhotoClickListener: () -> Unit,
+) {
     Row {
         AsyncImage(
             modifier = Modifier
+                .clickable {
+                    onAuthorPhotoClickListener()
+                }
                 .clip(CircleShape)
                 .size(35.dp),
             model = item.avatarImageUrl,

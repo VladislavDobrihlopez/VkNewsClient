@@ -13,10 +13,16 @@ interface ProfileApiService {
         @Query("fields") fields: String = FIELDS
     ): ProfileResponseDto
 
+    @GET("users.get?v=${API_VERSION}")
+    suspend fun getProfileInfo(
+        @Query("access_token") token: String,
+        @Query("fields") fields: String = FIELDS
+    ): ProfileResponseDto
+
     @GET("wall.get?v=${API_VERSION}&count=10&extended=1")
     suspend fun getWallContent(
         @Query("access_token") token: String,
-        @Query("domain") domain: String,
+        @Query("owner_id") ownerId: String,
     ): ProfileWallContentResponseDto
 
     companion object {

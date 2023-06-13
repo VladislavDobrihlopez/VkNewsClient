@@ -2,6 +2,7 @@ package com.voitov.vknewsclient.navigation
 
 import android.net.Uri
 import com.google.gson.Gson
+import com.voitov.vknewsclient.domain.entities.PostCommentItem
 import com.voitov.vknewsclient.domain.entities.PostItem
 
 sealed class AppNavScreen(
@@ -20,14 +21,31 @@ sealed class AppNavScreen(
         const val ARGUMENT_KEY_POST_ITEM = "post_item"
     }
 
-    object Profile : AppNavScreen(ROUTE_PROFILE_SCREEN)
+    object Profile : AppNavScreen(ROUTE_PROFILE_SCREEN) {
+        fun passArgs(authorId: Long): String {
+            return ROUTE_PROFILE_SCREEN.replace(
+                oldValue = "{$ARGUMENT_KEY_AUTHOR_ID}",
+                newValue = authorId.toString().encode()
+            )
+        }
+
+        fun buildFake(): String {
+            return ROUTE_PROFILE_SCREEN.replace(
+                oldValue = "{$ARGUMENT_KEY_AUTHOR_ID}",
+                newValue = "0"
+            )
+        }
+
+        const val ARGUMENT_KEY_AUTHOR_ID = "author_id"
+    }
+
     object Favorites : AppNavScreen(ROUTE_FAVORITES_SCREEN)
 
     companion object {
         private const val ROUTE_HOME_SCREEN = "home"
         private const val ROUTE_NEWS_FEED_SCREEN = "news_feed"
         private const val ROUTE_COMMENTS_SCREEN = "comments/{${Comments.ARGUMENT_KEY_POST_ITEM}}"
-        private const val ROUTE_PROFILE_SCREEN = "profile"
+        private const val ROUTE_PROFILE_SCREEN = "profile/{${Profile.ARGUMENT_KEY_AUTHOR_ID}}"
         private const val ROUTE_FAVORITES_SCREEN = "favorite"
     }
 }

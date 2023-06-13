@@ -10,7 +10,6 @@ import dagger.Subcomponent
 @CommentsScreenScope
 @Subcomponent(modules = [CommentScreenModule::class])
 interface CommentsScreenComponent {
-
     fun getViewModelsFactory(): ViewModelsFactory
 
     @Subcomponent.Factory
