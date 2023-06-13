@@ -6,6 +6,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.voitov.vknewsclient.domain.entities.PostItem
+import com.voitov.vknewsclient.domain.usecases.profile.ProfileAuthor
 
 class AppNavState(
     val navHostController: NavHostController
@@ -22,6 +23,26 @@ class AppNavState(
 
     fun navigateToComments(post: PostItem) {
         navHostController.navigate(AppNavScreen.Comments.passArgs(post))
+    }
+
+    fun navigateToProfile(author: ProfileAuthor) {
+        if (author is ProfileAuthor.OTHERS) {
+            navHostController.navigate(route = AppNavScreen.Profile.passArgs(author.authorId)) {
+                popUpTo(navHostController.graph.findStartDestination().id) {
+                    saveState = true
+                }
+                launchSingleTop = true
+                //restoreState = true
+            }
+        } else {
+            navHostController.navigate(route = AppNavScreen.Profile.buildFake()) {
+                popUpTo(navHostController.graph.findStartDestination().id) {
+                    saveState = true
+                }
+                launchSingleTop = true
+               // restoreState = true
+            }
+        }
     }
 }
 

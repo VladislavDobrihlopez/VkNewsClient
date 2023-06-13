@@ -19,6 +19,7 @@ interface ApplicationComponent {
     fun getViewModelsFactory(): ViewModelsFactory
 
     fun getCommentsScreenComponentFactory(): CommentsScreenComponent.Factory
+    fun getProfileScreenComponentFactory(): ProfileScreenComponent.Factory
 
     @Component.Factory
     interface Factory {

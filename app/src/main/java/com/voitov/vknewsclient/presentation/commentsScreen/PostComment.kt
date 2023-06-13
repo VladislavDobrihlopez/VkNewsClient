@@ -1,5 +1,6 @@
 package com.voitov.vknewsclient.presentation.commentsScreen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
@@ -14,13 +15,19 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.entities.PostCommentItem
-import com.voitov.vknewsclient.ui.theme.IconWithText
+import com.voitov.vknewsclient.presentation.reusableUIs.IconFollowedByText
 
 @Composable
-fun Comment(item: PostCommentItem) {
+fun Comment(
+    item: PostCommentItem,
+    onAuthorPhotoClickListener: () -> Unit,
+) {
     Row {
         AsyncImage(
             modifier = Modifier
+                .clickable {
+                    onAuthorPhotoClickListener()
+                }
                 .clip(CircleShape)
                 .size(35.dp),
             model = item.avatarImageUrl,
@@ -51,7 +58,7 @@ fun Comment(item: PostCommentItem) {
             modifier = Modifier.align(Alignment.Bottom),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconWithText(pictResId = R.drawable.ic_like, text = item.likesCount.toString()) {
+            IconFollowedByText(pictResId = R.drawable.ic_like, text = item.likesCount.toString()) {
 
             }
         }

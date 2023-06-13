@@ -20,11 +20,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.voitov.vknewsclient.domain.usecases.profile.ProfileAuthor
 import com.voitov.vknewsclient.navigation.AppNavGraph
 import com.voitov.vknewsclient.navigation.rememberNavigationState
 import com.voitov.vknewsclient.presentation.commentsScreen.CommentsScreen
 import com.voitov.vknewsclient.presentation.favoritePostsScreen.FavoritePostsScreen
 import com.voitov.vknewsclient.presentation.newsFeedScreen.HomeScreen
+import com.voitov.vknewsclient.presentation.profileScreen.ProfileScreen
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 
 const val TAG = "COMPOSE_TEST"
@@ -33,15 +35,12 @@ const val TAG = "COMPOSE_TEST"
 fun MainScreen() {
     val navigationState = rememberNavigationState()
 
-    Log.d(TAG, "MainScreen")
-
     Scaffold(
         bottomBar = {
             BottomNavigation {
                 val navBackStackEntry =
                     navigationState.navHostController.currentBackStackEntryAsState()
 
-                Log.d(TAG, "recomposed")
                 val items = listOf(
                     NavigationItem.Profile,
                     NavigationItem.Home,
@@ -57,7 +56,11 @@ fun MainScreen() {
                     BottomNavigationItem(
                         onClick = {
                             if (!bottomItemIsSelected) {
-                                navigationState.navigateTo(navigationItem.screen.route)
+                                if (navigationItem == NavigationItem.Profile) {
+                                    navigationState.navigateToProfile(ProfileAuthor.MINE)
+                                } else {
+                                    navigationState.navigateTo(navigationItem.screen.route)
+                                }
                             }
                         },
                         icon = {
@@ -78,8 +81,6 @@ fun MainScreen() {
         },
 
         ) {
-        Log.d(TAG, "VkNews")
-
         AppNavGraph(
             navHostController = navigationState.navHostController,
             newsFeedContent = {
@@ -91,33 +92,25 @@ fun MainScreen() {
                 )
             },
             favoritesScreenContent = {
-                //TestScreen(screenName = "favorite screen")
                 FavoritePostsScreen()
-                                     },
-            profileScreenContent = { TestScreen(screenName = "profile screen") },
+            },
+            profileScreenContent = { authorId ->
+                ProfileScreen(authorId)
+            },
             commentsContent = { clickedPost ->
-                CommentsScreen(post = clickedPost) {
-                    navigationState.navHostController.popBackStack()
-                }
+                CommentsScreen(post = clickedPost,
+                    onAuthorPhotoClickListener = {
+                        navigationState.navigateToProfile(ProfileAuthor.OTHERS(it.authorId))
+                    },
+                    onBackPressed = {
+                        navigationState.navHostController.popBackStack()
+                    })
                 BackHandler {
                     navigationState.navHostController.popBackStack()
                 }
             }
         )
     }
-}
-
-@Composable
-fun TestScreen(screenName: String) {
-    val touches = rememberSaveable {
-        mutableStateOf(0)
-    }
-    Text(
-        text = "$screenName ${touches.value}",
-        color = Color.DarkGray,
-        modifier = Modifier.clickable {
-            touches.value = touches.value + 1
-        })
 }
 
 @RequiresApi(Build.VERSION_CODES.P)

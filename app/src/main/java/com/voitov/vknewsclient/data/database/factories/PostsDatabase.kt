@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import com.voitov.vknewsclient.data.database.Converters
 import com.voitov.vknewsclient.data.database.dao.TaggedFeedPostsDao
 import com.voitov.vknewsclient.data.database.dao.TagsDao
 import com.voitov.vknewsclient.data.database.models.TagDbModel
@@ -14,6 +16,7 @@ import com.voitov.vknewsclient.data.database.models.TaggedPostItemDbModel
     version = 4,
     exportSchema = false
 )
+@TypeConverters(value = [Converters::class])
 abstract class PostsDatabase() : RoomDatabase() {
     companion object {
         private const val DB_NAME = "cached_posts.db"
@@ -25,7 +28,8 @@ abstract class PostsDatabase() : RoomDatabase() {
                     return it
                 }
                 val db = Room.databaseBuilder(context, PostsDatabase::class.java, DB_NAME)
-                    .allowMainThreadQueries().build()
+                    .addTypeConverter(Converters())
+                    .build()
                 instance = db
                 return db
             }

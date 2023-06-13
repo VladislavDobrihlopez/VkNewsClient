@@ -1,6 +1,6 @@
 package com.voitov.vknewsclient.data.mappers
 
-import com.voitov.vknewsclient.data.network.models.CommentsContentResponseDto
+import com.voitov.vknewsclient.data.network.models.postsFeedModels.CommentsContentResponseDto
 import com.voitov.vknewsclient.data.util.mapTimestampToDatePattern
 import com.voitov.vknewsclient.domain.entities.PostCommentItem
 import javax.inject.Inject
