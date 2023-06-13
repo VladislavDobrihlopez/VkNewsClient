@@ -28,8 +28,12 @@ class PostMapper @Inject constructor() {
                     communityPhotoUrl = postOwner.photoUrl,
                     authorName = postOwner.name,
                     contentText = post.text,
+                    dateInMillis = post.secondsSince1970,
                     date = mapTimestampToDatePattern(post.secondsSince1970),
-                    contentImageUrl = post.attachments?.firstOrNull()?.photo?.photos?.lastOrNull()?.url,
+                    contentImageUrl = post.attachments?.map {
+                        it.photo?.photos?.lastOrNull()?.url ?: ""
+                    }
+                        ?: listOf(),
                     isLikedByUser = post.likes.userLikes == LIKED,
                     metrics = listOf(
                         SocialMetric(MetricsType.LIKES, post.likes.count),

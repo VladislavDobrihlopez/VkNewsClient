@@ -1,7 +1,7 @@
 package com.voitov.vknewsclient.data.network
 
-import com.voitov.vknewsclient.data.network.models.profileModels.ProfileResponseDto
-import com.voitov.vknewsclient.data.network.models.profileModels.ProfileWallContentResponseDto
+import com.voitov.vknewsclient.data.network.models.profileModels.details.ProfileResponseDto
+import com.voitov.vknewsclient.data.network.models.profileModels.wall.ProfileWallContentResponseDto
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -13,7 +13,7 @@ interface ProfileApiService {
         @Query("fields") fields: String = FIELDS
     ): ProfileResponseDto
 
-    @GET("wall.get?v=${API_VERSION}&count=10")
+    @GET("wall.get?v=${API_VERSION}&count=10&extended=1")
     suspend fun getWallContent(
         @Query("access_token") token: String,
         @Query("domain") domain: String,

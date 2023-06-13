@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.presentation.newsFeedScreen
+package com.voitov.vknewsclient.presentation.reusableUIs
 
 import android.os.Build
 import android.util.Log
@@ -6,15 +6,23 @@ import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
@@ -23,12 +31,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -41,15 +51,15 @@ import com.voitov.vknewsclient.domain.SocialMetric
 import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.presentation.mainScreen.TAG
 import com.voitov.vknewsclient.presentation.util.shortenLengthOfMetricsIfPossible
-import com.voitov.vknewsclient.ui.theme.IconWithText
 import com.voitov.vknewsclient.ui.theme.Shapes
 import com.voitov.vknewsclient.ui.theme.TransparentRed
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
+import kotlin.math.min
 import kotlin.random.Random
 
-private const val DELAY_BEFORE_START = 1200
-private const val DELAY_BETWEEN_ANIMATIONS = 1900
-private const val ANIMATION_DURATION = 1500
+private const val DELAY_BEFORE_START = 900
+private const val DELAY_BETWEEN_ANIMATIONS = 1500
+private const val ANIMATION_DURATION = 1200
 private const val INVISIBLE = 0F
 private const val VISIBLE = 1F
 
@@ -57,6 +67,9 @@ private const val VISIBLE = 1F
 fun PostCard(
     modifier: Modifier = Modifier,
     postItem: PostItem,
+    PostHeaderContent: @Composable (ColumnScope.() -> Unit)? = null,
+    PostContent: @Composable (ColumnScope.() -> Unit)? = null,
+    PostFeedbackContent: @Composable (ColumnScope.() -> Unit)? = null,
     onCommentsClickListener: ((SocialMetric) -> Unit)? = null,
     onLikesClickListener: ((SocialMetric) -> Unit)? = null,
     onSharesClickListener: ((SocialMetric) -> Unit)? = null
@@ -72,9 +85,9 @@ fun PostCard(
             modifier = Modifier
                 .padding(all = 8.dp)
         ) {
-            PostHeader(postItem)
-            PostContent(postItem)
-            PostFeedback(
+            PostHeaderContent?.invoke(this) ?: PostHeader(postItem = postItem)
+            PostContent?.invoke(this) ?: PostContent(postItem = postItem)
+            PostFeedbackContent?.invoke(this) ?: PostFeedback(
                 postItem.isLikedByUser,
                 postItem.metrics,
                 onCommentsClickListener = {
@@ -121,33 +134,68 @@ private fun PostHeader(postItem: PostItem) {
 
 @Composable
 private fun PostContent(postItem: PostItem) {
-    PostText(postItem)
+    PostText(postItem.contentText)
     Spacer(modifier = Modifier.padding(vertical = 4.dp))
-    PostAdditionalResources(postItem)
+    PostAdditionalPhotos(postItem.contentImageUrl)
 }
 
 @Composable
-private fun PostText(postItem: PostItem) {
+fun PostText(text: String) {
     Text(
-        text = postItem.contentText,
+        text = text,
         modifier = Modifier.fillMaxWidth(),
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun PostAdditionalResources(postItem: PostItem) {
-    AsyncImage(
-        model = postItem.contentImageUrl,
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight(),
-        contentDescription = "",
-        contentScale = ContentScale.FillWidth,
-    )
+fun PostAdditionalPhotos(contentImgUrls: List<String>) {
+    val pagerState = rememberPagerState()
+
+    val pagesCount = contentImgUrls.size
+
+    HorizontalPager(
+        pageCount = pagesCount,
+        beyondBoundsPageCount = min(contentImgUrls.size, 2),
+        state = pagerState
+    ) { page ->
+        AsyncImage(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
+            model = contentImgUrls[page],
+            contentDescription = null,
+            contentScale = ContentScale.FillWidth,
+        )
+    }
+
+    if (pagesCount > 1) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .height(24.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            repeat(pagesCount) { iteration ->
+                val color =
+                    if (pagerState.currentPage == iteration)
+                        if (!isSystemInDarkTheme()) Color.DarkGray else Color.LightGray
+                    else
+                        if (!isSystemInDarkTheme()) Color.LightGray else Color.DarkGray
+                Box(
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .clip(CircleShape)
+                        .background(color)
+                        .size(10.dp)
+                )
+            }
+        }
+    }
 }
 
 @Composable
-private fun PostFeedback(
+fun PostFeedback(
     isPostLiked: Boolean,
     metrics: List<SocialMetric>,
     onCommentsClickListener: ((SocialMetric) -> Unit)? = null,
@@ -177,16 +225,6 @@ private fun PostFeedback(
                     easing = FastOutLinearInEasing
                 ),
             )
-
-        Row(modifier = Modifier.weight(0.3f)) {
-            val views = metrics.getMetricByType(MetricsType.VIEWS)
-            IconWithText(
-                pictResId = R.drawable.ic_views_count,
-                text = shortenLengthOfMetricsIfPossible(views.count),
-                modifier = Modifier.alpha(animatedFadeInViewsCount.value)
-            )
-        }
-
         val animatedFadeInShares =
             animateFloatAsState(
                 targetValue = if (firstTimeShownInNewsFeed.value) INVISIBLE else VISIBLE,
@@ -216,48 +254,106 @@ private fun PostFeedback(
                     easing = FastOutLinearInEasing
                 ),
             )
-
+        Row(modifier = Modifier.weight(0.3f)) {
+            AnimatedViewsCount(
+                animatedFadeInViewsCount,
+                metrics.getMetricByType(MetricsType.VIEWS).count,
+            )
+        }
+        Log.d("TEST_ANIMATIONS", "recomposition")
         Row(
             modifier = Modifier.weight(0.70f),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            with(metrics.getMetricByType(MetricsType.SHARES)) {
-                IconWithText(
-                    pictResId = R.drawable.ic_share,
-                    text = count.toString(),
-                    modifier = Modifier.alpha(animatedFadeInShares.value)
-                ) {
-                    onSharesClickListener?.invoke(this)
-                }
+            AnimatedSharesCount(
+                animatedFadeInShares,
+                metrics.getMetricByType(MetricsType.SHARES).count,
+            ) {
+                onSharesClickListener?.invoke(metrics.getMetricByType(MetricsType.SHARES))
             }
-            with(metrics.getMetricByType(MetricsType.COMMENTS)) {
-                IconWithText(
-                    pictResId = R.drawable.ic_comment,
-                    text = count.toString(),
-                    modifier = Modifier.alpha(animatedFadeInComments.value)
-                ) {
-                    onCommentsClickListener?.invoke(this@with)
-                }
+            AnimatedCommentsCount(
+                animatedFadeInComments,
+                metrics.getMetricByType(MetricsType.COMMENTS).count
+            ) {
+                onCommentsClickListener?.invoke(metrics.getMetricByType(MetricsType.COMMENTS))
             }
-            with(metrics.getMetricByType(MetricsType.LIKES)) {
-                IconWithText(
-                    pictResId = if (isPostLiked) {
-                        R.drawable.ic_liked
-                    } else {
-                        R.drawable.ic_like
-                    },
-                    text = shortenLengthOfMetricsIfPossible(count),
-                    iconTint = if (isPostLiked) {
-                        TransparentRed
-                    } else {
-                        MaterialTheme.colors.onSecondary
-                    },
-                    modifier = Modifier.alpha(animatedFadeInLikes.value)
-                ) {
-                    onLikesClickListener?.invoke(this@with)
-                }
+            AnimatedLikesCount(
+                animatedFadeInLikes,
+                metrics.getMetricByType(MetricsType.LIKES).count,
+                isPostLiked
+            ) {
+                onLikesClickListener?.invoke(metrics.getMetricByType(MetricsType.LIKES))
             }
         }
+    }
+}
+
+@Composable
+private fun AnimatedViewsCount(
+    alpha: State<Float>,
+    views: Int,
+) {
+    IconFollowedByText(
+        pictResId = R.drawable.ic_views_count,
+        text = shortenLengthOfMetricsIfPossible(views),
+        modifier = Modifier.alpha(alpha.value),
+    )
+}
+
+@Composable
+private fun AnimatedSharesCount(
+    alpha: State<Float>,
+    shares: Int,
+    onItemClicked: (() -> Unit)? = null
+) {
+    IconFollowedByText(
+        pictResId = R.drawable.ic_share,
+        text = shares.toString(),
+        modifier = Modifier.alpha(alpha.value)
+    ) {
+        onItemClicked?.invoke()
+    }
+}
+
+@Composable
+private fun AnimatedCommentsCount(
+    alpha: State<Float>,
+    comments: Int,
+    onItemClicked: (() -> Unit)? = null
+) {
+    IconFollowedByText(
+        pictResId = R.drawable.ic_comment,
+        text = comments.toString(),
+        modifier = Modifier.alpha(alpha.value)
+    ) {
+        onItemClicked?.invoke()
+    }
+}
+
+@Composable
+private fun AnimatedLikesCount(
+    alpha: State<Float>,
+    likes: Int,
+    isPostLiked: Boolean,
+    onItemClicked: (() -> Unit)? = null
+) {
+    Log.d("TEST_ANIMATIONS", "recomposition likes")
+
+    IconFollowedByText(
+        pictResId = if (isPostLiked) {
+            R.drawable.ic_liked
+        } else {
+            R.drawable.ic_like
+        },
+        text = shortenLengthOfMetricsIfPossible(likes),
+        iconTint = if (isPostLiked) {
+            TransparentRed
+        } else {
+            MaterialTheme.colors.onSecondary
+        },
+        modifier = Modifier.alpha(alpha.value)
+    ) {
+        onItemClicked?.invoke()
     }
 }
 
@@ -276,11 +372,12 @@ fun NewsPostLightTheme() {
                 communityId = 1,
                 R.drawable.post_community_image.toString(),
                 "Maks Korzh",
-                "today",
+                date = "3132",
+                dateInMillis = 23321321,
                 contentText = stringResource(
                     id = R.string.post_text
                 ),
-                contentImageUrl = null,
+                contentImageUrl = listOf(),
                 isLikedByUser = Random.nextBoolean(),
                 metrics = listOf(
                     SocialMetric(MetricsType.LIKES, 2_100),
@@ -306,11 +403,12 @@ fun NewsPostLightDark() {
                 communityId = 1,
                 R.drawable.post_community_image.toString(),
                 "Maks Korzh",
-                "today",
+                date = "3132",
+                dateInMillis = 23321321,
                 contentText = stringResource(
                     id = R.string.post_text
                 ),
-                contentImageUrl = null,
+                contentImageUrl = listOf(),
                 isLikedByUser = Random.nextBoolean(),
                 metrics = listOf(
                     SocialMetric(MetricsType.LIKES, 2_100),

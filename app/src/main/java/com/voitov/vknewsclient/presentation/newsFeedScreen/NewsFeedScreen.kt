@@ -57,6 +57,7 @@ import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.getApplicationComponent
 import com.voitov.vknewsclient.presentation.reusableUIs.IconedChip
 import com.voitov.vknewsclient.presentation.reusableUIs.LoadingGoingOn
+import com.voitov.vknewsclient.presentation.reusableUIs.PostCard
 import com.voitov.vknewsclient.ui.theme.TransparentGreen
 import com.voitov.vknewsclient.ui.theme.TransparentRed
 import kotlinx.coroutines.delay

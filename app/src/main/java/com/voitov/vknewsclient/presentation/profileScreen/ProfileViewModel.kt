@@ -10,7 +10,7 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val useCase: GetProfileInfoUseCase
 ) : ViewModel() {
-    val profileFlow = useCase("dobrihlopez").map {
+    val profileFlow = useCase("cheburastya").map {
         Log.d("TEST_PROFILE_WALL", it.toString())
         when (it) {
             is ProfileResult.Success -> ProfileScreenState.Success(

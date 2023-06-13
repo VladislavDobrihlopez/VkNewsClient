@@ -42,8 +42,8 @@ class ProfileRepositoryImpl @Inject constructor(
     private val profileDataFlow = combine(wallContentFlow, profileDetailsFlow) { content, profile ->
         Log.d("TEST_PROFILE_WALL", "successfully mapped")
         ProfileResult.Success(
-            profileDetails = profileMapper.mapDtoToEntity(profile),
-            wallContent = profileMapper.mapDtoToEntity(content)
+            profileDetails = profileMapper.mapDtoToEntities(profile),
+            wallContent = profileMapper.mapDtoToEntities(content)
         )
     }
 //        .catch {

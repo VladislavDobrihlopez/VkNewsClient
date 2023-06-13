@@ -60,6 +60,8 @@ import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.entities.ItemTag
 import com.voitov.vknewsclient.domain.entities.TaggedPostItem
 import com.voitov.vknewsclient.getApplicationComponent
+import com.voitov.vknewsclient.presentation.reusableUIs.PostCard
+import com.voitov.vknewsclient.presentation.reusableUIs.PostFeedback
 import com.voitov.vknewsclient.presentation.reusableUIs.IconedChip
 import com.voitov.vknewsclient.presentation.reusableUIs.LoadingGoingOn
 import com.voitov.vknewsclient.ui.theme.Shapes
@@ -382,11 +384,30 @@ private fun FeedPosts(
                     FractionalThreshold(0.6f)
                 }
             ) {
-                SavedPostCard(modifier = Modifier, taggedPost = post) {
-
-                }
+                PostCard(modifier = Modifier, postItem = post.postItem, PostFeedbackContent = {
+                    PostTagsAssociatedByUser(post)
+                    PostFeedback(
+                        post.postItem.isLikedByUser,
+                        post.postItem.metrics
+                    )
+                })
             }
         }
+    }
+}
+
+@Composable
+private fun PostTagsAssociatedByUser(taggedPost: TaggedPostItem) {
+    Row {
+        IconedChip(
+            borderWidth = 1.dp,
+            enabled = false,
+            painter = if (isSystemInDarkTheme())
+                painterResource(id = R.drawable.ic_check_white)
+            else
+                painterResource(id = R.drawable.ic_check_black),
+            text = taggedPost.tag.name,
+        )
     }
 }
 

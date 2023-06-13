@@ -1,6 +1,8 @@
 package com.voitov.vknewsclient.presentation.profileScreen
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
@@ -14,7 +16,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,27 +25,28 @@ import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.Slider
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationCity
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material.swipeable
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
@@ -72,10 +74,11 @@ import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.domain.entities.Profile
 import com.voitov.vknewsclient.domain.entities.WallPost
 import com.voitov.vknewsclient.getApplicationComponent
-import com.voitov.vknewsclient.presentation.newsFeedScreen.PostCard
 import com.voitov.vknewsclient.presentation.reusableUIs.LoadingGoingOn
+import com.voitov.vknewsclient.presentation.reusableUIs.PostAdditionalPhotos
+import com.voitov.vknewsclient.presentation.reusableUIs.PostCard
+import com.voitov.vknewsclient.presentation.reusableUIs.PostText
 import com.voitov.vknewsclient.ui.theme.CoolBlack
-import com.voitov.vknewsclient.ui.theme.CoolGray
 import com.voitov.vknewsclient.ui.theme.CoolWhite
 import com.voitov.vknewsclient.ui.theme.Shapes
 import kotlinx.coroutines.launch
@@ -95,6 +98,14 @@ fun ProfileScreen() {
         initial = ProfileScreenState.Initial
     )
 
+    Log.d("Profile_screen", "recomposed profileScreen")
+    ProfileScreenContent(state)
+}
+
+@Composable
+private fun ProfileScreenContent(state: State<ProfileScreenState>) {
+    Log.d("Profile_screen", "recomposed handle")
+
     when (val screenState = state.value) {
         is ProfileScreenState.Success -> Profile(
             profileInfo = screenState.profileDetails,
@@ -103,7 +114,7 @@ fun ProfileScreen() {
 
         is ProfileScreenState.Failure -> Failure(errorMessage = screenState.error)
         is ProfileScreenState.Initial -> {
-            LoadingGoingOn()
+            LoadingGoingOn(modifier = Modifier.fillMaxSize())
         }
     }
 }
@@ -134,20 +145,6 @@ private fun Profile(profileInfo: Profile, content: List<WallPost>) {
             ProfileDetails(profileInfo)
         }) {
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            val progress = rememberSaveable {
-                mutableStateOf(0f)
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-            Slider(
-                value = progress.value,
-                onValueChange = {
-                    progress.value = it
-                },
-                modifier = Modifier
-                    .padding(horizontal = 32.dp)
-            )
-
             val swipingState = rememberSwipeableState(initialValue = SwipingStates.EXPANDED)
             val heightInPx = with(LocalDensity.current) {
                 maxHeight.toPx()
@@ -192,8 +189,12 @@ private fun Profile(profileInfo: Profile, content: List<WallPost>) {
                     .fillMaxSize()
                     .swipeable(
                         state = swipingState,
-                        thresholds = { _, _ ->
-                            FractionalThreshold(0.15f)//it can be 0.5 in general
+                        thresholds = { stateFrom, stateTo ->
+                            if (stateFrom == SwipingStates.COLLAPSED) {
+                                FractionalThreshold(0.75f)//it can be 0.5 in general
+                            } else {
+                                FractionalThreshold(0.15f)
+                            }
                         },
                         orientation = Orientation.Vertical,
                         anchors = mapOf(
@@ -203,16 +204,16 @@ private fun Profile(profileInfo: Profile, content: List<WallPost>) {
                     )
                     .nestedScroll(nestedScrollConnection)
             ) {
-                val computedProgress by remember {//progress value will be decided as par state
+                Log.d("TEST_MOTION", "box recomposition")
+                val computedProgress = remember {//progress value will be decided as par state
                     derivedStateOf {
-                        if (swipingState.progress.to == SwipingStates.COLLAPSED)
+                        if (swipingState.progress.to == SwipingStates.COLLAPSED) {
                             swipingState.progress.fraction
-                        else
+                        } else {
                             1f - swipingState.progress.fraction
+                        }
                     }
                 }
-                val startHeightNum = 238
-
                 UserProfile(
                     progress = computedProgress, profileInfo, content, onDetailsClicked = {
                         scope.launch {
@@ -227,11 +228,13 @@ private fun Profile(profileInfo: Profile, content: List<WallPost>) {
 @OptIn(ExperimentalMotionApi::class)
 @Composable
 private fun UserProfile(
-    progress: Float,
+    progress: State<Float>,
     profileInfo: Profile,
     content: List<WallPost>,
     onDetailsClicked: () -> Unit,
 ) {
+    Log.d("TEST_MOTION", "user profile recomposition")
+
     val context = LocalContext.current
     val motionSceneData = remember {
         context.resources
@@ -242,7 +245,7 @@ private fun UserProfile(
 
     MotionLayout(
         motionScene = MotionScene(content = motionSceneData),
-        progress = progress,
+        progress = progress.value,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp)
@@ -253,7 +256,7 @@ private fun UserProfile(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(if (isSystemInDarkTheme()) CoolBlack else CoolWhite)
+                .background(if (isSystemInDarkTheme()) CoolBlack else Color.White)
                 .layoutId("background")
         )
         Box(
@@ -269,19 +272,97 @@ private fun UserProfile(
                     .fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(items = content, key = { it.id }) {
+                items(items = content, key = { it.id }) { wallPost ->
+                    val postItem = PostItem(
+                        id = wallPost.id,
+                        communityPhotoUrl = wallPost.producerPhotoUrl,
+                        communityId = wallPost.producerId,
+                        authorName = wallPost.producerName,
+                        date = wallPost.date,
+                        contentText = wallPost.contentText,
+                        isLikedByUser = wallPost.isLikedByUser,
+                        contentImageUrl = wallPost.contentImageUrl,
+                        metrics = wallPost.metrics,
+                        dateInMillis = 0,
+                    )
                     PostCard(
-                        postItem = PostItem(
-                            id = it.id,
-                            communityPhotoUrl = "",
-                            communityId = 123,
-                            authorName = "",
-                            date = it.date,
-                            contentText = it.contentText,
-                            isLikedByUser = it.isLikedByUser,
-                            contentImageUrl = it.contentImageUrl,
-                            metrics = it.metrics
-                        )
+                        postItem = postItem,
+                        PostContent = {
+                            PostText(text = postItem.contentText)
+                            wallPost.postLifecycleHierarchy.forEach { innerPost ->
+//                                Spacer(modifier = Modifier.padding(vertical = 2.dp))
+//                                Row {
+//                                    Icon(
+//                                        imageVector = Icons.Default.Repeat,
+//                                        contentDescription = null
+//                                    )
+//                                    Spacer(modifier = Modifier.padding(vertical = 4.dp))
+//                                    AsyncImage(
+//                                        model = innerPost.producerPhotoUrl,
+//                                        modifier = Modifier
+//                                            .clip(CircleShape)
+//                                            .size(50.dp),
+//                                        contentDescription = "community thumbnail"
+//                                    )
+//                                    Spacer(modifier = Modifier.padding(vertical = 4.dp))
+//                                    Text(text = innerPost.producerName)
+//                                    Spacer(modifier = Modifier.padding(vertical = 4.dp))
+//                                    Text(text = innerPost.date)
+//                                }
+                                PostCard(
+                                    modifier = Modifier.padding(horizontal = 4.dp),
+                                    postItem = PostItem(
+                                        id = innerPost.id,
+                                        communityPhotoUrl = innerPost.producerPhotoUrl,
+                                        communityId = innerPost.producerId,
+                                        authorName = innerPost.producerName,
+                                        date = innerPost.date,
+                                        contentText = innerPost.contentText,
+                                        isLikedByUser = false,
+                                        contentImageUrl = listOf(innerPost.contentImageUrl ?: ""),
+                                        metrics = listOf(),
+                                        dateInMillis = 0,
+                                    ),
+                                    PostFeedbackContent = {
+
+                                    },
+                                    PostHeaderContent = {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Repeat,
+                                                contentDescription = null
+                                            )
+                                            Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                                            AsyncImage(
+                                                model = innerPost.producerPhotoUrl,
+                                                modifier = Modifier
+                                                    .clip(CircleShape)
+                                                    .size(25.dp),
+                                                contentDescription = "community thumbnail"
+                                            )
+                                            Spacer(modifier = Modifier.padding(all = 4.dp))
+                                            Column(
+                                                modifier = Modifier.weight(1f)
+                                            ) {
+                                                Text(
+                                                    innerPost.producerName,
+                                                    color = MaterialTheme.colors.onPrimary
+                                                )
+                                                Spacer(modifier = Modifier.padding(vertical = 2.dp))
+                                                Text(
+                                                    innerPost.date,
+                                                    color = MaterialTheme.colors.onSecondary
+                                                )
+                                            }
+                                        }
+                                    }
+                                )
+                            }
+
+                            PostAdditionalPhotos(contentImgUrls = wallPost.contentImageUrl)
+                        }
                     )
                 }
             }
@@ -317,7 +398,7 @@ private fun UserProfile(
         Text(
             text = "${profileInfo.firstName} ${profileInfo.lastName}",
             color = if (isSystemInDarkTheme()) CoolWhite else CoolBlack,
-            fontSize = 18.sp,
+            fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             modifier = Modifier
@@ -353,6 +434,12 @@ private fun UserProfile(
                 Text(
                     text = "See details",
                     color = if (isSystemInDarkTheme()) CoolWhite else CoolBlack,
+                )
+                Spacer(modifier = Modifier.padding(horizontal = 2.dp))
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    tint = if (isSystemInDarkTheme()) Color.White else CoolBlack
                 )
             }
         }

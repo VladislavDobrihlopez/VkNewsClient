@@ -2,6 +2,7 @@ package com.voitov.vknewsclient.data.mappers
 
 import android.util.Log
 import com.voitov.vknewsclient.data.database.models.TaggedPostItemDbModel
+import com.voitov.vknewsclient.data.util.mapTimestampToDatePattern
 import com.voitov.vknewsclient.domain.MetricsType
 import com.voitov.vknewsclient.domain.SocialMetric
 import com.voitov.vknewsclient.domain.entities.ItemTag
@@ -18,7 +19,7 @@ class TaggedPostMapper @Inject constructor() {
             communityId = entity.postItem.communityId,
             communityPhotoUrl = entity.postItem.communityPhotoUrl,
             authorName = entity.postItem.authorName,
-            date = entity.postItem.date,
+            dateInMillis = entity.postItem.dateInMillis,
             contentText = entity.postItem.contentText,
             isLikedByUser = entity.postItem.isLikedByUser,
             contentImageUrl = entity.postItem.contentImageUrl,
@@ -42,7 +43,8 @@ class TaggedPostMapper @Inject constructor() {
                 communityId = dbModel.communityId,
                 communityPhotoUrl = dbModel.communityPhotoUrl,
                 authorName = dbModel.authorName,
-                date = dbModel.date,
+                dateInMillis = dbModel.dateInMillis,
+                date = mapTimestampToDatePattern(dbModel.dateInMillis),
                 contentText = dbModel.contentText,
                 isLikedByUser = dbModel.isLikedByUser,
                 contentImageUrl = dbModel.contentImageUrl,

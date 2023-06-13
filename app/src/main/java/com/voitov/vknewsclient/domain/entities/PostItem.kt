@@ -10,10 +10,11 @@ data class PostItem(
     val communityId: Long,
     val communityPhotoUrl: String,
     val authorName: String,
+    val dateInMillis: Long,
     val date: String,
     val contentText: String,
     val isLikedByUser: Boolean,
-    val contentImageUrl: String?,
+    val contentImageUrl: List<String>,
     val metrics: List<SocialMetric>,
 ) {
     companion object {

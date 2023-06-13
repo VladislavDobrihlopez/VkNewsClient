@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.ui.theme
+package com.voitov.vknewsclient.presentation.reusableUIs
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
@@ -15,7 +15,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun IconWithText(
+fun IconFollowedByText(
     pictResId: Int,
     text: String,
     modifier: Modifier = Modifier,

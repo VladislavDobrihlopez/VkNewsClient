@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.data.network.models.profileModels
+package com.voitov.vknewsclient.data.network.models.profileModels.wall
 
 import com.google.gson.annotations.SerializedName
 
