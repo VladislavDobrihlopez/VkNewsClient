@@ -3,6 +3,7 @@ package com.voitov.vknewsclient.presentation
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -24,6 +25,10 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+        )
         setContent {
             VkNewsClientTheme {
                 val appComponent = getApplicationComponent()
