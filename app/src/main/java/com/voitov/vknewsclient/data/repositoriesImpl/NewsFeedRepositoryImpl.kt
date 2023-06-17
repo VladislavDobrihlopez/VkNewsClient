@@ -5,9 +5,10 @@ import com.vk.api.sdk.VKPreferencesKeyValueStorage
 import com.vk.api.sdk.auth.VKAccessToken
 import com.voitov.vknewsclient.data.mappers.CommentMapper
 import com.voitov.vknewsclient.data.mappers.PostMapper
-import com.voitov.vknewsclient.data.network.PostsFeedApiService
+import com.voitov.vknewsclient.data.network.RecommendationsFeedApiService
 import com.voitov.vknewsclient.data.network.models.postsFeedModels.NewsFeedContentResponseDto
 import com.voitov.vknewsclient.domain.AuthorizationStateResult
+import com.voitov.vknewsclient.domain.CommentsResult
 import com.voitov.vknewsclient.domain.MetricsType
 import com.voitov.vknewsclient.domain.NewsFeedResult
 import com.voitov.vknewsclient.domain.SocialMetric
@@ -30,11 +31,12 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class NewsFeedRepositoryImpl @Inject constructor(
     private val storage: VKPreferencesKeyValueStorage,
-    private val postsFeedApiService: PostsFeedApiService,
+    private val recommendationsFeedApiService: RecommendationsFeedApiService,
     private val postMapper: PostMapper,
     private val commentMapper: CommentMapper
 ) : NewsFeedRepository {
@@ -43,16 +45,20 @@ class NewsFeedRepositoryImpl @Inject constructor(
         get() = VKAccessToken.restore(storage)
 
     private val _posts = mutableListOf<PostItem>()
-    private val posts: List<PostItem>
+    private val postItems: List<PostItem>
         get() = _posts.toList()
 
+    private val _comments = mutableListOf<PostCommentItem>()
+    private val commentItems: List<PostCommentItem>
+        get() = _comments.toList()
+
     private var nextPostFrom: String? = null
-    private var nextCommentFrom: String? = null
+    private var nextCommentOffset: Int = 0
 
     private val updateDataEvent = MutableSharedFlow<Unit>()
     private val updateDataFlow = flow {
         updateDataEvent.collect {
-            emit(posts)
+            emit(postItems)
         }
     }
 
@@ -62,12 +68,12 @@ class NewsFeedRepositoryImpl @Inject constructor(
         needNextDataEvents.collect {
             Log.d("INTERNET_TEST", "collect")
 
-            when (retrieveData()) {
-                is Result.Success -> {
-                    emit(NewsFeedResult.Success(posts))
+            when (retrieveFeedData()) {
+                is FeedResponseResult.Success -> {
+                    emit(NewsFeedResult.Success(postItems))
                 }
 
-                is Result.Failure -> {
+                is FeedResponseResult.Failure -> {
                     emit(NewsFeedResult.Failure)
                 }
 
@@ -105,15 +111,37 @@ class NewsFeedRepositoryImpl @Inject constructor(
     }.stateIn(
         scope = scope,
         started = SharingStarted.Lazily,
-        initialValue = NewsFeedResult.Success(posts = posts)
+        initialValue = NewsFeedResult.Success(posts = postItems)
     )
 
     override fun getRecommendationsFlow(): StateFlow<NewsFeedResult> {
         return combinedFlow
     }
 
-    override fun getCommentsFlow(post: PostItem): Flow<List<PostCommentItem>> {
-        return loadComments(post)
+    private val needNextCommentsEvent = MutableSharedFlow<PostItem>(replay = 1)
+    private val comments = flow {
+        needNextCommentsEvent.collect { post ->
+            Log.d("TEST_COMMENTS_SCREEN", "needNextCommentsEvent.collect()")
+            val result = retrievePostComments(post)
+            emit(result)
+        }
+    }.stateIn(
+        scope = scope,
+        started = SharingStarted.Lazily,
+        initialValue = CommentsResult.Initial
+    )
+
+    override fun getCommentsFlow(post: PostItem): StateFlow<CommentsResult> {
+        Log.d("TEST_COMMENTS_SCREEN", "getCommentsFlow()")
+
+        nextCommentOffset = 0
+        _comments.clear()
+        scope.launch {
+            Log.d("TEST_COMMENTS_SCREEN", "emit for getCommentsFlow()")
+
+            needNextCommentsEvent.emit(post)
+        }
+        return comments
     }
 
     override fun getAuthStatusFlow(): Flow<AuthorizationStateResult> {
@@ -125,53 +153,94 @@ class NewsFeedRepositoryImpl @Inject constructor(
         needNextDataEvents.emit(Unit)
     }
 
-    private sealed class Result {
-        class Success(val newsFeedContentResponseDto: NewsFeedContentResponseDto) : Result()
-        object Failure : Result()
-        object EndOfNewsFeed : Result()
+    override suspend fun retrieveNextChunkOfComments(post: PostItem) {
+        Log.d("TEST_COMMENTS_SCREEN", "offset: $nextCommentOffset")
+        needNextCommentsEvent.emit(post)
     }
 
-    private suspend fun retrieveData(): Result {
+    private sealed class FeedResponseResult {
+        class Success(val newsFeedContentResponseDto: NewsFeedContentResponseDto) :
+            FeedResponseResult()
+
+        object Failure : FeedResponseResult()
+        object EndOfNewsFeed : FeedResponseResult()
+    }
+
+    private suspend fun retrievePostComments(post: PostItem): CommentsResult {
+        if (vkPostCommentsAreOver()) {
+            return CommentsResult.EndOfComments
+        }
+
+        val commentsResponseResult = try {
+            val response = recommendationsFeedApiService.getComments(
+                token = getUserToken(),
+                ownerId = post.communityId,
+                postId = post.id,
+                offset = nextCommentOffset.coerceAtLeast(0)
+            )
+            val count = response.content.items.count()
+
+            if (count == 0) {
+                return CommentsResult.EndOfComments
+            }
+
+            nextCommentOffset += count
+
+            val mappedComments = commentMapper.mapDtoToEntity(response)
+            _comments.addAll(mappedComments)
+            CommentsResult.Success(commentItems)
+        } catch (ex: Exception) {
+            CommentsResult.Failure(ex)
+        }
+
+        return commentsResponseResult
+    }
+
+    private suspend fun retrieveFeedData(): FeedResponseResult {
         val placeToStartLoadingFrom = nextPostFrom
 
         if (vkHasNothingToRecommendAnymore()) {
-            return Result.EndOfNewsFeed
+            return FeedResponseResult.EndOfNewsFeed
         }
 
-        val result = try {
+        val feedResponseResult = try {
             val response = if (placeToStartLoadingFrom == null) {
-                postsFeedApiService.loadNews(getUserToken())
+                recommendationsFeedApiService.loadNews(getUserToken())
             } else {
-                postsFeedApiService.loadNews(getUserToken(), placeToStartLoadingFrom)
+                recommendationsFeedApiService.loadNews(getUserToken(), placeToStartLoadingFrom)
             }
-            Result.Success(response)
+            FeedResponseResult.Success(response)
         } catch (_: Exception) {
-            Result.Failure
+            FeedResponseResult.Failure
         }
 
-        if (result is Result.Success) {
-            nextPostFrom = result.newsFeedContentResponseDto.content.nextFrom
+        if (feedResponseResult is FeedResponseResult.Success) {
+            nextPostFrom = feedResponseResult.newsFeedContentResponseDto.content.nextFrom
             val mappedPosts =
-                postMapper.mapDtoResponseToEntitiesOfPostItem(result.newsFeedContentResponseDto)
+                postMapper.mapDtoResponseToEntitiesOfPostItem(feedResponseResult.newsFeedContentResponseDto)
             _posts.addAll(mappedPosts)
         }
-        return result
+        return feedResponseResult
     }
 
     private fun vkHasNothingToRecommendAnymore(): Boolean {
         return nextPostFrom == null && _posts.isNotEmpty()
     }
 
+    private fun vkPostCommentsAreOver(): Boolean {
+        return false
+    }
+
     override suspend fun changeLikeStatus(post: PostItem) {
         val updatedLikesCount = if (post.isLikedByUser) {
-            postsFeedApiService.removeLike(
+            recommendationsFeedApiService.removeLike(
                 token = getUserToken(),
                 type = PostItem.TYPE,
                 ownerId = post.communityId,
                 itemId = post.id
             ).likes.count
         } else {
-            postsFeedApiService.addLike(
+            recommendationsFeedApiService.addLike(
                 token = getUserToken(),
                 type = PostItem.TYPE,
                 ownerId = post.communityId,
@@ -194,7 +263,7 @@ class NewsFeedRepositoryImpl @Inject constructor(
     }
 
     override suspend fun ignoreItem(post: PostItem) {
-        postsFeedApiService.ignoreItem(
+        recommendationsFeedApiService.ignoreItem(
             token = getUserToken(),
             ownerId = post.communityId,
             ignoredItemId = post.id
@@ -203,19 +272,19 @@ class NewsFeedRepositoryImpl @Inject constructor(
         updateDataEvent.emit(Unit)
     }
 
-    private fun loadComments(post: PostItem): Flow<List<PostCommentItem>> = flow {
-        val res = postsFeedApiService.getComments(
-            token = getUserToken(),
-            ownerId = post.communityId,
-            postId = post.id,
-            startCommentId = 0
-        )
-        emit(commentMapper.mapDtoToEntity(res))
-    }
-        .retry(10) {
-            delay(RETRY_DELAY_IN_MILLIS)
-            true
-        }
+//    private fun loadComments(post: PostItem): Flow<List<PostCommentItem>> = flow {
+//        val res = recommendationsFeedApiService.getComments(
+//            token = getUserToken(),
+//            ownerId = post.communityId,
+//            postId = post.id,
+//            startCommentId = 0
+//        )
+//        emit(commentMapper.mapDtoToEntity(res))
+//    }
+//        .retry(10) {
+//            delay(RETRY_DELAY_IN_MILLIS)
+//            true
+//        }
     //.stateIn(scope = scope, started = SharingStarted.Lazily, initialValue = listOf())
 
 //    override fun getPostTags(): Flow<List<ItemTag>> {

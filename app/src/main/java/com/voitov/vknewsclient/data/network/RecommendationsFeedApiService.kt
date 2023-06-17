@@ -6,7 +6,7 @@ import com.voitov.vknewsclient.data.network.models.postsFeedModels.NewsFeedConte
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface PostsFeedApiService {
+interface RecommendationsFeedApiService {
     @GET("newsfeed.getRecommended?v=${API_VERSION}")
     suspend fun loadNews(@Query("access_token") token: String): NewsFeedContentResponseDto
 
@@ -40,12 +40,12 @@ interface PostsFeedApiService {
         @Query("item_id") ignoredItemId: Long
     )
 
-    @GET("wall.getComments?v=${API_VERSION}&need_likes=1&extended=1&fields=photo_100")
+    @GET("wall.getComments?v=${API_VERSION}&need_likes=1&extended=1&fields=photo_100&count=15")
     suspend fun getComments(
         @Query("access_token") token: String,
         @Query("owner_id") ownerId: Long,
         @Query("post_id") postId: Long,
-        @Query("start_comment_id") startCommentId: Long,
+        @Query("offset") offset: Int,
         @Query("sort") sortOrder: String = "asc"
     ): CommentsContentResponseDto
 

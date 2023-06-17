@@ -2,7 +2,6 @@ package com.voitov.vknewsclient.presentation.profileScreen
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
@@ -19,12 +18,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
@@ -78,7 +74,7 @@ import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.domain.entities.Profile
 import com.voitov.vknewsclient.domain.entities.WallPost
-import com.voitov.vknewsclient.domain.usecases.profile.ProfileAuthor
+import com.voitov.vknewsclient.domain.ProfileAuthor
 import com.voitov.vknewsclient.getApplicationComponent
 import com.voitov.vknewsclient.presentation.reusableUIs.LoadingGoingOn
 import com.voitov.vknewsclient.presentation.reusableUIs.PostAdditionalPhotos
@@ -96,17 +92,12 @@ private enum class SwipingStates {
 }
 
 @Composable
-fun ProfileScreen(authorId: Long?) {
+fun ProfileScreen(author: ProfileAuthor) {
     val component =
-        if (authorId != null) {
-            getApplicationComponent()
-                .getProfileScreenComponentFactory()
-                .create(ProfileAuthor.OTHERS(authorId))
-        } else {
-            getApplicationComponent()
-                .getProfileScreenComponentFactory()
-                .create(ProfileAuthor.MINE)
-        }
+        getApplicationComponent()
+            .getProfileScreenComponentFactory()
+            .create(author)
+
     val viewModel: ProfileViewModel =
         viewModel(factory = component.getViewModelsFactory())
 

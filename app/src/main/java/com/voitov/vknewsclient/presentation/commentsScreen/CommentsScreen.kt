@@ -2,10 +2,13 @@ package com.voitov.vknewsclient.presentation.commentsScreen
 
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Icon
@@ -16,9 +19,11 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -66,15 +71,21 @@ private fun CommentsScreenContent(
 ) {
     when (val currentState = state.value) {
         is CommentsScreenState.LoadingState -> {
-            Log.d("COMMENTS_TEST", "loading state")
-            CommentsScreenOnDataBeingLoadedState(onBackPressed)
+            Log.d("TEST_COMMENTS_SCREEN", "view: loading")
+            CommentsScreenOnDataBeingLoaded(onBackPressed)
         }
 
-        is CommentsScreenState.ShowingCommentsState -> {
-            Log.d("COMMENTS_TEST", "showing comments state")
+        CommentsScreenState.InitialState -> {
+            Log.d("TEST_COMMENTS_SCREEN", "view: initial")
+
+            CommentsScreenOnDataBeingLoaded(onBackPressed)
+        }
+
+        is CommentsScreenState.DisplayCommentsState -> {
             CommentsScreenOnViewState(
                 currentState.post,
                 currentState.comments,
+                isDataBeingLoaded = currentState.isDataBeingLoaded,
                 onAuthorPhotoClickListener = {
                     onAuthorPhotoClickListener(it)
                 },
@@ -82,15 +93,31 @@ private fun CommentsScreenContent(
                     onBackPressed()
                 }
             )
-        }
 
-        CommentsScreenState.InitialState -> {
+            when (currentState) {
+                is CommentsScreenState.DisplayCommentsState.CachedVersionState.FailureState -> {
+                    Toast.makeText(LocalContext.current, currentState.ex.message, Toast.LENGTH_LONG)
+                        .show()
+                }
+
+                is CommentsScreenState.DisplayCommentsState.CachedVersionState.EndOfCommentsState -> {
+                    Toast.makeText(
+                        LocalContext.current,
+                        "You have viewed all the comments",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+
+                is CommentsScreenState.DisplayCommentsState.Success -> {
+                    Log.d("TEST_COMMENTS_SCREEN", "view: display")
+                }
+            }
         }
     }
 }
 
 @Composable
-fun CommentsScreenOnDataBeingLoadedState(
+fun CommentsScreenOnDataBeingLoaded(
     onBackPressed: () -> Unit
 ) {
     Scaffold(
@@ -104,24 +131,16 @@ fun CommentsScreenOnDataBeingLoadedState(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.P)
-@Preview
-@Composable
-private fun PreviewCommentsScreenOnDataBeingLoadedState() {
-    VkNewsClientTheme {
-        CommentsScreenOnDataBeingLoadedState {
-
-        }
-    }
-}
-
 @Composable
 fun CommentsScreenOnViewState(
     post: PostItem,
     comments: List<PostCommentItem>,
+    isDataBeingLoaded: Boolean,
     onAuthorPhotoClickListener: (PostCommentItem) -> Unit,
     onBackPressed: () -> Unit
 ) {
+    val viewModel: CommentsViewModel = viewModel(modelClass = CommentsViewModel::class.java)
+
     Scaffold(
         topBar = {
             CommentsScreenTopAppBar(
@@ -140,6 +159,19 @@ fun CommentsScreenOnViewState(
             items(items = comments, key = { it.id }) { comment ->
                 Comment(item = comment) {
                     onAuthorPhotoClickListener(comment)
+                }
+            }
+            item {
+                if (isDataBeingLoaded) {
+                    LoadingGoingOn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .size(72.dp)
+                    )
+                } else {
+                    SideEffect {
+                        viewModel.loadCommentsContinuation()
+                    }
                 }
             }
         }
@@ -164,5 +196,16 @@ fun CommentsScreenTopAppBar(
             }
         }
     )
+}
+
+@RequiresApi(Build.VERSION_CODES.P)
+@Preview
+@Composable
+private fun PreviewCommentsScreenOnDataBeingLoadedState() {
+    VkNewsClientTheme {
+        CommentsScreenOnDataBeingLoaded {
+
+        }
+    }
 }
 
