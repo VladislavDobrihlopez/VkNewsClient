@@ -30,7 +30,7 @@ class CommentsViewModel @Inject constructor(
     private val cachedDataFlow = flow {
         eventContainer.collect {
             emit(
-                CommentsScreenState.DisplayCommentsState(
+                CommentsScreenState.DisplayCommentsState.Success(
                     post = post,
                     comments = cachedData,
                     isDataBeingLoaded = !viewedAllPosts
@@ -45,11 +45,18 @@ class CommentsViewModel @Inject constructor(
             when (result) {
                 CommentsResult.EndOfComments -> {
                     viewedAllPosts = true
-                    CommentsScreenState.CachedVersionState.EndOfCommentsState(post, cachedData)
+                    CommentsScreenState.DisplayCommentsState.CachedVersionState.EndOfCommentsState(
+                        post,
+                        cachedData
+                    )
                 }
 
                 is CommentsResult.Failure -> {
-                    CommentsScreenState.CachedVersionState.FailureState(result.ex, post, cachedData)
+                    CommentsScreenState.DisplayCommentsState.CachedVersionState.FailureState(
+                        result.ex,
+                        post,
+                        cachedData
+                    )
                 }
 
                 CommentsResult.Initial -> {
@@ -63,16 +70,16 @@ class CommentsViewModel @Inject constructor(
                 is CommentsResult.Success -> {
                     Log.d("TEST_COMMENTS_SCREEN", "viewmodel ${result.comments.count()}")
 
-                    CommentsScreenState.DisplayCommentsState(
+                    CommentsScreenState.DisplayCommentsState.Success(
                         post = post,
                         comments = result.comments
                     )
                 }
-            } as CommentsScreenState
+            }
         }
         .filter {
             when (val commentsState = it) {
-                is CommentsScreenState.DisplayCommentsState -> {
+                is CommentsScreenState.DisplayCommentsState.Success -> {
                     val result = commentsState.comments.isNotEmpty()
                     if (result) {
                         cachedData = commentsState.comments.toList()

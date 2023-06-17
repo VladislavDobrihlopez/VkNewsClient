@@ -75,8 +75,13 @@ private fun CommentsScreenContent(
             CommentsScreenOnDataBeingLoaded(onBackPressed)
         }
 
+        CommentsScreenState.InitialState -> {
+            Log.d("TEST_COMMENTS_SCREEN", "view: initial")
+
+            CommentsScreenOnDataBeingLoaded(onBackPressed)
+        }
+
         is CommentsScreenState.DisplayCommentsState -> {
-            Log.d("TEST_COMMENTS_SCREEN", "view: display")
             CommentsScreenOnViewState(
                 currentState.post,
                 currentState.comments,
@@ -88,40 +93,23 @@ private fun CommentsScreenContent(
                     onBackPressed()
                 }
             )
-        }
-
-        CommentsScreenState.InitialState -> {
-            Log.d("TEST_COMMENTS_SCREEN", "view: initial")
-
-            CommentsScreenOnDataBeingLoaded(onBackPressed)
-        }
-
-        is CommentsScreenState.CachedVersionState -> {
-            Log.d("TEST_COMMENTS_SCREEN", "view: end")
-            CommentsScreenOnViewState(
-                currentState.post,
-                currentState.soFarRetrievedComments,
-                isDataBeingLoaded = false,
-                onAuthorPhotoClickListener = {
-                    onAuthorPhotoClickListener(it)
-                },
-                onBackPressed = {
-                    onBackPressed()
-                }
-            )
 
             when (currentState) {
-                is CommentsScreenState.CachedVersionState.FailureState -> {
+                is CommentsScreenState.DisplayCommentsState.CachedVersionState.FailureState -> {
                     Toast.makeText(LocalContext.current, currentState.ex.message, Toast.LENGTH_LONG)
                         .show()
                 }
 
-                is CommentsScreenState.CachedVersionState.EndOfCommentsState -> {
+                is CommentsScreenState.DisplayCommentsState.CachedVersionState.EndOfCommentsState -> {
                     Toast.makeText(
                         LocalContext.current,
                         "You have viewed all the comments",
                         Toast.LENGTH_LONG
                     ).show()
+                }
+
+                is CommentsScreenState.DisplayCommentsState.Success -> {
+                    Log.d("TEST_COMMENTS_SCREEN", "view: display")
                 }
             }
         }
