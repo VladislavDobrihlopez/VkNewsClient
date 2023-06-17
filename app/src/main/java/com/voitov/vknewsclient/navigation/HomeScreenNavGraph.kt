@@ -10,15 +10,15 @@ import com.google.gson.Gson
 import com.voitov.vknewsclient.domain.entities.PostItem
 
 fun NavGraphBuilder.homeScreenNavGraph(
-    newsFeedContent: @Composable () -> Unit,
-    commentsContent: @Composable (PostItem) -> Unit
+    newsFeedScreenContent: @Composable () -> Unit,
+    commentsScreenContent: @Composable (PostItem) -> Unit
 ) {
     navigation(
         startDestination = AppNavScreen.NewsFeed.route,
         route = AppNavScreen.Home.route
     ) {
         composable(AppNavScreen.NewsFeed.route) {
-            newsFeedContent()
+            newsFeedScreenContent()
         }
         composable(AppNavScreen.Comments.route, arguments = listOf(
             navArgument(AppNavScreen.Comments.ARGUMENT_KEY_POST_ITEM) {
@@ -28,7 +28,7 @@ fun NavGraphBuilder.homeScreenNavGraph(
             val post = it.arguments?.getString(AppNavScreen.Comments.ARGUMENT_KEY_POST_ITEM)
                 ?: throw NullPointerException("ID wasn't provided for the comments screen")
             val parsedPost = Gson().fromJson(post.decode(), PostItem::class.java)
-            commentsContent(parsedPost)
+            commentsScreenContent(parsedPost)
         }
     }
 }

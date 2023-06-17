@@ -8,9 +8,7 @@ import com.voitov.vknewsclient.data.network.ProfileApiService
 import com.voitov.vknewsclient.data.network.models.profileModels.details.ProfileDataDto
 import com.voitov.vknewsclient.domain.ProfileResult
 import com.voitov.vknewsclient.domain.repository.ProfileRepository
-import com.voitov.vknewsclient.domain.usecases.profile.ProfileAuthor
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import com.voitov.vknewsclient.domain.ProfileAuthor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
@@ -21,8 +19,7 @@ class ProfileRepositoryImpl @Inject constructor(
     private val storage: VKPreferencesKeyValueStorage,
     private val apiService: ProfileApiService,
 ) : ProfileRepository {
-    private val repositoryScope = CoroutineScope(Dispatchers.Default)
-    private var currentUser: ProfileAuthor = ProfileAuthor.MINE
+    private var currentUser: ProfileAuthor = ProfileAuthor.Me
     private var signedInUserProfileInfo: ProfileDataDto? = null
 
     private val token
@@ -31,13 +28,13 @@ class ProfileRepositoryImpl @Inject constructor(
     private val profileDetailsFlow = flow {
         val profileDetailsDto =
             when (val user = currentUser) {
-                is ProfileAuthor.OTHERS ->
+                is ProfileAuthor.OtherPerson ->
                     apiService.getProfileInfo(
                         userIds = user.authorId.toString(),
                         token = getUserToken()
                     ).response[0]
 
-                is ProfileAuthor.MINE -> signedInUserProfileInfo ?: apiService.getProfileInfo(
+                is ProfileAuthor.Me -> signedInUserProfileInfo ?: apiService.getProfileInfo(
                     getUserToken()
                 ).response[0]
 
@@ -48,10 +45,13 @@ class ProfileRepositoryImpl @Inject constructor(
 
     private val wallContentFlow = flow {
         val profileDto = when (val user = currentUser) {
-            is ProfileAuthor.OTHERS ->
-                apiService.getWallContent(token = getUserToken(), ownerId = user.authorId.toString()).content
+            is ProfileAuthor.OtherPerson ->
+                apiService.getWallContent(
+                    token = getUserToken(),
+                    ownerId = user.authorId.toString()
+                ).content
 
-            is ProfileAuthor.MINE ->
+            is ProfileAuthor.Me ->
                 apiService.getWallContent(
                     token = getUserToken(),
                     ownerId = signedInUserProfileInfo?.id?.toString() ?: apiService.getProfileInfo(

@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.voitov.vknewsclient.domain.ProfileResult
 import com.voitov.vknewsclient.domain.usecases.profile.GetProfileInfoUseCase
-import com.voitov.vknewsclient.domain.usecases.profile.ProfileAuthor
+import com.voitov.vknewsclient.domain.ProfileAuthor
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
