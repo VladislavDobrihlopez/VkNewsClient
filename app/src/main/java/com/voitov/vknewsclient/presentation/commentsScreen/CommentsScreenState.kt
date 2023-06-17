@@ -6,8 +6,25 @@ import com.voitov.vknewsclient.domain.entities.PostItem
 sealed class CommentsScreenState {
     object InitialState : CommentsScreenState()
     object LoadingState : CommentsScreenState()
-    data class ShowingCommentsState(
+    sealed class CachedVersionState(
+        open val post: PostItem,
+        open val soFarRetrievedComments: List<PostCommentItem>
+    ) : CommentsScreenState() {
+        data class FailureState(
+            val ex: Throwable,
+            override val post: PostItem,
+            override val soFarRetrievedComments: List<PostCommentItem>,
+        ) : CachedVersionState(post, soFarRetrievedComments)
+
+        data class EndOfCommentsState(
+            override val post: PostItem,
+            override val soFarRetrievedComments: List<PostCommentItem>,
+        ) : CachedVersionState(post, soFarRetrievedComments)
+    }
+
+    data class DisplayCommentsState(
         val post: PostItem,
-        val comments: List<PostCommentItem>
+        val comments: List<PostCommentItem>,
+        val isDataBeingLoaded: Boolean = false
     ) : CommentsScreenState()
 }

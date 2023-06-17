@@ -6,7 +6,7 @@ import com.voitov.vknewsclient.data.database.dao.TaggedFeedPostsDao
 import com.voitov.vknewsclient.data.database.dao.TagsDao
 import com.voitov.vknewsclient.data.database.factories.PostsDatabase
 import com.voitov.vknewsclient.data.network.ApiFactory
-import com.voitov.vknewsclient.data.network.PostsFeedApiService
+import com.voitov.vknewsclient.data.network.RecommendationsFeedApiService
 import com.voitov.vknewsclient.data.network.ProfileApiService
 import com.voitov.vknewsclient.data.repositoriesImpl.NewsFeedRepositoryImpl
 import com.voitov.vknewsclient.data.repositoriesImpl.ProfileRepositoryImpl
@@ -42,8 +42,8 @@ interface DataModule {
     companion object {
         @ApplicationScope
         @Provides
-        fun providePostFeedApiService(): PostsFeedApiService {
-            return ApiFactory.postsFeedApiService
+        fun providePostFeedApiService(): RecommendationsFeedApiService {
+            return ApiFactory.recommendationsFeedApiService
         }
 
         @ApplicationScope
