@@ -8,5 +8,5 @@ data class InnerWallPost(
     val postType: String,
     val date: String,
     val contentText: String,
-    val contentImageUrl: String?,
+    val contentImageUrl: List<String>?,
 )

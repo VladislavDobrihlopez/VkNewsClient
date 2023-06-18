@@ -11,6 +11,7 @@ import com.voitov.vknewsclient.domain.usecases.newsFeed.ChangeLikeStatusUseCase
 import com.voitov.vknewsclient.domain.usecases.newsFeed.GetRecommendationsUseCase
 import com.voitov.vknewsclient.domain.usecases.newsFeed.IgnoreItemUseCase
 import com.voitov.vknewsclient.domain.usecases.newsFeed.RetrieveNextRecommendationsUseCase
+import com.voitov.vknewsclient.domain.usecases.newsFeed.SharePostUseCase
 import com.voitov.vknewsclient.domain.usecases.storedPosts.CachePostUseCase
 import com.voitov.vknewsclient.domain.usecases.storedPosts.GetTagsUseCase
 import com.voitov.vknewsclient.extensions.mergeWith
@@ -31,6 +32,7 @@ import javax.inject.Inject
 
 class NewsFeedScreenViewModel @Inject constructor(
     private val changeLikeStatusUseCase: ChangeLikeStatusUseCase,
+    private val sharePostUseCase: SharePostUseCase,
     private val ignoreItemUseCase: IgnoreItemUseCase,
     private val getRecommendationsUseCase: GetRecommendationsUseCase,
     private val retrieveNextRecommendationsUseCase: RetrieveNextRecommendationsUseCase,
@@ -106,6 +108,12 @@ class NewsFeedScreenViewModel @Inject constructor(
         }
     }
 
+    fun confirmShareAction(post: PostItem) {
+        viewModelScope.launch {
+            confirmationEvents.emit(NewsFeedScreenContentState.OnPostShareActionConfirmation(post))
+        }
+    }
+
     fun confirmActionOnSwipeEndToStart(post: PostItem) {
         viewModelScope.launch {
             confirmationEvents.emit(NewsFeedScreenContentState.OnEndToStartActionConfirmation(post = post))
@@ -143,6 +151,13 @@ class NewsFeedScreenViewModel @Inject constructor(
                 changeLikeStatusUseCase(post)
                 confirmationEvents.emit(NewsFeedScreenContentState.Content)
             }
+        }
+    }
+
+    fun share(post: PostItem) {
+        viewModelScope.launch(exceptionHandler) {
+            sharePostUseCase(post)
+            confirmationEvents.emit(NewsFeedScreenContentState.Content)
         }
     }
 

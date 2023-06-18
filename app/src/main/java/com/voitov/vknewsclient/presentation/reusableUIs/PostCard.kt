@@ -52,6 +52,8 @@ import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.presentation.mainScreen.TAG
 import com.voitov.vknewsclient.presentation.util.shortenLengthOfMetricsIfPossible
 import com.voitov.vknewsclient.ui.theme.Shapes
+import com.voitov.vknewsclient.ui.theme.TransparentBlue
+import com.voitov.vknewsclient.ui.theme.TransparentGreen
 import com.voitov.vknewsclient.ui.theme.TransparentRed
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 import kotlin.math.min
@@ -88,8 +90,9 @@ fun PostCard(
             PostHeaderContent?.invoke(this) ?: PostHeader(postItem = postItem)
             PostContent?.invoke(this) ?: PostContent(postItem = postItem)
             PostFeedbackContent?.invoke(this) ?: PostFeedback(
-                postItem.isLikedByUser,
-                postItem.metrics,
+                isPostShared = postItem.isSharedByUser,
+                isPostLiked = postItem.isLikedByUser,
+                metrics = postItem.metrics,
                 onCommentsClickListener = {
                     onCommentsClickListener?.invoke(it)
                 },
@@ -197,6 +200,7 @@ fun PostAdditionalPhotos(contentImgUrls: List<String>) {
 @Composable
 fun PostFeedback(
     isPostLiked: Boolean,
+    isPostShared: Boolean,
     metrics: List<SocialMetric>,
     onCommentsClickListener: ((SocialMetric) -> Unit)? = null,
     onLikesClickListener: ((SocialMetric) -> Unit)? = null,
@@ -268,6 +272,7 @@ fun PostFeedback(
             AnimatedSharesCount(
                 animatedFadeInShares,
                 metrics.getMetricByType(MetricsType.SHARES).count,
+                isPostShared
             ) {
                 onSharesClickListener?.invoke(metrics.getMetricByType(MetricsType.SHARES))
             }
@@ -304,10 +309,20 @@ private fun AnimatedViewsCount(
 private fun AnimatedSharesCount(
     alpha: State<Float>,
     shares: Int,
+    isPostShared: Boolean,
     onItemClicked: (() -> Unit)? = null
 ) {
     IconFollowedByText(
-        pictResId = R.drawable.ic_share,
+        pictResId = if (isPostShared) {
+            R.drawable.ic_shared
+        } else {
+            R.drawable.ic_share
+        },
+        iconTint = if (isPostShared) {
+            TransparentBlue
+        } else {
+            MaterialTheme.colors.onSecondary
+        },
         text = shares.toString(),
         modifier = Modifier.alpha(alpha.value)
     ) {
@@ -379,6 +394,7 @@ fun NewsPostLightTheme() {
                 ),
                 contentImageUrl = listOf(),
                 isLikedByUser = Random.nextBoolean(),
+                isSharedByUser = Random.nextBoolean(),
                 metrics = listOf(
                     SocialMetric(MetricsType.LIKES, 2_100),
                     SocialMetric(MetricsType.VIEWS, 15_000),
@@ -410,6 +426,7 @@ fun NewsPostLightDark() {
                 ),
                 contentImageUrl = listOf(),
                 isLikedByUser = Random.nextBoolean(),
+                isSharedByUser = Random.nextBoolean(),
                 metrics = listOf(
                     SocialMetric(MetricsType.LIKES, 2_100),
                     SocialMetric(MetricsType.VIEWS, 15_000),
