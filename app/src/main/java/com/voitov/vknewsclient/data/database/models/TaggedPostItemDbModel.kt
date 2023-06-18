@@ -26,6 +26,7 @@ data class TaggedPostItemDbModel(
     val dateInMillis: Long,
     val contentText: String,
     val isLikedByUser: Boolean,
+    val isSharedByUser: Boolean,
     val contentImageUrl: List<String>,
     val likes: Int,
     val comments: Int,

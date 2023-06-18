@@ -35,6 +35,7 @@ class PostMapper @Inject constructor() {
                     }
                         ?: listOf(),
                     isLikedByUser = post.likes.userLikes == LIKED,
+                    isSharedByUser = post.reposts.userShared == SHARED,
                     metrics = listOf(
                         SocialMetric(MetricsType.LIKES, post.likes.count),
                         SocialMetric(MetricsType.COMMENTS, post.comments.count),
@@ -54,5 +55,6 @@ class PostMapper @Inject constructor() {
 
     companion object {
         private const val LIKED = 1
+        private const val SHARED = 1
     }
 }

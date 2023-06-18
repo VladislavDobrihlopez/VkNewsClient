@@ -22,6 +22,7 @@ class TaggedPostMapper @Inject constructor() {
             dateInMillis = entity.postItem.dateInMillis,
             contentText = entity.postItem.contentText,
             isLikedByUser = entity.postItem.isLikedByUser,
+            isSharedByUser = entity.postItem.isSharedByUser,
             contentImageUrl = entity.postItem.contentImageUrl,
             likes = entity.postItem.metrics.find { it.type == MetricsType.LIKES }?.count
                 ?: METRICS_BY_DEFAULT,
@@ -46,6 +47,7 @@ class TaggedPostMapper @Inject constructor() {
                 dateInMillis = dbModel.dateInMillis,
                 date = mapTimestampToDatePattern(dbModel.dateInMillis),
                 contentText = dbModel.contentText,
+                isSharedByUser = dbModel.isSharedByUser,
                 isLikedByUser = dbModel.isLikedByUser,
                 contentImageUrl = dbModel.contentImageUrl,
                 metrics = listOf(

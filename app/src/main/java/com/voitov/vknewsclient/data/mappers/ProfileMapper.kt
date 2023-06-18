@@ -66,6 +66,7 @@ class ProfileMapper @Inject constructor() {
                 contentImageUrl = post.attachments?.map { it.photo?.photos?.lastOrNull()?.url ?: "" }
                     ?: listOf(),
                 isLikedByUser = post.likes.userLikes == LIKED,
+                isSharedByUser = post.reposts.userShares == SHARED,
                 metrics = listOf(
                     SocialMetric(MetricsType.LIKES, post.likes.count),
                     SocialMetric(MetricsType.COMMENTS, post.comments.count),
@@ -112,12 +113,14 @@ class ProfileMapper @Inject constructor() {
             postType = post.type,
             contentText = post.text,
             date = mapTimestampToDatePattern(post.secondsSince1970),
-            contentImageUrl = post.attachments?.firstOrNull()?.photo?.photos?.lastOrNull()?.url,
+            contentImageUrl = post.attachments?.map { it.photo?.photos?.lastOrNull()?.url ?: "" }
+                ?: listOf()//post.attachments?.firstOrNull()?.photo?.photos?.lastOrNull()?.url,
         )
     }
 
     companion object {
         private const val ENABLED = 1
         private const val LIKED = 1
+        private const val SHARED = 1
     }
 }

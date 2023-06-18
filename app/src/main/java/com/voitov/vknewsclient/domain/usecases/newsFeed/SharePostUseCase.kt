@@ -4,10 +4,10 @@ import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.domain.repository.NewsFeedRepository
 import javax.inject.Inject
 
-class ChangeLikeStatusUseCase @Inject constructor(
+class SharePostUseCase @Inject constructor(
     private val repository: NewsFeedRepository
 ) {
     suspend operator fun invoke(postItem: PostItem) {
-        repository.reverseLikeStatus(postItem)
+        repository.sharePostOnProfileWall(postItem)
     }
 }

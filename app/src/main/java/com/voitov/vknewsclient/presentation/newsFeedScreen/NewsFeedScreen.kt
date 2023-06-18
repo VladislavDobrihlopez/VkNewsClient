@@ -91,6 +91,9 @@ fun NewsFeedScreen(
             }
         }
 
+        is NewsFeedScreenContentState.OnPostShareActionConfirmation -> {
+            ShareConfirmationDialog(post = state.post, viewModel = viewModel)
+        }
         else -> {}
     }
 
@@ -102,6 +105,9 @@ fun NewsFeedScreen(
         onCommentsClickListener = onCommentsClickListener,
         onLikesClickListener = { post ->
             viewModel.confirmLikeAction(post)
+        },
+        onSharesClickListener = { post ->
+            viewModel.confirmShareAction(post)
         },
         onIgnorePostSwipeEndToStart = { post ->
             viewModel.confirmActionOnSwipeEndToStart(post)
@@ -121,6 +127,7 @@ private fun NewsFeedScreenContent(
     isDataBeingLoaded: Boolean,
     onCommentsClickListener: (PostItem) -> Unit,
     onLikesClickListener: (PostItem) -> Unit,
+    onSharesClickListener: (PostItem) -> Unit,
     onIgnorePostSwipeEndToStart: (PostItem) -> Unit,
     onCachePostSwipeStartToEnd: (PostItem) -> Unit
 ) {
@@ -204,6 +211,9 @@ private fun NewsFeedScreenContent(
                     onLikesClickListener = {
                         onLikesClickListener(post)
                     },
+                    onSharesClickListener = {
+                        onSharesClickListener(post)
+                    }
                 )
 
             }
@@ -245,6 +255,35 @@ private fun LikeConfirmationDialog(post: PostItem, viewModel: NewsFeedScreenView
         },
         text = {
             Text(text = "Do you agree to change the status of like?")
+        }
+    )
+}
+
+@Composable
+private fun ShareConfirmationDialog(post: PostItem, viewModel: NewsFeedScreenViewModel) {
+    AlertDialog(
+        onDismissRequest = {
+            viewModel.dismiss()
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                viewModel.share(post)
+            }) {
+                Text("Confirm", color = MaterialTheme.colors.onPrimary)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = {
+                viewModel.dismiss()
+            }) {
+                Text("Dismiss", color = MaterialTheme.colors.onPrimary)
+            }
+        },
+        title = {
+            Text(text = "Changing status of repost")
+        },
+        text = {
+            Text(text = "Do you agree to share this post?")
         }
     )
 }

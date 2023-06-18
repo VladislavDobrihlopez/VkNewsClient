@@ -387,8 +387,9 @@ private fun FeedPosts(
                 PostCard(modifier = Modifier, postItem = post.postItem, PostFeedbackContent = {
                     PostTagsAssociatedByUser(post)
                     PostFeedback(
-                        post.postItem.isLikedByUser,
-                        post.postItem.metrics
+                        isPostShared = post.postItem.isSharedByUser,
+                        isPostLiked = post.postItem.isLikedByUser,
+                        metrics = post.postItem.metrics
                     )
                 })
             }

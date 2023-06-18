@@ -13,6 +13,7 @@ data class WallPost(
     val date: String,
     val contentText: String,
     val isLikedByUser: Boolean,
+    val isSharedByUser: Boolean,
     val contentImageUrl: List<String>,
     val postLifecycleHierarchy: List<InnerWallPost>,
     val metrics: List<SocialMetric>,

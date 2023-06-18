@@ -205,9 +205,9 @@ class NewsFeedRepositoryImpl @Inject constructor(
 
         val feedResponseResult = try {
             val response = if (placeToStartLoadingFrom == null) {
-                recommendationsFeedApiService.loadNews(getUserToken())
+                recommendationsFeedApiService.loadRecommendations(getUserToken())
             } else {
-                recommendationsFeedApiService.loadNews(getUserToken(), placeToStartLoadingFrom)
+                recommendationsFeedApiService.loadRecommendations(getUserToken(), placeToStartLoadingFrom)
             }
             FeedResponseResult.Success(response)
         } catch (_: Exception) {
@@ -231,7 +231,29 @@ class NewsFeedRepositoryImpl @Inject constructor(
         return false
     }
 
-    override suspend fun changeLikeStatus(post: PostItem) {
+    override suspend fun sharePostOnProfileWall(post: PostItem) {
+        val updatedMetricsInfo = recommendationsFeedApiService.sharePost(
+            token = getUserToken(),
+            sharedObject = "wall${post.communityId}_${post.id}"
+        ).response
+
+        val updatedMetrics = post.metrics.toMutableList().apply {
+            removeIf { it.type == MetricsType.LIKES }
+            add(SocialMetric(MetricsType.LIKES, updatedMetricsInfo.likes))
+            removeIf { it.type == MetricsType.SHARES }
+            add(SocialMetric(MetricsType.SHARES, updatedMetricsInfo.shares))
+        }
+        val updatedPost = post.copy(isSharedByUser = true, isLikedByUser = true, metrics = updatedMetrics)
+        val indexOfElementToBeReplaced = _posts.indexOf(post)
+        if (indexOfElementToBeReplaced == -1) {
+            return
+        }
+
+        _posts[indexOfElementToBeReplaced] = updatedPost
+        updateDataEvent.emit(Unit)
+    }
+
+    override suspend fun reverseLikeStatus(post: PostItem) {
         val updatedLikesCount = if (post.isLikedByUser) {
             recommendationsFeedApiService.removeLike(
                 token = getUserToken(),
