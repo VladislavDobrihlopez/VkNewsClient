@@ -25,7 +25,7 @@ class CommentsViewModel @Inject constructor(
     private val post: PostItem
 ) : ViewModel() {
     private var viewedAllPosts = false
-    private lateinit var cachedData: List<PostCommentItem>
+    private var cachedData: List<PostCommentItem> = listOf()
     private val eventContainer = MutableSharedFlow<Unit>()
     private val cachedDataFlow = flow {
         eventContainer.collect {
