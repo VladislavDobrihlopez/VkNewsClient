@@ -1,6 +1,7 @@
 package com.voitov.vknewsclient.presentation.profileScreen
 
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -42,6 +43,7 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material.swipeable
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -71,10 +73,10 @@ import androidx.constraintlayout.compose.MotionScene
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.voitov.vknewsclient.R
+import com.voitov.vknewsclient.domain.ProfileAuthor
 import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.domain.entities.Profile
 import com.voitov.vknewsclient.domain.entities.WallPost
-import com.voitov.vknewsclient.domain.ProfileAuthor
 import com.voitov.vknewsclient.getApplicationComponent
 import com.voitov.vknewsclient.presentation.reusableUIs.LoadingGoingOn
 import com.voitov.vknewsclient.presentation.reusableUIs.PostAdditionalPhotos
@@ -101,37 +103,50 @@ fun ProfileScreen(author: ProfileAuthor) {
     val viewModel: ProfileViewModel =
         viewModel(factory = component.getViewModelsFactory())
 
-    val state = viewModel.profileFlow.collectAsState(
-        initial = ProfileScreenState.Initial
-    )
+    Log.d("TEST_R", "recomposition: $viewModel}")
 
-    Log.d("Profile_screen", "recomposed profileScreen")
-    ProfileScreenContent(state)
+    val state =
+        viewModel.profileFlow.collectAsState(
+            initial = ProfileScreenState.InitialState
+        )
+
+    ProfileScreenContent(state = state) {
+        Log.d("TEST_R", "callback: $viewModel}")
+        viewModel.loadContinuingWallPosts()
+    }
 }
 
 @Composable
-private fun ProfileScreenContent(state: State<ProfileScreenState>) {
-    Log.d("Profile_screen", "recomposed handle")
-
+fun ProfileScreenContent(state: State<ProfileScreenState>, onEndOfWallPosts: () -> Unit) {
     when (val screenState = state.value) {
-        is ProfileScreenState.Success.FreeProfile -> Profile(
-            profileInfo = screenState.profileDetails,
-        ) {
-            PostFeed(content = screenState.wallContent)
+        is ProfileScreenState.SuccessState -> {
+            Profile(
+                profileInfo = screenState.profileDetails,
+            ) {
+                if (screenState is ProfileScreenState.SuccessState.ProfileWithWall) {
+                    PostFeed(content = screenState.wallContent, screenState.isDataBeingLoaded) {
+                        onEndOfWallPosts()
+                    }
+                    if (screenState is ProfileScreenState.SuccessState.ProfileWithWall.EndOfPostsState) {
+                        Toast.makeText(LocalContext.current, "that's all", Toast.LENGTH_SHORT).show()
+                    }
+                } else if (screenState is ProfileScreenState.SuccessState.PrivateProfileState) {
+                    UnavailableAsNoAccess(modifier = Modifier.fillMaxSize())
+                }
+            }
         }
 
-        is ProfileScreenState.Success.PrivateProfile -> Profile(
-            profileInfo = screenState.profileDetails,
-        ) {
-            UnavailableAsNoAccess(modifier = Modifier.fillMaxSize())
+        is ProfileScreenState.FailureState -> Failure(errorMessage = screenState.error)
+        is ProfileScreenState.InitialState -> {
+            LoadingGoingOn(modifier = Modifier.padding(8.dp))
         }
 
-        is ProfileScreenState.Failure -> Failure(errorMessage = screenState.error)
-        is ProfileScreenState.Initial -> {
+        ProfileScreenState.LoadingState -> {
             LoadingGoingOn(modifier = Modifier.padding(8.dp))
         }
     }
 }
+
 
 @Composable
 private fun Failure(errorMessage: String) {
@@ -267,7 +282,11 @@ private fun Profile(
 }
 
 @Composable
-private fun PostFeed(content: List<WallPost>) {
+private fun PostFeed(
+    content: List<WallPost>,
+    isDataBeingLoaded: Boolean,
+    onEndOfWallPosts: () -> Unit
+) {
     LazyColumn(
         modifier = Modifier
             .padding(bottom = 136.dp)
@@ -349,6 +368,15 @@ private fun PostFeed(content: List<WallPost>) {
                     PostAdditionalPhotos(contentImgUrls = wallPost.contentImageUrl)
                 }
             )
+        }
+        item {
+            if (isDataBeingLoaded) {
+                LoadingGoingOn(modifier = Modifier.fillMaxWidth())
+            } else {
+                SideEffect {
+                    onEndOfWallPosts()
+                }
+            }
         }
     }
 }

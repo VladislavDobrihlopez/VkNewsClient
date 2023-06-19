@@ -23,6 +23,7 @@ interface ProfileApiService {
     suspend fun getWallContent(
         @Query("access_token") token: String,
         @Query("owner_id") ownerId: String,
+        @Query("offset") offset: Int,
     ): ProfileWallContentResponseDto
 
     companion object {

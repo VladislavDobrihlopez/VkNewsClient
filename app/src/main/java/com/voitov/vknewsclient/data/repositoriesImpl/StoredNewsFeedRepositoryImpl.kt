@@ -29,7 +29,7 @@ class StoredNewsFeedRepositoryImpl @Inject constructor(
     private val tagsMapper: TagsMapper,
     private val taggedPostMapper: TaggedPostMapper
 ) : StoredNewsFeedRepository {
-    private val scope = CoroutineScope(Dispatchers.Default)
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     init {
         scope.launch {
