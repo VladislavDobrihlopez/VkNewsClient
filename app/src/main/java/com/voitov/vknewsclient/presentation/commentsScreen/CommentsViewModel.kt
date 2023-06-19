@@ -40,7 +40,7 @@ class CommentsViewModel @Inject constructor(
     }
     val screenState: Flow<CommentsScreenState> = getCommentsUseCase(post)
         .map { result ->
-            Log.d("TEST_COMMENTS_SCREEN", "viewmodel: ${result}")
+            Log.d("TEST_COMMENTS_SCREEN", "viewmodel: $result")
 
             when (result) {
                 CommentsResult.EndOfComments -> {
@@ -60,10 +60,6 @@ class CommentsViewModel @Inject constructor(
                 }
 
                 CommentsResult.Initial -> {
-                    CommentsScreenState.LoadingState
-                }
-
-                CommentsResult.Loading -> {
                     CommentsScreenState.LoadingState
                 }
 

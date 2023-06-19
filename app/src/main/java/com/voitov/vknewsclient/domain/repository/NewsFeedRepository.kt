@@ -5,12 +5,13 @@ import com.voitov.vknewsclient.domain.CommentsResult
 import com.voitov.vknewsclient.domain.NewsFeedResult
 import com.voitov.vknewsclient.domain.entities.PostItem
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
 interface NewsFeedRepository {
     fun getRecommendationsFlow(): StateFlow<NewsFeedResult>
 
-    fun getCommentsFlow(post: PostItem): StateFlow<CommentsResult>
+    fun getCommentsFlow(post: PostItem): SharedFlow<CommentsResult>
 
     fun getAuthStatusFlow(): Flow<AuthorizationStateResult>
 

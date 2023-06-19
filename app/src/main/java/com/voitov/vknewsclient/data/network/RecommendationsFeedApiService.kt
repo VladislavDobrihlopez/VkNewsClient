@@ -54,10 +54,11 @@ interface RecommendationsFeedApiService {
         @Query("owner_id") ownerId: Long,
         @Query("post_id") postId: Long,
         @Query("offset") offset: Int,
-        @Query("sort") sortOrder: String = "asc"
+        @Query("sort") sortOrder: String = SORT_IN_ASCENDING_ORDER
     ): CommentsContentResponseDto
 
     companion object {
         private const val API_VERSION = "5.131"
+        private const val SORT_IN_ASCENDING_ORDER = "asc"
     }
 }

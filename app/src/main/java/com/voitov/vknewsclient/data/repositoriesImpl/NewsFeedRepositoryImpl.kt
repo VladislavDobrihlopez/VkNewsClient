@@ -133,6 +133,7 @@ class NewsFeedRepositoryImpl @Inject constructor(
 
     override fun getCommentsFlow(post: PostItem): StateFlow<CommentsResult> {
         Log.d("TEST_COMMENTS_SCREEN", "getCommentsFlow()")
+        Log.d("TEST_COMMENTS_SCREEN", "${this@NewsFeedRepositoryImpl}")
 
         nextCommentOffset = 0
         _comments.clear()
@@ -155,6 +156,8 @@ class NewsFeedRepositoryImpl @Inject constructor(
 
     override suspend fun retrieveNextChunkOfComments(post: PostItem) {
         Log.d("TEST_COMMENTS_SCREEN", "offset: $nextCommentOffset")
+        Log.d("TEST_COMMENTS_SCREEN", "${this@NewsFeedRepositoryImpl}")
+
         needNextCommentsEvent.emit(post)
     }
 

@@ -7,5 +7,8 @@ sealed class ProfileResult {
     data class Success(val profileDetails: Profile, val wallContent: List<WallPost>?) :
         ProfileResult()
 
-    data class Failure(val error: String) : ProfileResult()
+    data class Failure(val ex: Throwable) : ProfileResult()
+
+    object EndOfWallPosts : ProfileResult()
+    object Initial : ProfileResult()
 }

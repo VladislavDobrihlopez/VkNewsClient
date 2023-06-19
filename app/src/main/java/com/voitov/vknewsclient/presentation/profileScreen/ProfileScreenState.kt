@@ -4,13 +4,24 @@ import com.voitov.vknewsclient.domain.entities.Profile
 import com.voitov.vknewsclient.domain.entities.WallPost
 
 sealed class ProfileScreenState {
-    sealed class Success() : ProfileScreenState() {
-        data class FreeProfile(val profileDetails: Profile, val wallContent: List<WallPost>) :
-            Success()
+    sealed class SuccessState : ProfileScreenState() {
+        data class FreeProfileState(
+            val profileDetails: Profile,
+            val wallContent: List<WallPost>,
+            val isDataBeingLoaded: Boolean = false
+        ) : SuccessState()
 
-        data class PrivateProfile(val profileDetails: Profile) : Success()
+        data class EndOfPostsState(
+            val profileDetails: Profile,
+            val wallContent: List<WallPost>
+        ) : SuccessState()
+
+        data class PrivateProfileState(
+            val profileDetails: Profile
+        ) : SuccessState()
     }
 
-    data class Failure(val error: String) : ProfileScreenState()
-    object Initial : ProfileScreenState()
+    data class FailureState(val error: String) : ProfileScreenState()
+    object InitialState : ProfileScreenState()
+    object LoadingState : ProfileScreenState()
 }
