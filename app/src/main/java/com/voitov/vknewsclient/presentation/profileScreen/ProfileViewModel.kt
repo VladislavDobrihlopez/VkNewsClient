@@ -31,7 +31,7 @@ class ProfileViewModel @Inject constructor(
     private val cachedDataFlow = flow {
         eventContainer.collect {
             emit(
-                ProfileScreenState.SuccessState.FreeProfileState(
+                ProfileScreenState.SuccessState.ProfileWithWall.FreeProfileState(
                     profileDetails = cachedProfileDetails,
                     wallContent = cachedPosts,
                     isDataBeingLoaded = true
@@ -44,7 +44,7 @@ class ProfileViewModel @Inject constructor(
             Log.d("TEST_PROFILE_WALL", "$it")
             when (it) {
                 is ProfileResult.Success -> if (it.wallContent != null) {
-                    ProfileScreenState.SuccessState.FreeProfileState(
+                    ProfileScreenState.SuccessState.ProfileWithWall.FreeProfileState(
                         profileDetails = it.profileDetails,
                         wallContent = it.wallContent
                     )
@@ -61,7 +61,7 @@ class ProfileViewModel @Inject constructor(
                 is ProfileResult.EndOfWallPosts -> {
                     viewedAllPosts = true
 
-                    ProfileScreenState.SuccessState.EndOfPostsState(
+                    ProfileScreenState.SuccessState.ProfileWithWall.EndOfPostsState(
                         profileDetails = cachedProfileDetails,
                         wallContent = cachedPosts.toList()
                     )
@@ -73,7 +73,7 @@ class ProfileViewModel @Inject constructor(
             }
         }
         .onEach { state ->
-            if (state is ProfileScreenState.SuccessState.FreeProfileState) {
+            if (state is ProfileScreenState.SuccessState.ProfileWithWall.FreeProfileState) {
                 cachedPosts = state.wallContent
                 cachedProfileDetails = state.profileDetails
             } else if (state is ProfileScreenState.SuccessState.PrivateProfileState) {

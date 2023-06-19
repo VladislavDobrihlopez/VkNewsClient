@@ -119,36 +119,26 @@ fun ProfileScreen(author: ProfileAuthor) {
 @Composable
 fun ProfileScreenContent(state: State<ProfileScreenState>, onEndOfWallPosts: () -> Unit) {
     when (val screenState = state.value) {
-        is ProfileScreenState.SuccessState.FreeProfileState -> {
+        is ProfileScreenState.SuccessState -> {
             Profile(
                 profileInfo = screenState.profileDetails,
             ) {
-                PostFeed(content = screenState.wallContent, screenState.isDataBeingLoaded) {
-                    onEndOfWallPosts()
+                if (screenState is ProfileScreenState.SuccessState.ProfileWithWall) {
+                    PostFeed(content = screenState.wallContent, screenState.isDataBeingLoaded) {
+                        onEndOfWallPosts()
+                    }
+                    if (screenState is ProfileScreenState.SuccessState.ProfileWithWall.EndOfPostsState) {
+                        Toast.makeText(LocalContext.current, "that's all", Toast.LENGTH_SHORT).show()
+                    }
+                } else if (screenState is ProfileScreenState.SuccessState.PrivateProfileState) {
+                    UnavailableAsNoAccess(modifier = Modifier.fillMaxSize())
                 }
             }
-        }
-
-        is ProfileScreenState.SuccessState.PrivateProfileState -> Profile(
-            profileInfo = screenState.profileDetails,
-        ) {
-            UnavailableAsNoAccess(modifier = Modifier.fillMaxSize())
         }
 
         is ProfileScreenState.FailureState -> Failure(errorMessage = screenState.error)
         is ProfileScreenState.InitialState -> {
             LoadingGoingOn(modifier = Modifier.padding(8.dp))
-        }
-
-        is ProfileScreenState.SuccessState.EndOfPostsState -> {
-            Toast.makeText(LocalContext.current, "that's all", Toast.LENGTH_SHORT).show()
-            Profile(
-                profileInfo = screenState.profileDetails,
-            ) {
-                PostFeed(content = screenState.wallContent, false) {
-                    onEndOfWallPosts()
-                }
-            }
         }
 
         ProfileScreenState.LoadingState -> {
