@@ -8,29 +8,29 @@ sealed class ProfileScreenState {
         open val profileDetails: Profile,
         open val wallContent: List<WallPost>,
     ) : ProfileScreenState() {
-        sealed class ProfileWithWall(
+        sealed class ProfileWithPublicAccessToWallState(
             override val profileDetails: Profile,
             override val wallContent: List<WallPost>,
             open val isDataBeingLoaded: Boolean = false
         ) : SuccessState(profileDetails, wallContent) {
-            data class FreeProfileState(
+            data class Success(
                 override val profileDetails: Profile,
                 override val wallContent: List<WallPost>,
                 override val isDataBeingLoaded: Boolean = false
-            ) : ProfileWithWall(profileDetails, wallContent, isDataBeingLoaded)
+            ) : ProfileWithPublicAccessToWallState(profileDetails, wallContent, isDataBeingLoaded)
 
-            data class EndOfPostsState(
+            data class EndOfPosts(
                 override val profileDetails: Profile,
                 override val wallContent: List<WallPost>,
-            ) : ProfileWithWall(profileDetails, wallContent, false)
+            ) : ProfileWithPublicAccessToWallState(profileDetails, wallContent, false)
         }
 
-        data class PrivateProfileState(
+        data class PrivateProfile(
             override val profileDetails: Profile
         ) : SuccessState(profileDetails, listOf())
     }
 
-    data class FailureState(val error: String) : ProfileScreenState()
-    object InitialState : ProfileScreenState()
-    object LoadingState : ProfileScreenState()
+    data class Failure(val error: String) : ProfileScreenState()
+    object Initial : ProfileScreenState()
+    object Loading : ProfileScreenState()
 }

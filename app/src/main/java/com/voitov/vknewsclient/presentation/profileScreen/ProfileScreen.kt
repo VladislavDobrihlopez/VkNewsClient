@@ -33,6 +33,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cake
+import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationCity
@@ -107,7 +108,7 @@ fun ProfileScreen(author: ProfileAuthor) {
 
     val state =
         viewModel.profileFlow.collectAsState(
-            initial = ProfileScreenState.InitialState
+            initial = ProfileScreenState.Initial
         )
 
     ProfileScreenContent(state = state) {
@@ -123,25 +124,26 @@ fun ProfileScreenContent(state: State<ProfileScreenState>, onEndOfWallPosts: () 
             Profile(
                 profileInfo = screenState.profileDetails,
             ) {
-                if (screenState is ProfileScreenState.SuccessState.ProfileWithWall) {
+                if (screenState is ProfileScreenState.SuccessState.ProfileWithPublicAccessToWallState) {
                     PostFeed(content = screenState.wallContent, screenState.isDataBeingLoaded) {
                         onEndOfWallPosts()
                     }
-                    if (screenState is ProfileScreenState.SuccessState.ProfileWithWall.EndOfPostsState) {
-                        Toast.makeText(LocalContext.current, "that's all", Toast.LENGTH_SHORT).show()
+                    if (screenState is ProfileScreenState.SuccessState.ProfileWithPublicAccessToWallState.EndOfPosts) {
+                        Toast.makeText(LocalContext.current, "that's all", Toast.LENGTH_SHORT)
+                            .show()
                     }
-                } else if (screenState is ProfileScreenState.SuccessState.PrivateProfileState) {
+                } else if (screenState is ProfileScreenState.SuccessState.PrivateProfile) {
                     UnavailableAsNoAccess(modifier = Modifier.fillMaxSize())
                 }
             }
         }
 
-        is ProfileScreenState.FailureState -> Failure(errorMessage = screenState.error)
-        is ProfileScreenState.InitialState -> {
+        is ProfileScreenState.Failure -> Failure(errorMessage = screenState.error)
+        is ProfileScreenState.Initial -> {
             LoadingGoingOn(modifier = Modifier.padding(8.dp))
         }
 
-        ProfileScreenState.LoadingState -> {
+        ProfileScreenState.Loading -> {
             LoadingGoingOn(modifier = Modifier.padding(8.dp))
         }
     }
@@ -469,7 +471,7 @@ private fun UserProfile(
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Friends: 150",
+                    text = "Friends: ${profileInfo.friendsCount}",
                     color = if (isSystemInDarkTheme()) CoolWhite else CoolBlack,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
@@ -510,41 +512,84 @@ private fun ProfileDetails(profileInfo: Profile) {
             .padding(8.dp)
             .fillMaxSize()
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            Icon(imageVector = Icons.Default.Search, contentDescription = null)
-            Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-            Text(modifier = Modifier.weight(1f), text = "Short_link: @${profileInfo.shortenedLink}")
+
+        ShortenedProfileLink(link = profileInfo.shortenedLink)
+        with(profileInfo) {
+            birthday?.let {
+                Birthday(date = it)
+            }
+            countryName?.let {
+                CountryName(name = it)
+            }
+            cityName?.let {
+                CityName(name = it)
+            }
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            Icon(imageVector = Icons.Default.Cake, contentDescription = null)
-            Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-            Text(modifier = Modifier.weight(1f), text = "Birthday: ${profileInfo.birthday}")
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            Icon(imageVector = Icons.Default.Flag, contentDescription = null)
-            Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-            Text(modifier = Modifier.weight(1f), text = "Country: ${profileInfo.countryName}")
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            Icon(imageVector = Icons.Default.LocationCity, contentDescription = null)
-            Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-            Text(modifier = Modifier.weight(1f), text = "City: ${profileInfo.cityName}")
-        }
+        Gifts(profileInfo.giftsCount)
+    }
+}
+
+@Composable
+private fun ShortenedProfileLink(link: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Icon(imageVector = Icons.Default.Search, contentDescription = null)
+        Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+        Text(modifier = Modifier.weight(1f), text = "Short_link: @${link}")
+    }
+}
+
+@Composable
+private fun Birthday(date: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Icon(imageVector = Icons.Default.Cake, contentDescription = null)
+        Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+        Text(modifier = Modifier.weight(1f), text = "Birthday: ${date}")
+    }
+}
+
+@Composable
+private fun CountryName(name: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Icon(imageVector = Icons.Default.Flag, contentDescription = null)
+        Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+        Text(modifier = Modifier.weight(1f), text = "Country: $name")
+    }
+}
+
+@Composable
+private fun CityName(name: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Icon(imageVector = Icons.Default.LocationCity, contentDescription = null)
+        Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+        Text(modifier = Modifier.weight(1f), text = "City: $name")
+    }
+}
+
+@Composable
+private fun Gifts(count: Int) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Icon(imageVector = Icons.Default.CardGiftcard, contentDescription = null)
+        Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+        Text(modifier = Modifier.weight(1f), text = "Gifts: ${count}")
     }
 }

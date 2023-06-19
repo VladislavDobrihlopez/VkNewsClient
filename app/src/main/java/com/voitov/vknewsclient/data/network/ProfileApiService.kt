@@ -39,7 +39,8 @@ interface ProfileApiService {
             "online",
             "followers_count",
             "deactivated",
-            "cover"
+            "cover",
+            "counters"
         ).joinToString(",")
     }
 }

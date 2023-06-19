@@ -13,7 +13,7 @@ data class ProfileDataDto(
     @SerializedName("bdate") val birthday: String?,
     @SerializedName("photo_max") val photoMaxUrl: String,
     @SerializedName("about") val about: String?,
-    @SerializedName("followers_count") val followersCount: Int,
+    @SerializedName("counters") val counters: CountersDto,
     @SerializedName("online") val isOnline: Int,
     @SerializedName("city") val city: CityDto?,
     @SerializedName("country") val country: CountryDto?,

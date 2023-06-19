@@ -11,6 +11,8 @@ data class Profile(
     val photoMaxUrl: String,
     val about: String,
     val followersCount: Int,
+    val friendsCount: Int,
+    val giftsCount: Int,
     val isOnline: Int,
     val cityName: String? = null,
     val countryName: String? = null,

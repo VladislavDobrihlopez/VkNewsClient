@@ -31,7 +31,7 @@ class ProfileViewModel @Inject constructor(
     private val cachedDataFlow = flow {
         eventContainer.collect {
             emit(
-                ProfileScreenState.SuccessState.ProfileWithWall.FreeProfileState(
+                ProfileScreenState.SuccessState.ProfileWithPublicAccessToWallState.Success(
                     profileDetails = cachedProfileDetails,
                     wallContent = cachedPosts,
                     isDataBeingLoaded = true
@@ -44,44 +44,44 @@ class ProfileViewModel @Inject constructor(
             Log.d("TEST_PROFILE_WALL", "$it")
             when (it) {
                 is ProfileResult.Success -> if (it.wallContent != null) {
-                    ProfileScreenState.SuccessState.ProfileWithWall.FreeProfileState(
+                    ProfileScreenState.SuccessState.ProfileWithPublicAccessToWallState.Success(
                         profileDetails = it.profileDetails,
                         wallContent = it.wallContent
                     )
                 } else {
-                    ProfileScreenState.SuccessState.PrivateProfileState(
+                    ProfileScreenState.SuccessState.PrivateProfile(
                         profileDetails = it.profileDetails,
                     )
                 }
 
-                is ProfileResult.Failure -> ProfileScreenState.FailureState(
+                is ProfileResult.Failure -> ProfileScreenState.Failure(
                     error = it.toString()
                 )
 
                 is ProfileResult.EndOfWallPosts -> {
                     viewedAllPosts = true
 
-                    ProfileScreenState.SuccessState.ProfileWithWall.EndOfPostsState(
+                    ProfileScreenState.SuccessState.ProfileWithPublicAccessToWallState.EndOfPosts(
                         profileDetails = cachedProfileDetails,
                         wallContent = cachedPosts.toList()
                     )
                 }
 
                 is ProfileResult.Initial -> {
-                    ProfileScreenState.InitialState
+                    ProfileScreenState.Initial
                 }
             }
         }
         .onEach { state ->
-            if (state is ProfileScreenState.SuccessState.ProfileWithWall.FreeProfileState) {
+            if (state is ProfileScreenState.SuccessState.ProfileWithPublicAccessToWallState.Success) {
                 cachedPosts = state.wallContent
                 cachedProfileDetails = state.profileDetails
-            } else if (state is ProfileScreenState.SuccessState.PrivateProfileState) {
+            } else if (state is ProfileScreenState.SuccessState.PrivateProfile) {
                 cachedProfileDetails = state.profileDetails
             }
         }
         .onStart {
-            emit(ProfileScreenState.LoadingState)
+            emit(ProfileScreenState.Loading)
             delay(100)
         }
         .mergeWith(cachedDataFlow)
