@@ -1,5 +1,6 @@
 package com.voitov.vknewsclient.presentation.newsFeedScreen
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,8 +42,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -78,11 +82,55 @@ fun NewsFeedScreen(
 
     when (state) {
         is NewsFeedScreenContentState.OnPostLikeActionConfirmation -> {
-            LikeConfirmationDialog(post = state.post, viewModel = viewModel)
+            ConfirmationDialog(
+                title = {
+                    Text(text = stringResource(R.string.alert_title_changing_status_of_like))
+                },
+                text = {
+                    Text(text = stringResource(R.string.alert_agreement_text_change_like))
+                },
+                confirmation = {
+                    Text(stringResource(R.string.confirm), color = MaterialTheme.colors.onPrimary)
+                },
+                dismissing = {
+                    Text(stringResource(R.string.dismiss), color = MaterialTheme.colors.onPrimary)
+                },
+                onDismissRequest = {
+                    viewModel.dismiss()
+                },
+                onConfirmationButtonClicked = {
+                    viewModel.changeLikeStatus(state.post)
+                },
+                onDismissButtonClicked = {
+                    viewModel.dismiss()
+                }
+            )
         }
 
         is NewsFeedScreenContentState.OnEndToStartActionConfirmation -> {
-            IgnoreConfirmationDialog(post = state.post, viewModel = viewModel)
+            ConfirmationDialog(
+                confirmation = {
+                    Text(stringResource(R.string.confirm), color = MaterialTheme.colors.onPrimary)
+                },
+                dismissing = {
+                    Text(stringResource(R.string.dismiss), color = MaterialTheme.colors.onPrimary)
+                },
+                title = {
+                    Text(text = stringResource(R.string.alert_title_ignore_the_post))
+                },
+                text = {
+                    Text(text = stringResource(R.string.alert_switching_post_to_ignored_state))
+                },
+                onDismissRequest = {
+                    viewModel.dismiss()
+                },
+                onConfirmationButtonClicked = {
+                    viewModel.ignoreItem(state.post)
+                },
+                onDismissButtonClicked = {
+                    viewModel.dismiss()
+                }
+            )
         }
 
         is NewsFeedScreenContentState.OnStartToEndActionConfirmation -> {
@@ -92,9 +140,41 @@ fun NewsFeedScreen(
         }
 
         is NewsFeedScreenContentState.OnPostShareActionConfirmation -> {
-            ShareConfirmationDialog(post = state.post, viewModel = viewModel)
+            viewModel.dismiss()
+            ConfirmationDialog(
+                confirmation = {
+                    Text(stringResource(R.string.confirm), color = MaterialTheme.colors.onPrimary)
+                },
+                dismissing = {
+                    Text(stringResource(R.string.dismiss), color = MaterialTheme.colors.onPrimary)
+                },
+                title = {
+                    Text(text = stringResource(R.string.alert_title_changing_share_status))
+                },
+                text = {
+                    Text(text = stringResource(R.string.alert_agreement_on_sharing_post))
+                },
+                onDismissRequest = { viewModel.dismiss() },
+                onConfirmationButtonClicked = {
+                    viewModel.share(state.post)
+                },
+                onDismissButtonClicked = {
+                    viewModel.dismiss()
+                }
+            )
         }
-        else -> {}
+
+        is NewsFeedScreenContentState.OnEndOfPosts -> {
+            Toast.makeText(
+                LocalContext.current,
+                stringResource(R.string.you_ve_viewed_all_the_posts),
+                Toast.LENGTH_LONG
+            ).show()
+        }
+
+        else -> {
+
+        }
     }
 
     NewsFeedScreenContent(
@@ -231,94 +311,44 @@ private fun NewsFeedScreenContent(
 }
 
 @Composable
-private fun LikeConfirmationDialog(post: PostItem, viewModel: NewsFeedScreenViewModel) {
+private fun ConfirmationDialog(
+    confirmation: @Composable RowScope.() -> Unit,
+    dismissing: @Composable RowScope.() -> Unit,
+    title: @Composable () -> Unit,
+    text: @Composable () -> Unit,
+    onDismissRequest: () -> Unit,
+    onConfirmationButtonClicked: () -> Unit,
+    onDismissButtonClicked: () -> Unit,
+) {
     AlertDialog(
         onDismissRequest = {
-            viewModel.dismiss()
+            onDismissRequest()
         },
         confirmButton = {
             TextButton(onClick = {
-                viewModel.changeLikeStatus(post)
+                onConfirmationButtonClicked()
             }) {
-                Text("Confirm", color = MaterialTheme.colors.onPrimary)
+                confirmation()
             }
         },
         dismissButton = {
             TextButton(onClick = {
-                viewModel.dismiss()
+                onDismissButtonClicked()
             }) {
-                Text("Dismiss", color = MaterialTheme.colors.onPrimary)
+                dismissing()
             }
         },
         title = {
-            Text(text = "Changing status of like")
+            title()
         },
         text = {
-            Text(text = "Do you agree to change the status of like?")
+            text()
         }
     )
 }
 
 @Composable
-private fun ShareConfirmationDialog(post: PostItem, viewModel: NewsFeedScreenViewModel) {
-    AlertDialog(
-        onDismissRequest = {
-            viewModel.dismiss()
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                viewModel.share(post)
-            }) {
-                Text("Confirm", color = MaterialTheme.colors.onPrimary)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = {
-                viewModel.dismiss()
-            }) {
-                Text("Dismiss", color = MaterialTheme.colors.onPrimary)
-            }
-        },
-        title = {
-            Text(text = "Changing status of repost")
-        },
-        text = {
-            Text(text = "Do you agree to share this post?")
-        }
-    )
-}
-
-@Composable
-private fun IgnoreConfirmationDialog(post: PostItem, viewModel: NewsFeedScreenViewModel) {
-    AlertDialog(
-        onDismissRequest = {
-            viewModel.dismiss()
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                viewModel.ignoreItem(post)
-            }) {
-                Text("Confirm", color = MaterialTheme.colors.onPrimary)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = {
-                viewModel.dismiss()
-            }) {
-                Text("Dismiss", color = MaterialTheme.colors.onPrimary)
-            }
-        },
-        title = {
-            Text(text = "Do you want to now see this posts in the future?")
-        },
-        text = {
-            Text(text = "Do you agree to ignore the post?")
-        }
-    )
-}
-
-@Composable
-fun CachePostIncludingTagPopUp(
+private fun CachePostIncludingTagPopUp(
     viewModel: NewsFeedScreenViewModel,
     onButtonClickListener: (ItemTag) -> Unit
 ) {
@@ -341,7 +371,7 @@ fun CachePostIncludingTagPopUp(
                 modifier = Modifier.padding(32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "Select tags you want to associate to this post")
+                Text(text = stringResource(R.string.alert_select_tags), textAlign = TextAlign.Center)
                 Spacer(modifier = Modifier.height(16.dp))
                 val tagsState = viewModel.tagsFlow.collectAsState(initial = TagsTabState.Loading)
 
@@ -366,7 +396,7 @@ fun CachePostIncludingTagPopUp(
                         viewModel.dismiss()
                     }
                 }) {
-                    Text(text = "Cache the post")
+                    Text(text = stringResource(R.string.cache_the_post))
                 }
             }
         }
@@ -386,11 +416,10 @@ private fun Tags(
         maxItemsInEachRow = 7
     ) {
         val currentlySelectedTag = remember {
-            mutableStateOf(ItemTag("default"))
+            mutableStateOf(ItemTag(DEFAULT))
         }
 
         state.forEach { itemTag ->
-            //val selected = remember { mutableStateOf(false) }
             Box(modifier = Modifier.padding(vertical = 4.dp)) {
                 IconedChip(
                     enabled = true,
@@ -411,6 +440,8 @@ private fun Tags(
     }
 }
 
+private const val DEFAULT = "default"
+
 private class WindowCenterOffsetPositionProvider(
     private val x: Int = 0,
     private val y: Int = 0
@@ -423,7 +454,7 @@ private class WindowCenterOffsetPositionProvider(
     ): IntOffset {
         return IntOffset(
             (windowSize.width - popupContentSize.width) / 2 + x,
-            (windowSize.height - popupContentSize.height) / 2 + y
+            (windowSize.height - popupContentSize.height) - 96 + y
         )
     }
 }

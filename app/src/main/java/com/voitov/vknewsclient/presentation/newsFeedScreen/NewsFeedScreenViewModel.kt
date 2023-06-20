@@ -70,7 +70,13 @@ class NewsFeedScreenViewModel @Inject constructor(
                     posts = feedLoadResult.posts,
                     isDataBeingLoaded = false
                 )
-
+                is NewsFeedResult.EndOfNewsFeed -> {
+                    confirmationEvents.emit(NewsFeedScreenContentState.OnEndOfPosts)
+                    NewsFeedScreenState.ShowingPostsState(
+                        posts = previousPosts,
+                        isDataBeingLoaded = false
+                    )
+                }
                 else -> throw IllegalStateException("Unexpected type: $feedLoadResult")
             } as NewsFeedScreenState
         }

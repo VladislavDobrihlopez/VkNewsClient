@@ -1,7 +1,6 @@
 package com.voitov.vknewsclient.presentation.favoritePostsScreen
 
 import android.os.Build
-import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -51,6 +50,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -60,10 +60,10 @@ import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.entities.ItemTag
 import com.voitov.vknewsclient.domain.entities.TaggedPostItem
 import com.voitov.vknewsclient.getApplicationComponent
-import com.voitov.vknewsclient.presentation.reusableUIs.PostCard
-import com.voitov.vknewsclient.presentation.reusableUIs.PostFeedback
 import com.voitov.vknewsclient.presentation.reusableUIs.IconedChip
 import com.voitov.vknewsclient.presentation.reusableUIs.LoadingGoingOn
+import com.voitov.vknewsclient.presentation.reusableUIs.PostCard
+import com.voitov.vknewsclient.presentation.reusableUIs.PostFeedback
 import com.voitov.vknewsclient.ui.theme.Shapes
 import com.voitov.vknewsclient.ui.theme.TransparentGreen
 import com.voitov.vknewsclient.ui.theme.TransparentRed
@@ -202,7 +202,7 @@ private fun Tags(state: TagsTabState.Success, viewModel: FavoritesViewModel) {
         viewModel.retrievePosts(newItems)
     }
 
-    ShowToast(itemTags = currentItems.value)
+    //ShowToast(itemTags = currentItems.value)
 }
 
 @Composable
@@ -210,7 +210,6 @@ private fun TagsStorageManager(
     onAddNewTagListener: () -> Unit,
     onRemoveTagListener: () -> Unit
 ) {
-    Log.d("TEST_COMPOSITION", "Tags storage manager")
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceAround,
@@ -222,7 +221,7 @@ private fun TagsStorageManager(
                 onAddNewTagListener()
             }
         ) {
-            Text("Add a new tag")
+            Text(stringResource(R.string.add_a_new_tag))
         }
         Button(
             colors = ButtonDefaults.buttonColors(contentColor = TransparentRed),
@@ -230,7 +229,7 @@ private fun TagsStorageManager(
                 onRemoveTagListener()
             }
         ) {
-            Text("Delete a tag")
+            Text(stringResource(R.string.delete_a_tag))
         }
     }
 }
@@ -247,26 +246,32 @@ private fun NewTagAdditionDialog(viewModel: FavoritesViewModel) {
             TextButton(onClick = {
                 viewModel.saveTag(consideringTagName.value)
             }) {
-                Text("Confirm", color = MaterialTheme.colors.onPrimary)
+                Text(stringResource(id = R.string.confirm), color = MaterialTheme.colors.onPrimary)
             }
         },
         dismissButton = {
             TextButton(onClick = {
                 viewModel.dismissToAddNewTags()
             }) {
-                Text("Dismiss", color = MaterialTheme.colors.onPrimary)
+                Text(stringResource(id = R.string.dismiss), color = MaterialTheme.colors.onPrimary)
             }
         },
         title = {
-            Text(text = "Adding a new tag")
+            Text(
+                text = stringResource(R.string.creating_a_new_tag)
+            )
         },
         text = {
-            TextField(
-                modifier = Modifier.padding(8.dp),
-                value = consideringTagName.value,
-                textStyle = TextStyle(fontSize = 18.sp),
-                onValueChange = { newText -> consideringTagName.value = newText }
-            )
+            Box(
+                modifier = Modifier.padding(vertical = 16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                TextField(
+                    value = consideringTagName.value,
+                    textStyle = TextStyle(fontSize = 18.sp),
+                    onValueChange = { newText -> consideringTagName.value = newText }
+                )
+            }
         }
     )
 }
@@ -283,22 +288,22 @@ private fun RemoveTagDialog(itemTags: List<ItemTag>, viewModel: FavoritesViewMod
             TextButton(onClick = {
                 viewModel.removeTag(consideringTagForRemoving.value)
             }) {
-                Text("Confirm", color = MaterialTheme.colors.onPrimary)
+                Text(stringResource(id = R.string.confirm), color = MaterialTheme.colors.onPrimary)
             }
         },
         dismissButton = {
             TextButton(onClick = {
                 viewModel.dismissToAddNewTags()
             }) {
-                Text("Dismiss", color = MaterialTheme.colors.onPrimary)
+                Text(stringResource(id = R.string.dismiss), color = MaterialTheme.colors.onPrimary)
             }
         },
         title = {
-            Text(text = "Removing a tag")
+            Text(text = stringResource(R.string.removing_a_tag))
         },
         text = {
             Column(modifier = Modifier.padding(8.dp)) {
-                Text("Select the tag you want to remove")
+                Text(stringResource(R.string.select_the_tag_you_want_to_remove))
                 Spacer(modifier = Modifier.padding(vertical = 8.dp))
                 TagsList(itemTags) {
                     consideringTagForRemoving.value = it
@@ -325,7 +330,6 @@ private fun TagsList(
         }
 
         itemTags.forEach { itemTag ->
-            //val selected = remember { mutableStateOf(false) }
             Box(modifier = Modifier.padding(vertical = 4.dp)) {
                 IconedChip(
                     enabled = true,
@@ -425,21 +429,21 @@ private fun RemoveFromCacheConfirmationDialog(
             TextButton(onClick = {
                 viewModel.removeCachedPost(taggedPost)
             }) {
-                Text("Confirm", color = MaterialTheme.colors.onPrimary)
+                Text(stringResource(id = R.string.confirm), color = MaterialTheme.colors.onPrimary)
             }
         },
         dismissButton = {
             TextButton(onClick = {
                 viewModel.dismissToRemovePost()
             }) {
-                Text("Dismiss", color = MaterialTheme.colors.onPrimary)
+                Text(stringResource(id = R.string.dismiss), color = MaterialTheme.colors.onPrimary)
             }
         },
         title = {
-            Text(text = "Removing cached post ${taggedPost.postItem.id}")
+            Text(text = stringResource(R.string.removing_cached_post) + "${taggedPost.postItem.id}")
         },
         text = {
-            Text(text = "Do you agree to remove the post from cache?")
+            Text(text = stringResource(R.string.do_you_agree_to_remove_the_post_from_cache))
         }
     )
 }
@@ -455,7 +459,7 @@ private fun DismissedPostBackground() {
             .padding(all = 16.dp),
         contentAlignment = Alignment.CenterEnd
     ) {
-        Text(text = "Delete item", color = Color.White, fontSize = 16.sp)
+        Text(text = stringResource(R.string.delete_item), color = Color.White, fontSize = 16.sp)
     }
 }
 

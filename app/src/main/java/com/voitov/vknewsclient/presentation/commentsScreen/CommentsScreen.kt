@@ -24,9 +24,11 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.entities.PostCommentItem
 import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.getApplicationComponent
@@ -71,13 +73,10 @@ private fun CommentsScreenContent(
 ) {
     when (val currentState = state.value) {
         is CommentsScreenState.LoadingState -> {
-            Log.d("TEST_COMMENTS_SCREEN", "view: loading")
             CommentsScreenOnDataBeingLoaded(onBackPressed)
         }
 
         CommentsScreenState.InitialState -> {
-            Log.d("TEST_COMMENTS_SCREEN", "view: initial")
-
             CommentsScreenOnDataBeingLoaded(onBackPressed)
         }
 
@@ -103,7 +102,7 @@ private fun CommentsScreenContent(
                 is CommentsScreenState.DisplayCommentsState.CachedVersionState.EndOfCommentsState -> {
                     Toast.makeText(
                         LocalContext.current,
-                        "You have viewed all the comments",
+                        stringResource(R.string.you_have_viewed_all_the_comments),
                         Toast.LENGTH_LONG
                     ).show()
                 }
@@ -148,10 +147,10 @@ fun CommentsScreenOnViewState(
                 onBackPressed = onBackPressed
             )
         }
-    ) {
+    ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
-                .padding(it)
+                .padding(paddingValues)
                 .padding(vertical = 16.dp, horizontal = 8.dp)
                 .padding(bottom = 56.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -186,12 +185,12 @@ fun CommentsScreenTopAppBar(
 ) {
     TopAppBar(
         modifier = modifier,
-        title = { Text(text = "Comments post: $feedPostName") },
+        title = { Text(text = stringResource(R.string.comments_post) + feedPostName) },
         navigationIcon = {
             IconButton(onClick = { onBackPressed() }) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = "navigate back"
+                    contentDescription = stringResource(R.string.content_description_navigate_back)
                 )
             }
         }

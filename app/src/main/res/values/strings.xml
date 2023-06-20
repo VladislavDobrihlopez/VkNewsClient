@@ -10,7 +10,7 @@
     <string name="troubles_with_the_internet">Troubles with the internet</string>
     <string name="sign_in">Auth</string>
     <string name="try_reconnecting">Try reconnecting</string>
-    <string name="all_the_posts_are_viewed">All the posts are viewed</string>
+    <string name="all_the_posts_are_viewed">You\'ve viewed all the posts</string>
     <string name="profile_private_info">This profile is private. Add them as a friend to see their posts, photos and other content</string>
     <string name="content_description_community_thumbnail">community thumbnail</string>
     <string name="more_details">More details</string>
@@ -24,4 +24,27 @@
     <string name="country">Country</string>
     <string name="city">City</string>
     <string name="gifts">Gifts</string>
+    <string name="alert_title_changing_status_of_like">Changing the like status</string>
+    <string name="alert_agreement_text_change_like">Do you agree to change the status of the like to the opposite?</string>
+    <string name="confirm">Confirm</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="alert_agreement_on_sharing_post">Do you agree to share this post?</string>
+    <string name="alert_title_changing_share_status">Changing share status</string>
+    <string name="alert_title_ignore_the_post">Ignore the post</string>
+    <string name="alert_switching_post_to_ignored_state">Do you agree to ignore the post?</string>
+    <string name="alert_select_tags">Select tags you want to associate to this post</string>
+    <string name="cache_the_post">Cache the post</string>
+    <string name="you_ve_viewed_all_the_posts">You\'ve viewed all the posts</string>
+    <string name="you_have_viewed_all_the_comments">You have viewed all the comments</string>
+    <string name="comments_post">"Comments post: "</string>
+    <string name="content_description_navigate_back">navigate back</string>
+    <string name="content_description_image">commentator\'s image</string>
+    <string name="add_a_new_tag">Add a new tag</string>
+    <string name="delete_a_tag">Delete a tag</string>
+    <string name="creating_a_new_tag">Creating a new tag</string>
+    <string name="removing_a_tag">Removing a tag</string>
+    <string name="select_the_tag_you_want_to_remove">Select the tag you want to remove</string>
+    <string name="removing_cached_post">"Removing cached post "</string>
+    <string name="do_you_agree_to_remove_the_post_from_cache">Do you agree to remove the post from cache?</string>
+    <string name="delete_item">Delete item</string>
 </resources>

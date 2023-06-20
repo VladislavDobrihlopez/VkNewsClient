@@ -22,4 +22,27 @@
     <string name="country">Страна</string>
     <string name="city">Город</string>
     <string name="gifts">Подарки</string>
+    <string name="alert_title_changing_status_of_like">Подтверждение лайка</string>
+    <string name="alert_agreement_text_change_like">Вы собираетесь осуществить изменение статуса лайка</string>
+    <string name="confirm">Подтвердить</string>
+    <string name="dismiss">Отклонить</string>
+    <string name="alert_agreement_on_sharing_post">Вы намереваетесь сделать репост записи</string>
+    <string name="alert_title_changing_share_status">Подтверждение репоста</string>
+    <string name="alert_title_ignore_the_post">Игнорирование поста</string>
+    <string name="alert_switching_post_to_ignored_state">Данный пост будет игнорироваться в дальнейшем</string>
+    <string name="alert_select_tags">Выберите тег для присваивания данному посту</string>
+    <string name="cache_the_post">Кешировать</string>
+    <string name="you_ve_viewed_all_the_posts">Все посты просмотрены</string>
+    <string name="you_have_viewed_all_the_comments">Все комментарии просмотрены</string>
+    <string name="comments_post">Комменты к посту:</string>
+    <string name="content_description_navigate_back">Обратно</string>
+    <string name="content_description_image">Изображение комментатора</string>
+    <string name="add_a_new_tag">Добавить тег</string>
+    <string name="delete_a_tag">Удалить тег</string>
+    <string name="creating_a_new_tag">Создание нового тега</string>
+    <string name="removing_a_tag">Удаление тега</string>
+    <string name="select_the_tag_you_want_to_remove">Выберите тег для удаления</string>
+    <string name="removing_cached_post">Удаление закешированного поста</string>
+    <string name="do_you_agree_to_remove_the_post_from_cache">Вы намереваетесь удалить пост из логкального хранилища</string>
+    <string name="delete_item">Удалить</string>
 </resources>

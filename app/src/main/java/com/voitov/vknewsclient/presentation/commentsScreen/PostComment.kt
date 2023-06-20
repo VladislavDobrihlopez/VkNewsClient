@@ -1,7 +1,11 @@
 package com.voitov.vknewsclient.presentation.commentsScreen
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -9,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,7 +36,7 @@ fun Comment(
                 .clip(CircleShape)
                 .size(35.dp),
             model = item.avatarImageUrl,
-            contentDescription = "image"
+            contentDescription = stringResource(R.string.content_description_image)
         )
         Column(
             modifier = Modifier
@@ -64,37 +69,3 @@ fun Comment(
         }
     }
 }
-
-//@Preview
-//@Composable
-//private fun PreviewCommentDarkTheme() {
-//    VkNewsClientTheme(darkTheme = true) {
-//        Card {
-//            Comment(
-//                item = PostCommentItem(
-//                    id = 1,
-//                    postId = 1,
-//                    authorId = 1,
-//                    text = "somethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomething"
-//                )
-//            )
-//        }
-//    }
-//}
-//
-//@Preview
-//@Composable
-//private fun PreviewCommentLightTheme() {
-//    VkNewsClientTheme(darkTheme = false) {
-//        Card {
-//            Comment(
-//                item = PostCommentItem(
-//                    id = 1,
-//                    postId = 1,
-//                    authorId = 1,
-//                    text = "somethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomethingsomething"
-//                )
-//            )
-//        }
-//    }
-//}
