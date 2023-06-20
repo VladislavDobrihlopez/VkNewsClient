@@ -63,6 +63,7 @@ import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Velocity
@@ -89,7 +90,6 @@ import com.voitov.vknewsclient.ui.theme.Shapes
 import kotlinx.coroutines.launch
 
 private enum class SwipingStates {
-    //our own enum class for stoppages e.g. expanded and collapsed
     EXPANDED,
     COLLAPSED
 }
@@ -129,8 +129,11 @@ fun ProfileScreenContent(state: State<ProfileScreenState>, onEndOfWallPosts: () 
                         onEndOfWallPosts()
                     }
                     if (screenState is ProfileScreenState.SuccessState.ProfileWithPublicAccessToWallState.EndOfPosts) {
-                        Toast.makeText(LocalContext.current, "that's all", Toast.LENGTH_SHORT)
-                            .show()
+                        Toast.makeText(
+                            LocalContext.current,
+                            stringResource(R.string.all_the_posts_are_viewed),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 } else if (screenState is ProfileScreenState.SuccessState.PrivateProfile) {
                     UnavailableAsNoAccess(modifier = Modifier.fillMaxSize())
@@ -153,7 +156,9 @@ fun ProfileScreenContent(state: State<ProfileScreenState>, onEndOfWallPosts: () 
 @Composable
 private fun Failure(errorMessage: String) {
     Text(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(all = 8.dp),
         textAlign = TextAlign.Center,
         text = errorMessage
     )
@@ -169,13 +174,13 @@ private fun UnavailableAsNoAccess(modifier: Modifier = Modifier) {
         ) {
             Text(
                 textAlign = TextAlign.Center,
-                text = "This profile is private. Add them as a friend to see their posts, photos and other content"
+                text = stringResource(R.string.profile_private_info)
             )
             Spacer(modifier = Modifier.padding(vertical = 8.dp))
             Icon(
                 modifier = Modifier.size(36.dp),
                 imageVector = Icons.Default.Lock,
-                contentDescription = null
+                contentDescription = stringResource(R.string.content_description_access_denied)
             )
         }
     }
@@ -247,7 +252,7 @@ private fun Profile(
                         state = swipingState,
                         thresholds = { stateFrom, stateTo ->
                             if (stateFrom == SwipingStates.COLLAPSED) {
-                                FractionalThreshold(0.75f)//it can be 0.5 in general
+                                FractionalThreshold(0.75f)
                             } else {
                                 FractionalThreshold(0.15f)
                             }
@@ -261,7 +266,7 @@ private fun Profile(
                     .nestedScroll(nestedScrollConnection)
             ) {
                 Log.d("TEST_MOTION", "box recomposition")
-                val computedProgress = remember {//progress value will be decided as par state
+                val computedProgress = remember {
                     derivedStateOf {
                         if (swipingState.progress.to == SwipingStates.COLLAPSED) {
                             swipingState.progress.fraction
@@ -338,7 +343,7 @@ private fun PostFeed(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Repeat,
-                                        contentDescription = null
+                                        contentDescription = stringResource(R.string.content_description_posted_by_another_group)
                                     )
                                     Spacer(modifier = Modifier.padding(horizontal = 4.dp))
                                     AsyncImage(
@@ -346,7 +351,7 @@ private fun PostFeed(
                                         modifier = Modifier
                                             .clip(CircleShape)
                                             .size(25.dp),
-                                        contentDescription = "community thumbnail"
+                                        contentDescription = stringResource(R.string.content_description_community_thumbnail)
                                     )
                                     Spacer(modifier = Modifier.padding(all = 4.dp))
                                     Column(
@@ -433,7 +438,7 @@ private fun UserProfile(
                 .aspectRatio(3f / 1f),
             contentScale = ContentScale.FillBounds,
             //placeholder = painterResource(id = R.drawable.test_cover),
-            contentDescription = null
+            contentDescription = stringResource(R.string.content_description_profile_cover)
         )
         Divider(
             modifier = Modifier.layoutId("divider"),
@@ -451,7 +456,7 @@ private fun UserProfile(
                     shape = CircleShape
                 )
                 .layoutId("profile_picture"),
-            contentDescription = null
+            contentDescription = stringResource(R.string.content_description_owner_photo)
         )
 
         Text(
@@ -491,13 +496,13 @@ private fun UserProfile(
 
                 onClick = { onDetailsClicked() }) {
                 Text(
-                    text = "See details",
+                    text = stringResource(R.string.more_details),
                     color = if (isSystemInDarkTheme()) CoolWhite else CoolBlack,
                 )
                 Spacer(modifier = Modifier.padding(horizontal = 2.dp))
                 Icon(
                     imageVector = Icons.Default.Info,
-                    contentDescription = null,
+                    contentDescription = stringResource(R.string.content_description_profiles_owner_info),
                     tint = if (isSystemInDarkTheme()) Color.White else CoolBlack
                 )
             }
@@ -538,7 +543,10 @@ private fun ShortenedProfileLink(link: String) {
     ) {
         Icon(imageVector = Icons.Default.Search, contentDescription = null)
         Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-        Text(modifier = Modifier.weight(1f), text = "Short_link: @${link}")
+        Text(
+            modifier = Modifier.weight(1f),
+            text = stringResource(R.string.short_link) + ": @${link}"
+        )
     }
 }
 
@@ -551,7 +559,7 @@ private fun Birthday(date: String) {
     ) {
         Icon(imageVector = Icons.Default.Cake, contentDescription = null)
         Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-        Text(modifier = Modifier.weight(1f), text = "Birthday: ${date}")
+        Text(modifier = Modifier.weight(1f), text = stringResource(R.string.birthday) + ": $date")
     }
 }
 
@@ -564,7 +572,7 @@ private fun CountryName(name: String) {
     ) {
         Icon(imageVector = Icons.Default.Flag, contentDescription = null)
         Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-        Text(modifier = Modifier.weight(1f), text = "Country: $name")
+        Text(modifier = Modifier.weight(1f), text = stringResource(R.string.country) + ": $name")
     }
 }
 
@@ -577,7 +585,7 @@ private fun CityName(name: String) {
     ) {
         Icon(imageVector = Icons.Default.LocationCity, contentDescription = null)
         Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-        Text(modifier = Modifier.weight(1f), text = "City: $name")
+        Text(modifier = Modifier.weight(1f), text = stringResource(R.string.city) + ": $name")
     }
 }
 
@@ -590,6 +598,6 @@ private fun Gifts(count: Int) {
     ) {
         Icon(imageVector = Icons.Default.CardGiftcard, contentDescription = null)
         Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-        Text(modifier = Modifier.weight(1f), text = "Gifts: ${count}")
+        Text(modifier = Modifier.weight(1f), text = stringResource(R.string.gifts) + ": $count")
     }
 }

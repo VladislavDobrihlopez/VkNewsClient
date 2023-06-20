@@ -33,14 +33,14 @@ class ProfileRepositoryImpl @Inject constructor(
     private var currentUser: ProfileAuthor = ProfileAuthor.Me
     private var signedInUserProfileInfo: ProfileDataDto? = null
 
-    private var _cachedWallPosts = mutableListOf<WallPostDto>()
+    private var _cachedWallPosts = HashSet<WallPostDto>()
     private val cachedWallPosts
         get() = _cachedWallPosts.toList()
 
-    private val _cachedGroupInfo = mutableListOf<GroupInfoDto>()
+    private val _cachedGroupInfo = HashSet<GroupInfoDto>()
     private val cachedGroupInfo
         get() = _cachedGroupInfo.toList()
-    private val _cachedProfile = mutableListOf<ProfileDto>()
+    private val _cachedProfile = HashSet<ProfileDto>()
     private val cachedProfile
         get() = _cachedProfile.toList()
 
@@ -80,7 +80,7 @@ class ProfileRepositoryImpl @Inject constructor(
                     )
                     return@collect
                 } else if (retrievedChunkOfWall.posts.isEmpty()) {
-                    emit(ProfileResult.EndOfWallPosts)
+                    emit(ProfileResult.EndOfWallPosts(mapper.mapDtoToEntities(retrievedProfileDetailsDto)))
                     return@collect
                 } else {
                     nextPostsOffset += retrievedChunkOfWall.posts.count()

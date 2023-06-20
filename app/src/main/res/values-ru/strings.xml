@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bottom_navigation_item_home">Главная</string>
+    <string name="bottom_navigation_item_favorite">Избранное</string>
+    <string name="bottom_navigation_item_profile">Профиль</string>
+    <string name="bookmark">Добавление поста в избранное</string>
+    <string name="trash_post">Не показывайте больше</string>
+    <string name="troubles_with_the_internet">Возникли проблемы с интернетом</string>
+    <string name="sign_in">Авторизация</string>
+    <string name="try_reconnecting">Переподключиться</string>
+    <string name="all_the_posts_are_viewed">Все посты просмотрены</string>
+    <string name="profile_private_info">Данный профиль приватный. Добавьте владельца в друзья, чтобы видеть его посты, фотки и другую информацию</string>
+    <string name="content_description_community_thumbnail">Значок сообщества</string>
+    <string name="more_details">Подробнее</string>
+    <string name="content_description_access_denied">Вам неразрешено читать данный профиль из-за настроек приватности владельца страницы</string>
+    <string name="content_description_posted_by_another_group">Перерепост от другой группы</string>
+    <string name="content_description_profile_cover">Обложка профиля</string>
+    <string name="content_description_owner_photo">Фото владельца профиля</string>
+    <string name="content_description_profiles_owner_info">Информация владельца профиля</string>
+    <string name="short_link">Адрес</string>
+    <string name="birthday">День рождения</string>
+    <string name="country">Страна</string>
+    <string name="city">Город</string>
+    <string name="gifts">Подарки</string>
+</resources>

@@ -26,14 +26,14 @@ class ProfileViewModel @Inject constructor(
 ) : ViewModel() {
     private var viewedAllPosts = false
     private lateinit var cachedProfileDetails: Profile
-    private lateinit var cachedPosts: List<WallPost>
+    private var cachedPosts: List<WallPost>? = null
     private val eventContainer = MutableSharedFlow<Unit>()
     private val cachedDataFlow = flow {
         eventContainer.collect {
             emit(
                 ProfileScreenState.SuccessState.ProfileWithPublicAccessToWallState.Success(
                     profileDetails = cachedProfileDetails,
-                    wallContent = cachedPosts,
+                    wallContent = cachedPosts ?: throw IllegalStateException(),
                     isDataBeingLoaded = true
                 )
             )
@@ -61,10 +61,18 @@ class ProfileViewModel @Inject constructor(
                 is ProfileResult.EndOfWallPosts -> {
                     viewedAllPosts = true
 
-                    ProfileScreenState.SuccessState.ProfileWithPublicAccessToWallState.EndOfPosts(
-                        profileDetails = cachedProfileDetails,
-                        wallContent = cachedPosts.toList()
-                    )
+                    val currentCache = cachedPosts
+                    if (currentCache == null) { // in case of empty wall and public access
+                        ProfileScreenState.SuccessState.ProfileWithPublicAccessToWallState.EndOfPosts(
+                            profileDetails = it.profileDetails,
+                            wallContent = listOf()
+                        )
+                    } else {
+                        ProfileScreenState.SuccessState.ProfileWithPublicAccessToWallState.EndOfPosts(
+                            profileDetails = cachedProfileDetails,
+                            wallContent = currentCache
+                        )
+                    }
                 }
 
                 is ProfileResult.Initial -> {
@@ -73,11 +81,22 @@ class ProfileViewModel @Inject constructor(
             }
         }
         .onEach { state ->
-            if (state is ProfileScreenState.SuccessState.ProfileWithPublicAccessToWallState.Success) {
-                cachedPosts = state.wallContent
-                cachedProfileDetails = state.profileDetails
-            } else if (state is ProfileScreenState.SuccessState.PrivateProfile) {
-                cachedProfileDetails = state.profileDetails
+            when (state) {
+                is ProfileScreenState.SuccessState.ProfileWithPublicAccessToWallState.Success -> {
+                    cachedPosts = state.wallContent
+                    cachedProfileDetails = state.profileDetails
+                }
+
+                is ProfileScreenState.SuccessState.PrivateProfile -> {
+                    cachedProfileDetails = state.profileDetails
+                }
+
+                is ProfileScreenState.SuccessState.ProfileWithPublicAccessToWallState.EndOfPosts -> {
+                    cachedPosts = state.wallContent
+                    cachedProfileDetails = state.profileDetails
+                }
+
+                else -> {}
             }
         }
         .onStart {
