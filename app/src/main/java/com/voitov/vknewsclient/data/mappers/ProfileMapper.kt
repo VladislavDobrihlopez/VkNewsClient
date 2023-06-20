@@ -27,7 +27,9 @@ class ProfileMapper @Inject constructor() {
             birthday = dto?.birthday,
             photoMaxUrl = dto.photoMaxUrl,
             about = dto?.about ?: "",
-            followersCount = dto.followersCount,
+            followersCount = dto.counters.followers,
+            friendsCount = dto.counters.friends,
+            giftsCount = dto.counters.gifts,
             isOnline = dto.isOnline,
             cityName = dto.city?.name,
             countryName = dto.country?.title,
@@ -63,7 +65,9 @@ class ProfileMapper @Inject constructor() {
                 postType = post.type,
                 contentText = post.text,
                 date = mapTimestampToDatePattern(post.secondsSince1970),
-                contentImageUrl = post.attachments?.map { it.photo?.photos?.lastOrNull()?.url ?: "" }
+                contentImageUrl = post.attachments?.map {
+                    it.photo?.photos?.lastOrNull()?.url ?: ""
+                }
                     ?: listOf(),
                 isLikedByUser = post.likes.userLikes == LIKED,
                 isSharedByUser = post.reposts.userShares == SHARED,

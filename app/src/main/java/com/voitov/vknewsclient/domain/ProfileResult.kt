@@ -9,6 +9,6 @@ sealed class ProfileResult {
 
     data class Failure(val ex: Throwable) : ProfileResult()
 
-    object EndOfWallPosts : ProfileResult()
+    data class EndOfWallPosts(val profileDetails: Profile) : ProfileResult()
     object Initial : ProfileResult()
 }

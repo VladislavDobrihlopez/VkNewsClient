@@ -33,6 +33,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cake
+import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationCity
@@ -62,6 +63,7 @@ import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Velocity
@@ -88,7 +90,6 @@ import com.voitov.vknewsclient.ui.theme.Shapes
 import kotlinx.coroutines.launch
 
 private enum class SwipingStates {
-    //our own enum class for stoppages e.g. expanded and collapsed
     EXPANDED,
     COLLAPSED
 }
@@ -107,7 +108,7 @@ fun ProfileScreen(author: ProfileAuthor) {
 
     val state =
         viewModel.profileFlow.collectAsState(
-            initial = ProfileScreenState.InitialState
+            initial = ProfileScreenState.Initial
         )
 
     ProfileScreenContent(state = state) {
@@ -123,25 +124,29 @@ fun ProfileScreenContent(state: State<ProfileScreenState>, onEndOfWallPosts: () 
             Profile(
                 profileInfo = screenState.profileDetails,
             ) {
-                if (screenState is ProfileScreenState.SuccessState.ProfileWithWall) {
+                if (screenState is ProfileScreenState.SuccessState.ProfileWithPublicAccessToWallState) {
                     PostFeed(content = screenState.wallContent, screenState.isDataBeingLoaded) {
                         onEndOfWallPosts()
                     }
-                    if (screenState is ProfileScreenState.SuccessState.ProfileWithWall.EndOfPostsState) {
-                        Toast.makeText(LocalContext.current, "that's all", Toast.LENGTH_SHORT).show()
+                    if (screenState is ProfileScreenState.SuccessState.ProfileWithPublicAccessToWallState.EndOfPosts) {
+                        Toast.makeText(
+                            LocalContext.current,
+                            stringResource(R.string.all_the_posts_are_viewed),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
-                } else if (screenState is ProfileScreenState.SuccessState.PrivateProfileState) {
+                } else if (screenState is ProfileScreenState.SuccessState.PrivateProfile) {
                     UnavailableAsNoAccess(modifier = Modifier.fillMaxSize())
                 }
             }
         }
 
-        is ProfileScreenState.FailureState -> Failure(errorMessage = screenState.error)
-        is ProfileScreenState.InitialState -> {
+        is ProfileScreenState.Failure -> Failure(errorMessage = screenState.error)
+        is ProfileScreenState.Initial -> {
             LoadingGoingOn(modifier = Modifier.padding(8.dp))
         }
 
-        ProfileScreenState.LoadingState -> {
+        ProfileScreenState.Loading -> {
             LoadingGoingOn(modifier = Modifier.padding(8.dp))
         }
     }
@@ -151,7 +156,9 @@ fun ProfileScreenContent(state: State<ProfileScreenState>, onEndOfWallPosts: () 
 @Composable
 private fun Failure(errorMessage: String) {
     Text(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(all = 8.dp),
         textAlign = TextAlign.Center,
         text = errorMessage
     )
@@ -167,13 +174,13 @@ private fun UnavailableAsNoAccess(modifier: Modifier = Modifier) {
         ) {
             Text(
                 textAlign = TextAlign.Center,
-                text = "This profile is private. Add them as a friend to see their posts, photos and other content"
+                text = stringResource(R.string.profile_private_info)
             )
             Spacer(modifier = Modifier.padding(vertical = 8.dp))
             Icon(
                 modifier = Modifier.size(36.dp),
                 imageVector = Icons.Default.Lock,
-                contentDescription = null
+                contentDescription = stringResource(R.string.content_description_access_denied)
             )
         }
     }
@@ -245,7 +252,7 @@ private fun Profile(
                         state = swipingState,
                         thresholds = { stateFrom, stateTo ->
                             if (stateFrom == SwipingStates.COLLAPSED) {
-                                FractionalThreshold(0.75f)//it can be 0.5 in general
+                                FractionalThreshold(0.75f)
                             } else {
                                 FractionalThreshold(0.15f)
                             }
@@ -259,7 +266,7 @@ private fun Profile(
                     .nestedScroll(nestedScrollConnection)
             ) {
                 Log.d("TEST_MOTION", "box recomposition")
-                val computedProgress = remember {//progress value will be decided as par state
+                val computedProgress = remember {
                     derivedStateOf {
                         if (swipingState.progress.to == SwipingStates.COLLAPSED) {
                             swipingState.progress.fraction
@@ -336,7 +343,7 @@ private fun PostFeed(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Repeat,
-                                        contentDescription = null
+                                        contentDescription = stringResource(R.string.content_description_posted_by_another_group)
                                     )
                                     Spacer(modifier = Modifier.padding(horizontal = 4.dp))
                                     AsyncImage(
@@ -344,7 +351,7 @@ private fun PostFeed(
                                         modifier = Modifier
                                             .clip(CircleShape)
                                             .size(25.dp),
-                                        contentDescription = "community thumbnail"
+                                        contentDescription = stringResource(R.string.content_description_community_thumbnail)
                                     )
                                     Spacer(modifier = Modifier.padding(all = 4.dp))
                                     Column(
@@ -431,7 +438,7 @@ private fun UserProfile(
                 .aspectRatio(3f / 1f),
             contentScale = ContentScale.FillBounds,
             //placeholder = painterResource(id = R.drawable.test_cover),
-            contentDescription = null
+            contentDescription = stringResource(R.string.content_description_profile_cover)
         )
         Divider(
             modifier = Modifier.layoutId("divider"),
@@ -449,7 +456,7 @@ private fun UserProfile(
                     shape = CircleShape
                 )
                 .layoutId("profile_picture"),
-            contentDescription = null
+            contentDescription = stringResource(R.string.content_description_owner_photo)
         )
 
         Text(
@@ -469,7 +476,7 @@ private fun UserProfile(
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Friends: 150",
+                    text = "Friends: ${profileInfo.friendsCount}",
                     color = if (isSystemInDarkTheme()) CoolWhite else CoolBlack,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
@@ -489,13 +496,13 @@ private fun UserProfile(
 
                 onClick = { onDetailsClicked() }) {
                 Text(
-                    text = "See details",
+                    text = stringResource(R.string.more_details),
                     color = if (isSystemInDarkTheme()) CoolWhite else CoolBlack,
                 )
                 Spacer(modifier = Modifier.padding(horizontal = 2.dp))
                 Icon(
                     imageVector = Icons.Default.Info,
-                    contentDescription = null,
+                    contentDescription = stringResource(R.string.content_description_profiles_owner_info),
                     tint = if (isSystemInDarkTheme()) Color.White else CoolBlack
                 )
             }
@@ -510,41 +517,87 @@ private fun ProfileDetails(profileInfo: Profile) {
             .padding(8.dp)
             .fillMaxSize()
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            Icon(imageVector = Icons.Default.Search, contentDescription = null)
-            Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-            Text(modifier = Modifier.weight(1f), text = "Short_link: @${profileInfo.shortenedLink}")
+
+        ShortenedProfileLink(link = profileInfo.shortenedLink)
+        with(profileInfo) {
+            birthday?.let {
+                Birthday(date = it)
+            }
+            countryName?.let {
+                CountryName(name = it)
+            }
+            cityName?.let {
+                CityName(name = it)
+            }
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            Icon(imageVector = Icons.Default.Cake, contentDescription = null)
-            Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-            Text(modifier = Modifier.weight(1f), text = "Birthday: ${profileInfo.birthday}")
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            Icon(imageVector = Icons.Default.Flag, contentDescription = null)
-            Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-            Text(modifier = Modifier.weight(1f), text = "Country: ${profileInfo.countryName}")
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            Icon(imageVector = Icons.Default.LocationCity, contentDescription = null)
-            Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-            Text(modifier = Modifier.weight(1f), text = "City: ${profileInfo.cityName}")
-        }
+        Gifts(profileInfo.giftsCount)
+    }
+}
+
+@Composable
+private fun ShortenedProfileLink(link: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Icon(imageVector = Icons.Default.Search, contentDescription = null)
+        Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+        Text(
+            modifier = Modifier.weight(1f),
+            text = stringResource(R.string.short_link) + ": @${link}"
+        )
+    }
+}
+
+@Composable
+private fun Birthday(date: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Icon(imageVector = Icons.Default.Cake, contentDescription = null)
+        Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+        Text(modifier = Modifier.weight(1f), text = stringResource(R.string.birthday) + ": $date")
+    }
+}
+
+@Composable
+private fun CountryName(name: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Icon(imageVector = Icons.Default.Flag, contentDescription = null)
+        Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+        Text(modifier = Modifier.weight(1f), text = stringResource(R.string.country) + ": $name")
+    }
+}
+
+@Composable
+private fun CityName(name: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Icon(imageVector = Icons.Default.LocationCity, contentDescription = null)
+        Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+        Text(modifier = Modifier.weight(1f), text = stringResource(R.string.city) + ": $name")
+    }
+}
+
+@Composable
+private fun Gifts(count: Int) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Icon(imageVector = Icons.Default.CardGiftcard, contentDescription = null)
+        Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+        Text(modifier = Modifier.weight(1f), text = stringResource(R.string.gifts) + ": $count")
     }
 }
