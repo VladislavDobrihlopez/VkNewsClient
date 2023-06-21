@@ -129,7 +129,7 @@ class ProfileRemoteDataSourceImpl @Inject constructor(
             is ProfileAuthor.Me ->
                 apiService.getWallContent(
                     token = getUserToken(),
-                    ownerId = "137554875",//getSignedUser().id.toString(),
+                    ownerId = getSignedUser().id.toString(),
                     offset = nextPostsOffset
                 ).content
         }
