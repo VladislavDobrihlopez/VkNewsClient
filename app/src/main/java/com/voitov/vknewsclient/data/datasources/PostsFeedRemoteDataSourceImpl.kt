@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.data.repositoriesImpl
+package com.voitov.vknewsclient.data.datasources
 
 import android.util.Log
 import com.vk.api.sdk.VKPreferencesKeyValueStorage
@@ -14,7 +14,6 @@ import com.voitov.vknewsclient.domain.NewsFeedResult
 import com.voitov.vknewsclient.domain.SocialMetric
 import com.voitov.vknewsclient.domain.entities.PostCommentItem
 import com.voitov.vknewsclient.domain.entities.PostItem
-import com.voitov.vknewsclient.domain.repository.NewsFeedRepository
 import com.voitov.vknewsclient.extensions.mergeWith
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,12 +33,12 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class NewsFeedRepositoryImpl @Inject constructor(
+class PostsFeedRemoteDataSourceImpl @Inject constructor(
     private val storage: VKPreferencesKeyValueStorage,
     private val recommendationsFeedApiService: RecommendationsFeedApiService,
     private val postMapper: PostMapper,
     private val commentMapper: CommentMapper
-) : NewsFeedRepository {
+) : PostsFeedRemoteDataSource {
     private val scope = CoroutineScope(Dispatchers.IO)
     private val token
         get() = VKAccessToken.restore(storage)
@@ -133,7 +132,6 @@ class NewsFeedRepositoryImpl @Inject constructor(
 
     override fun getCommentsFlow(post: PostItem): StateFlow<CommentsResult> {
         Log.d("TEST_COMMENTS_SCREEN", "getCommentsFlow()")
-        Log.d("TEST_COMMENTS_SCREEN", "${this@NewsFeedRepositoryImpl}")
 
         nextCommentOffset = 0
         _comments.clear()
@@ -156,7 +154,6 @@ class NewsFeedRepositoryImpl @Inject constructor(
 
     override suspend fun retrieveNextChunkOfComments(post: PostItem) {
         Log.d("TEST_COMMENTS_SCREEN", "offset: $nextCommentOffset")
-        Log.d("TEST_COMMENTS_SCREEN", "${this@NewsFeedRepositoryImpl}")
 
         needNextCommentsEvent.emit(post)
     }
@@ -210,7 +207,10 @@ class NewsFeedRepositoryImpl @Inject constructor(
             val response = if (placeToStartLoadingFrom == null) {
                 recommendationsFeedApiService.loadRecommendations(getUserToken())
             } else {
-                recommendationsFeedApiService.loadRecommendations(getUserToken(), placeToStartLoadingFrom)
+                recommendationsFeedApiService.loadRecommendations(
+                    getUserToken(),
+                    placeToStartLoadingFrom
+                )
             }
             FeedResponseResult.Success(response)
         } catch (_: Exception) {
@@ -246,7 +246,8 @@ class NewsFeedRepositoryImpl @Inject constructor(
             removeIf { it.type == MetricsType.SHARES }
             add(SocialMetric(MetricsType.SHARES, updatedMetricsInfo.shares))
         }
-        val updatedPost = post.copy(isSharedByUser = true, isLikedByUser = true, metrics = updatedMetrics)
+        val updatedPost =
+            post.copy(isSharedByUser = true, isLikedByUser = true, metrics = updatedMetrics)
         val indexOfElementToBeReplaced = _posts.indexOf(post)
         if (indexOfElementToBeReplaced == -1) {
             return

@@ -40,6 +40,7 @@ import androidx.compose.material.TextField
 import androidx.compose.material.rememberDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -84,21 +85,32 @@ fun FavoritePostsScreen() {
     ) {
         TagsMenu(viewModel = viewModel)
         Spacer(modifier = Modifier.padding(vertical = 8.dp))
-        PostsContent(viewModel = viewModel)
+        CachedPosts(viewModel = viewModel)
     }
 }
 
 @Composable
-private fun PostsContent(viewModel: FavoritesViewModel) {
-    when (val feedPostsState =
-        viewModel.postsFlow.collectAsState(initial = FavoritePostsFeedState.Loading).value) {
+private fun CachedPosts(viewModel: FavoritesViewModel) {
+    val state = viewModel.postsFlow.collectAsState(initial = FavoritePostsFeedState.Loading)
+    PostsContent(state = state, onDeletePost = {
+        viewModel.confirmActionOnSwipeEndToStart(it)
+    }, viewModel)
+}
+
+@Composable
+private fun PostsContent(
+    state: State<FavoritePostsFeedState>,
+    onDeletePost: (TaggedPostItem) -> Unit,
+    viewModel: FavoritesViewModel // take off there in the future
+) {
+    when (val feedPostsState = state.value) {
         is FavoritePostsFeedState.Loading -> {
             LoadingGoingOn()
         }
 
         is FavoritePostsFeedState.Success -> {
             FeedPosts(posts = feedPostsState.posts) { post ->
-                viewModel.confirmActionOnSwipeEndToStart(post)
+                onDeletePost(post)
             }
 
             if (feedPostsState.dialogData.showDialog) {
@@ -111,8 +123,6 @@ private fun PostsContent(viewModel: FavoritesViewModel) {
                 )
             }
         }
-
-        else -> {}
     }
 }
 

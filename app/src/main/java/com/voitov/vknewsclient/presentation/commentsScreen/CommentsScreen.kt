@@ -47,7 +47,7 @@ fun CommentsScreen(
         .getCommentsScreenComponentFactory()
         .create(post)
 
-    Log.d("NEWS_FEED_APPLICATION", "recomposition")
+    //Log.d("TEST_RR", "recomposition")
 
     val viewModel: CommentsViewModel = viewModel(
         factory = component.getViewModelsFactory()

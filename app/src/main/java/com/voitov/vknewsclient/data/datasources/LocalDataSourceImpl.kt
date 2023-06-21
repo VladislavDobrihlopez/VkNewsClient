@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.data.repositoriesImpl
+package com.voitov.vknewsclient.data.datasources
 
 import android.util.Log
 import com.voitov.vknewsclient.data.database.dao.TaggedFeedPostsDao
@@ -7,7 +7,7 @@ import com.voitov.vknewsclient.data.mappers.TaggedPostMapper
 import com.voitov.vknewsclient.data.mappers.TagsMapper
 import com.voitov.vknewsclient.domain.entities.ItemTag
 import com.voitov.vknewsclient.domain.entities.TaggedPostItem
-import com.voitov.vknewsclient.domain.repository.StoredNewsFeedRepository
+import com.voitov.vknewsclient.domain.repository.StoredPostsFeedRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -23,19 +23,16 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class StoredNewsFeedRepositoryImpl @Inject constructor(
+class LocalDataSourceImpl @Inject constructor(
     private val tagsDao: TagsDao,
     private val taggedFeedPostsDao: TaggedFeedPostsDao,
     private val tagsMapper: TagsMapper,
     private val taggedPostMapper: TaggedPostMapper
-) : StoredNewsFeedRepository {
+) : LocalDataSource {
     private val scope = CoroutineScope(Dispatchers.IO)
 
     init {
         scope.launch {
-//            tagsDao.saveTag(TagDbModel("read later"))
-//            tagsDao.saveTag(TagDbModel("this weekend"))
-
             val filters = tagsDao.getAllTags().map { dbModel ->
                 tagsMapper.mapDbModelToEntity(dbModel)
             }

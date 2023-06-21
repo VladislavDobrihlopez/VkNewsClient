@@ -46,7 +46,6 @@ import androidx.compose.material.swipeable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -72,6 +71,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ExperimentalMotionApi
 import androidx.constraintlayout.compose.MotionLayout
 import androidx.constraintlayout.compose.MotionScene
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.voitov.vknewsclient.R
@@ -101,15 +101,14 @@ fun ProfileScreen(author: ProfileAuthor) {
             .getProfileScreenComponentFactory()
             .create(author)
 
+    Log.d("TEST_R", "recomposition $author")
+
     val viewModel: ProfileViewModel =
         viewModel(factory = component.getViewModelsFactory())
 
-    Log.d("TEST_R", "recomposition: $viewModel}")
-
-    val state =
-        viewModel.profileFlow.collectAsState(
-            initial = ProfileScreenState.Initial
-        )
+    val state = viewModel.profileFlow.collectAsStateWithLifecycle(
+        initialValue = ProfileScreenState.Initial
+    )
 
     ProfileScreenContent(state = state) {
         Log.d("TEST_R", "callback: $viewModel}")

@@ -1,5 +1,8 @@
 package com.voitov.vknewsclient.domain.entities
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class Profile(
     val shortenedLink: String,
     val firstName: String,

@@ -1,8 +1,8 @@
 package com.voitov.vknewsclient.di.modules
 
-import com.voitov.vknewsclient.data.repositoriesImpl.NewsFeedRepositoryImpl
+import com.voitov.vknewsclient.data.repositoriesImpl.PostsFeedRepositoryImpl
 import com.voitov.vknewsclient.di.scopes.ApplicationScope
-import com.voitov.vknewsclient.domain.repository.NewsFeedRepository
+import com.voitov.vknewsclient.domain.repository.PostsFeedRepository
 import dagger.Binds
 import dagger.Module
 
@@ -10,5 +10,5 @@ import dagger.Module
 interface DomainModule {
     @ApplicationScope
     @Binds
-    fun provideRepositoryImplementation(repository: NewsFeedRepositoryImpl): NewsFeedRepository
+    fun provideRepositoryImplementation(repository: PostsFeedRepositoryImpl): PostsFeedRepository
 }

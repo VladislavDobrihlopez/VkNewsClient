@@ -1,5 +1,8 @@
 package com.voitov.vknewsclient.domain.entities
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class InnerWallPost(
     val id: Long,
     val producerId: Long,

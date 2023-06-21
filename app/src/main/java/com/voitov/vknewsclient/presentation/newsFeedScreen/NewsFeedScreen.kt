@@ -36,6 +36,7 @@ import androidx.compose.material.rememberDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -73,14 +74,30 @@ fun NewsFeedScreen(
     isDataBeingLoaded: Boolean,
     onCommentsClickListener: (PostItem) -> Unit,
 ) {
-
     val viewModel: NewsFeedScreenViewModel =
         viewModel(factory = getApplicationComponent().getViewModelsFactory())
-
     val state =
-        viewModel.screenContentStateFlow.collectAsState(initial = NewsFeedScreenContentState.Content).value
+        viewModel.screenContentStateFlow.collectAsState(initial = NewsFeedScreenContentState.Content)
+    NewsFeedScreenContent(
+        state = state,
+        viewModel = viewModel,
+        paddingValues = paddingValues,
+        posts = posts,
+        isDataBeingLoaded = isDataBeingLoaded,
+        onCommentsClickListener = onCommentsClickListener
+    )
+}
 
-    when (state) {
+@Composable
+private fun NewsFeedScreenContent(
+    state: State<NewsFeedScreenContentState>,
+    viewModel: NewsFeedScreenViewModel,
+    paddingValues: PaddingValues,
+    posts: List<PostItem>,
+    isDataBeingLoaded: Boolean,
+    onCommentsClickListener: (PostItem) -> Unit,
+) {
+    when (val currentState = state.value) {
         is NewsFeedScreenContentState.OnPostLikeActionConfirmation -> {
             ConfirmationDialog(
                 title = {
@@ -99,7 +116,7 @@ fun NewsFeedScreen(
                     viewModel.dismiss()
                 },
                 onConfirmationButtonClicked = {
-                    viewModel.changeLikeStatus(state.post)
+                    viewModel.changeLikeStatus(currentState.post)
                 },
                 onDismissButtonClicked = {
                     viewModel.dismiss()
@@ -125,7 +142,7 @@ fun NewsFeedScreen(
                     viewModel.dismiss()
                 },
                 onConfirmationButtonClicked = {
-                    viewModel.ignoreItem(state.post)
+                    viewModel.ignoreItem(currentState.post)
                 },
                 onDismissButtonClicked = {
                     viewModel.dismiss()
@@ -135,7 +152,7 @@ fun NewsFeedScreen(
 
         is NewsFeedScreenContentState.OnStartToEndActionConfirmation -> {
             CachePostIncludingTagPopUp(viewModel = viewModel) { tag ->
-                viewModel.cachePost(state.post, tag)
+                viewModel.cachePost(currentState.post, tag)
             }
         }
 
@@ -156,7 +173,7 @@ fun NewsFeedScreen(
                 },
                 onDismissRequest = { viewModel.dismiss() },
                 onConfirmationButtonClicked = {
-                    viewModel.share(state.post)
+                    viewModel.share(currentState.post)
                 },
                 onDismissButtonClicked = {
                     viewModel.dismiss()
@@ -177,7 +194,7 @@ fun NewsFeedScreen(
         }
     }
 
-    NewsFeedScreenContent(
+    PostsContent(
         paddingValues = paddingValues,
         posts = posts,
         viewModel = viewModel,
@@ -200,7 +217,7 @@ fun NewsFeedScreen(
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
-private fun NewsFeedScreenContent(
+private fun PostsContent(
     paddingValues: PaddingValues,
     posts: List<PostItem>,
     viewModel: NewsFeedScreenViewModel,
@@ -371,7 +388,10 @@ private fun CachePostIncludingTagPopUp(
                 modifier = Modifier.padding(32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = stringResource(R.string.alert_select_tags), textAlign = TextAlign.Center)
+                Text(
+                    text = stringResource(R.string.alert_select_tags),
+                    textAlign = TextAlign.Center
+                )
                 Spacer(modifier = Modifier.height(16.dp))
                 val tagsState = viewModel.tagsFlow.collectAsState(initial = TagsTabState.Loading)
 

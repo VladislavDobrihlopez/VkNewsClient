@@ -19,7 +19,7 @@ interface ProfileApiService {
         @Query("fields") fields: String = FIELDS
     ): ProfileResponseDto
 
-    @GET("wall.get?v=${API_VERSION}&count=10&extended=1")
+    @GET("wall.get?v=${API_VERSION}&count=20&extended=1")
     suspend fun getWallContent(
         @Query("access_token") token: String,
         @Query("owner_id") ownerId: String,

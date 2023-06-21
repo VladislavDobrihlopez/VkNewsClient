@@ -15,6 +15,6 @@ class NewsFeedApplication : Application() {
 
 @Composable
 fun getApplicationComponent(): ApplicationComponent {
-    Log.d("NEWS_FEED_APPLICATION", "getApplication")
+    Log.d("NEWS_FEED_APPLICATIONN", "getApplication")
     return (LocalContext.current.applicationContext as NewsFeedApplication).component
 }

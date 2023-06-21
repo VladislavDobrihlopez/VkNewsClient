@@ -24,6 +24,9 @@ class ProfileViewModel @Inject constructor(
     private val getProfileInfoUseCase: GetProfileInfoUseCase,
     private val retrieveNextChunkOfWallPostsUseCase: RetrieveNextChunkOfWallPostsUseCase
 ) : ViewModel() {
+    init {
+        Log.d("TEST_PROFILE_WALL", "creating viewmodel: $this")
+    }
     private var viewedAllPosts = false
     private lateinit var cachedProfileDetails: Profile
     private var cachedPosts: List<WallPost>? = null
@@ -41,9 +44,11 @@ class ProfileViewModel @Inject constructor(
     }
     val profileFlow = getProfileInfoUseCase(profileAuthor)
         .map {
-            Log.d("TEST_PROFILE_WALL", "$it")
+            Log.d("TEST_PROFILE_WALL", "OnEach ${it.javaClass}")
             when (it) {
                 is ProfileResult.Success -> if (it.wallContent != null) {
+                    Log.d("TEST_PROFILE_WALL", "OnEach ${it.profileDetails.firstName}")
+
                     ProfileScreenState.SuccessState.ProfileWithPublicAccessToWallState.Success(
                         profileDetails = it.profileDetails,
                         wallContent = it.wallContent
@@ -55,7 +60,7 @@ class ProfileViewModel @Inject constructor(
                 }
 
                 is ProfileResult.Failure -> ProfileScreenState.Failure(
-                    error = it.toString()
+                    error = it.ex.toString() + it.ex.stackTraceToString()
                 )
 
                 is ProfileResult.EndOfWallPosts -> {

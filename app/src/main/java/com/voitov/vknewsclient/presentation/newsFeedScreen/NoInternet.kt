@@ -1,11 +1,14 @@
 package com.voitov.vknewsclient.presentation.newsFeedScreen
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -86,10 +90,12 @@ private fun ErrorImage(
             .size(128.dp)
             .rotate(degrees = rotationDegree.value),
         imageVector = ImageVector.vectorResource(id = R.drawable.ic_no_connection),
+        colorFilter = ColorFilter.tint(if (isSystemInDarkTheme()) Color.White else Color.Black),
         contentDescription = "no connection to the internet"
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Preview
 @Composable
 private fun PreviewNoInternetLabel() {

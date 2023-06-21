@@ -18,6 +18,7 @@ data class PostItem(
     val contentImageUrl: List<String>,
     val metrics: List<SocialMetric>,
 ) {
+    @Immutable
     companion object {
         const val TYPE = "post"
     }

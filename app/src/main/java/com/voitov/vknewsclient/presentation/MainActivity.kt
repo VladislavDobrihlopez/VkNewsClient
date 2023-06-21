@@ -8,8 +8,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vk.api.sdk.VK
@@ -26,58 +24,46 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val appComponent = getApplicationComponent()
+            val viewModel: AuthorizationViewModel =
+                viewModel(factory = appComponent.getViewModelsFactory())
+
+            val authorizationState = viewModel.authorizationState.collectAsState(
+                AuthorizationStateResult.InitialState
+            )
+
             VkNewsClientTheme {
-                val appComponent = getApplicationComponent()
-                val viewModel: AuthorizationViewModel =
-                    viewModel(factory = appComponent.getViewModelsFactory())
-
-                val authorizationState = viewModel.authorizationState.collectAsState(
-                    AuthorizationStateResult.InitialState
+                val loginLauncher = rememberLauncherForActivityResult(
+                    contract = VK.getVKAuthActivityResultContract(),
+                    onResult = {
+                        viewModel.handleAuthenticationResult()
+                    }
                 )
-                Log.d("AUTH_TEST", authorizationState.value.toString())
 
-                Authorization(
-                    viewModel = viewModel,
-                    authorizationState = authorizationState
-                )
-            }
-        }
-    }
+                when (authorizationState.value) {
+                    AuthorizationStateResult.AuthorizationStateFailure -> {
+                        Log.d("AUTH_TEST", "failure")
+                        window.setFlags(
+                            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                        )
+                        AuthorizationScreen {
+                            loginLauncher.launch(listOf(VKScope.WALL, VKScope.FRIENDS))
+                        }
+                    }
 
-    @Composable
-    private fun Authorization(
-        viewModel: AuthorizationViewModel,
-        authorizationState: State<AuthorizationStateResult>
-    ) {
-        val loginLauncher = rememberLauncherForActivityResult(
-            contract = VK.getVKAuthActivityResultContract(),
-            onResult = {
-                viewModel.handleAuthenticationResult()
-            }
-        )
+                    AuthorizationStateResult.AuthorizationStateSuccess -> {
+                        window.setFlags(
+                            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                        )
+                        MainScreen()
+                    }
 
-        when (authorizationState.value) {
-            AuthorizationStateResult.AuthorizationStateFailure -> {
-                Log.d("AUTH_TEST", "failure")
-                window.setFlags(
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                )
-                AuthorizationScreen {
-                    loginLauncher.launch(listOf(VKScope.WALL, VKScope.FRIENDS))
+                    else -> {
+
+                    }
                 }
-            }
-
-            AuthorizationStateResult.AuthorizationStateSuccess -> {
-                window.setFlags(
-                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
-                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
-                )
-                MainScreen()
-            }
-
-            else -> {
-
             }
         }
     }
