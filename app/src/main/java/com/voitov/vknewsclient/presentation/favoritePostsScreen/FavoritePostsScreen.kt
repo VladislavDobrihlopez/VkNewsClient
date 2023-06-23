@@ -32,11 +32,16 @@ import androidx.compose.material.Card
 import androidx.compose.material.DismissDirection
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Backpack
+import androidx.compose.material.icons.filled.NoBackpack
+import androidx.compose.material.icons.filled.Notes
 import androidx.compose.material.rememberDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,6 +58,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -101,7 +107,7 @@ private fun CachedPosts(viewModel: FavoritesViewModel) {
 private fun PostsContent(
     state: State<FavoritePostsFeedState>,
     onDeletePost: (TaggedPostItem) -> Unit,
-    viewModel: FavoritesViewModel // take off there in the future
+    viewModel: FavoritesViewModel
 ) {
     when (val feedPostsState = state.value) {
         is FavoritePostsFeedState.Loading -> {
@@ -111,6 +117,10 @@ private fun PostsContent(
         is FavoritePostsFeedState.Success -> {
             FeedPosts(posts = feedPostsState.posts) { post ->
                 onDeletePost(post)
+            }
+
+            if (feedPostsState.posts.isEmpty()) {
+                NoCachedPostsYet(modifier = Modifier.padding(16.dp))
             }
 
             if (feedPostsState.dialogData.showDialog) {
@@ -123,6 +133,19 @@ private fun PostsContent(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun NoCachedPostsYet(modifier: Modifier = Modifier) {
+    Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Icon(
+            imageVector = Icons.Default.NoBackpack,
+            contentDescription = "no posts were added yet",
+            modifier = Modifier.size(144.dp),
+            tint = if (isSystemInDarkTheme()) Color.White else Color.Black
+        )
+        Text(modifier = Modifier.padding(vertical = 8.dp), text = stringResource(R.string.no_posts))
     }
 }
 
@@ -151,16 +174,34 @@ private fun TagsMenu(viewModel: FavoritesViewModel) {
                         beyondBoundsPageCount = TAGS_MENU_PAGES_COUNT - 1,
                         state = pagerState
                     ) { page ->
-                        if (page == 0) {
-                            Tags(state = state, viewModel = viewModel)
-                        } else {
-                            TagsStorageManager(
-                                onAddNewTagListener = {
-                                    viewModel.confirmAddTagAction()
-                                },
-                                onRemoveTagListener = {
-                                    viewModel.confirmRemoveTagAction()
-                                })
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            if (page == 0) {
+                                Text(
+                                    modifier = Modifier.padding(8.dp),
+                                    text = stringResource(R.string.title_tags),
+                                    style = MaterialTheme.typography.h2,
+                                    textAlign = TextAlign.Start
+                                )
+                                Tags(
+                                    modifier = Modifier.padding(4.dp),
+                                    state = state,
+                                    viewModel = viewModel
+                                )
+                            } else {
+                                Text(
+                                    modifier = Modifier.padding(8.dp),
+                                    text = stringResource(R.string.title_tags_manager),
+                                    style = MaterialTheme.typography.h2,
+                                    textAlign = TextAlign.Start
+                                )
+                                TagsStorageManager(
+                                    onAddNewTagListener = {
+                                        viewModel.confirmAddTagAction()
+                                    },
+                                    onRemoveTagListener = {
+                                        viewModel.confirmRemoveTagAction()
+                                    })
+                            }
                         }
                     }
 
@@ -200,16 +241,30 @@ private fun TagsMenu(viewModel: FavoritesViewModel) {
 }
 
 @Composable
-private fun Tags(state: TagsTabState.Success, viewModel: FavoritesViewModel) {
+private fun Tags(
+    modifier: Modifier = Modifier,
+    state: TagsTabState.Success,
+    viewModel: FavoritesViewModel
+) {
     val currentItems = rememberSaveable {
         mutableStateOf<List<ItemTag>>(listOf())
     }
 
-    TagsWithMultipleChecks(tags = state.tags, modifier = Modifier.padding(4.dp)) {
-        val newItems = mutableListOf<ItemTag>()
-        newItems.addAll(it)
-        currentItems.value = newItems
-        viewModel.retrievePosts(newItems)
+    Box(modifier = modifier.fillMaxWidth()) {
+        if (state.tags.isEmpty()) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                text = stringResource(R.string.swipe_from_right_to_left_to_add_tags)
+            )
+        } else {
+            TagsWithMultipleChecks(tags = state.tags) {
+                val newItems = mutableListOf<ItemTag>()
+                newItems.addAll(it)
+                currentItems.value = newItems
+                viewModel.retrievePosts(newItems)
+            }
+        }
     }
 
     //ShowToast(itemTags = currentItems.value)
@@ -217,11 +272,12 @@ private fun Tags(state: TagsTabState.Success, viewModel: FavoritesViewModel) {
 
 @Composable
 private fun TagsStorageManager(
+    modifier: Modifier = Modifier,
     onAddNewTagListener: () -> Unit,
     onRemoveTagListener: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -487,7 +543,10 @@ fun TagsWithMultipleChecks(
 ) {
     FlowRow(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceAround,
+        horizontalArrangement = Arrangement.spacedBy(
+            4.dp,
+            alignment = Alignment.CenterHorizontally
+        ),
         maxItemsInEachRow = 5
     ) {
         val currentlySelectedTags = rememberSaveable {
@@ -496,7 +555,7 @@ fun TagsWithMultipleChecks(
 
         tags.forEach { itemTag ->
             val selected = rememberSaveable { mutableStateOf(true) }
-            Box(modifier = Modifier.padding(vertical = 6.dp)) {
+            Box(modifier = Modifier.padding(vertical = 4.dp)) {
                 IconedChip(
                     enabled = true,
                     isSelected = selected.value,

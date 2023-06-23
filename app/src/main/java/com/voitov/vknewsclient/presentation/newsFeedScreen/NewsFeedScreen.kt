@@ -157,7 +157,6 @@ private fun NewsFeedScreenContent(
         }
 
         is NewsFeedScreenContentState.OnPostShareActionConfirmation -> {
-            viewModel.dismiss()
             ConfirmationDialog(
                 confirmation = {
                     Text(stringResource(R.string.confirm), color = MaterialTheme.colors.onPrimary)
@@ -380,9 +379,10 @@ private fun CachePostIncludingTagPopUp(
     ) {
 
         Surface(
+            modifier = Modifier.fillMaxWidth(),
             border = BorderStroke(1.dp, MaterialTheme.colors.secondary),
             shape = RoundedCornerShape(8.dp),
-            color = MaterialTheme.colors.surface.copy(alpha = 0.75f),
+            color = MaterialTheme.colors.surface.copy(alpha = 0.85f),
         ) {
             Column(
                 modifier = Modifier.padding(32.dp),
@@ -474,7 +474,7 @@ private class WindowCenterOffsetPositionProvider(
     ): IntOffset {
         return IntOffset(
             (windowSize.width - popupContentSize.width) / 2 + x,
-            (windowSize.height - popupContentSize.height) - 96 + y
+            (windowSize.height - popupContentSize.height) - 58 + y
         )
     }
 }

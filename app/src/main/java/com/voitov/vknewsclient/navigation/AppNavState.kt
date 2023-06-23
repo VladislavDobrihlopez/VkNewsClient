@@ -34,12 +34,7 @@ class AppNavState(
 
         val prevNavigatedProfileScreen = previousNavigatedProfileScreen
 
-        val stateNeedToBeRestored =
-            if (prevNavigatedProfileScreen == null || !(prevNavigatedProfileScreen == author)) {
-                false
-            } else {
-                true
-            }
+        val stateNeedToBeRestored = !(prevNavigatedProfileScreen == null || prevNavigatedProfileScreen != author)
         previousNavigatedProfileScreen = author
 
         Log.d("TEST_NAVIGATION", "previous $stateNeedToBeRestored")
@@ -51,9 +46,6 @@ class AppNavState(
             launchSingleTop = true
 
             restoreState = stateNeedToBeRestored
-//            if (author is ProfileAuthor.Me) {
-//                restoreState = true
-//            }
         }
     }
 }

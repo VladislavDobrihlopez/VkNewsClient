@@ -47,4 +47,8 @@
     <string name="removing_cached_post">"Removing cached post "</string>
     <string name="do_you_agree_to_remove_the_post_from_cache">Do you agree to remove the post from cache?</string>
     <string name="delete_item">Delete item</string>
+    <string name="swipe_from_right_to_left_to_add_tags">Swipe from right to left to add tags</string>
+    <string name="title_tags_manager">Tags manager</string>
+    <string name="no_posts">Posts haven\'t been cached yet</string>
+    <string name="title_tags">Tags</string>
 </resources>

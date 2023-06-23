@@ -13,13 +13,13 @@ import com.voitov.vknewsclient.data.database.models.TaggedPostItemDbModel
 
 @Database(
     entities = [TaggedPostItemDbModel::class, TagDbModel::class],
-    version = 4,
+    version = 1,
     exportSchema = false
 )
 @TypeConverters(value = [Converters::class])
 abstract class PostsDatabase() : RoomDatabase() {
     companion object {
-        private const val DB_NAME = "cached_posts.db"
+        private const val DB_NAME = "cached_feed_posts.db"
         private var instance: PostsDatabase? = null
         private val MONITOR = Any()
         fun getInstance(context: Context): PostsDatabase {

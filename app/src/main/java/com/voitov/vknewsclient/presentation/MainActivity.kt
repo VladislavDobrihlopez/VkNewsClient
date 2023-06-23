@@ -23,6 +23,10 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+        )
         setContent {
             val appComponent = getApplicationComponent()
             val viewModel: AuthorizationViewModel =
@@ -43,20 +47,13 @@ class MainActivity : ComponentActivity() {
                 when (authorizationState.value) {
                     AuthorizationStateResult.AuthorizationStateFailure -> {
                         Log.d("AUTH_TEST", "failure")
-                        window.setFlags(
-                            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                        )
+
                         AuthorizationScreen {
                             loginLauncher.launch(listOf(VKScope.WALL, VKScope.FRIENDS))
                         }
                     }
 
                     AuthorizationStateResult.AuthorizationStateSuccess -> {
-                        window.setFlags(
-                            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
-                            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
-                        )
                         MainScreen()
                     }
 

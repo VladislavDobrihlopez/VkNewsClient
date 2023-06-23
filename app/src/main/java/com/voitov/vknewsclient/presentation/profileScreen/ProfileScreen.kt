@@ -251,7 +251,7 @@ private fun Profile(
                         state = swipingState,
                         thresholds = { stateFrom, stateTo ->
                             if (stateFrom == SwipingStates.COLLAPSED) {
-                                FractionalThreshold(0.75f)
+                                FractionalThreshold(0.45f)
                             } else {
                                 FractionalThreshold(0.15f)
                             }
@@ -436,13 +436,14 @@ private fun UserProfile(
                 .layoutId("cover")
                 .aspectRatio(3f / 1f),
             contentScale = ContentScale.FillBounds,
-            //placeholder = painterResource(id = R.drawable.test_cover),
             contentDescription = stringResource(R.string.content_description_profile_cover)
         )
-        Divider(
-            modifier = Modifier.layoutId("divider"),
-            color = Color.White
-        )
+        if (profileInfo.coverPhotoUrl != null) {
+            Divider(
+                modifier = Modifier.layoutId("divider"),
+                color = Color.White
+            )
+        }
         AsyncImage(
             placeholder = painterResource(id = R.drawable.profile_placeholder),
             model = profileInfo.photoMaxUrl,

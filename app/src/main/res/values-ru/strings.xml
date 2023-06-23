@@ -45,4 +45,8 @@
     <string name="removing_cached_post">Удаление закешированного поста</string>
     <string name="do_you_agree_to_remove_the_post_from_cache">Вы намереваетесь удалить пост из логкального хранилища</string>
     <string name="delete_item">Удалить</string>
+    <string name="swipe_from_right_to_left_to_add_tags">Свайпни влево для добавления тега</string>
+    <string name="title_tags_manager">Настройка тегов</string>
+    <string name="no_posts">Посты ещё не были добавлены</string>
+    <string name="title_tags">Теги</string>
 </resources>
