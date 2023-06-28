@@ -9,6 +9,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.collectAsState
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vk.api.sdk.VK
 import com.vk.api.sdk.auth.VKScope
@@ -27,6 +28,7 @@ class MainActivity : ComponentActivity() {
             WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
             WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
         )
+        installSplashScreen()
         setContent {
             val appComponent = getApplicationComponent()
             val viewModel: AuthorizationViewModel =

@@ -474,7 +474,7 @@ private class WindowCenterOffsetPositionProvider(
     ): IntOffset {
         return IntOffset(
             (windowSize.width - popupContentSize.width) / 2 + x,
-            (windowSize.height - popupContentSize.height) - 58 + y
+            (windowSize.height - popupContentSize.height) - 10 + y
         )
     }
 }
