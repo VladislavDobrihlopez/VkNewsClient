@@ -73,8 +73,6 @@ class LocalDataSourceImpl @Inject constructor(
             emit(cachedPosts)
         }
     }
-        .onCompletion { Log.d("TEST_POSTS_FLOW", "[repository] completion allPostsFlow") }
-        //.mergeWith(updatedPostsFlow)
         .map { taggedPosts ->
             if (tagsForPostFiltering == null) {
                 taggedPosts
@@ -112,17 +110,14 @@ class LocalDataSourceImpl @Inject constructor(
 
     private val allTagsFlow = flow<List<ItemTag>> {
         emit(tagsDao.getAllTags().map { dbModel ->
-            Log.d("TEST_POSTS_FLOW", "[repository] emit tags")
             tagsMapper.mapDbModelToEntity(dbModel)
         })
         shouldLoadAvailableTags.collect {
             emit(tagsDao.getAllTags().map { dbModel ->
-                Log.d("TEST_POSTS_FLOW", "[repository] emit tags")
                 tagsMapper.mapDbModelToEntity(dbModel)
             })
         }
     }.onEach { tagsForPostFiltering = it.toList() }
-        .onCompletion { Log.d("TEST_POSTS_FLOW", "[repository] onCompletion") }
         .shareIn(scope, SharingStarted.Lazily, replay = 1)
 
     override fun getAllTags(): Flow<List<ItemTag>> {

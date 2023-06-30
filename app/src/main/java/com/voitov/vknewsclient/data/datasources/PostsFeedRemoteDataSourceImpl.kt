@@ -65,8 +65,6 @@ class PostsFeedRemoteDataSourceImpl @Inject constructor(
     private val recommendations: Flow<NewsFeedResult> = flow {
         needNextDataEvents.emit(Unit)
         needNextDataEvents.collect {
-            Log.d("INTERNET_TEST", "collect")
-
             when (retrieveFeedData()) {
                 is FeedResponseResult.Success -> {
                     emit(NewsFeedResult.Success(postItems))
@@ -84,11 +82,9 @@ class PostsFeedRemoteDataSourceImpl @Inject constructor(
     }
         .retry(1) {
             delay(RETRY_DELAY_IN_MILLIS)
-            Log.d("INTERNET_TEST", "retry")
             true
         }
         .catch {
-            Log.d("INTERNET_TEST", "catch")
             emit(NewsFeedResult.Failure)
         }
 
@@ -120,7 +116,6 @@ class PostsFeedRemoteDataSourceImpl @Inject constructor(
     private val needNextCommentsEvent = MutableSharedFlow<PostItem>(replay = 1)
     private val comments = flow {
         needNextCommentsEvent.collect { post ->
-            Log.d("TEST_COMMENTS_SCREEN", "needNextCommentsEvent.collect()")
             val result = retrievePostComments(post)
             emit(result)
         }
@@ -131,13 +126,9 @@ class PostsFeedRemoteDataSourceImpl @Inject constructor(
     )
 
     override fun getCommentsFlow(post: PostItem): StateFlow<CommentsResult> {
-        Log.d("TEST_COMMENTS_SCREEN", "getCommentsFlow()")
-
         nextCommentOffset = 0
         _comments.clear()
         scope.launch {
-            Log.d("TEST_COMMENTS_SCREEN", "emit for getCommentsFlow()")
-
             needNextCommentsEvent.emit(post)
         }
         return comments
@@ -148,13 +139,10 @@ class PostsFeedRemoteDataSourceImpl @Inject constructor(
     }
 
     override suspend fun retrieveNextRecommendations() {
-        Log.d("INTERNET_TEST", "ask for next recommendations")
         needNextDataEvents.emit(Unit)
     }
 
     override suspend fun retrieveNextChunkOfComments(post: PostItem) {
-        Log.d("TEST_COMMENTS_SCREEN", "offset: $nextCommentOffset")
-
         needNextCommentsEvent.emit(post)
     }
 

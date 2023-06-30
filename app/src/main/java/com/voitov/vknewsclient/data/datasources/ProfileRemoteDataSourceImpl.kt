@@ -15,6 +15,7 @@ import com.voitov.vknewsclient.domain.ProfileResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -32,20 +33,18 @@ class ProfileRemoteDataSourceImpl @Inject constructor(
     private var currentUser: ProfileAuthor = ProfileAuthor.Me
     private var signedInUserProfileInfo: ProfileDataDto? = null
 
-    private var _cachedWallPosts = HashSet<WallPostDto>()
-    private val cachedWallPosts
-        get() = _cachedWallPosts.toList().sortedBy {
+    private var _retrievedSoFarWallPosts = HashSet<WallPostDto>()
+    private val retrievedSoFarWallPosts
+        get() = _retrievedSoFarWallPosts.toList().sortedBy {
             -it.secondsSince1970
         }
 
-    private var _cachedGroupInfo = HashSet<GroupInfoDto>()
-    private val cachedGroupInfo
-        get() = _cachedGroupInfo.toList()
-    private var _cachedProfile = HashSet<ProfileDto>()
-    private val cachedProfile
-        get() = _cachedProfile.toList()
-
-    private var cachedUserProfileDataDto: ProfileDataDto? = null
+    private var _retrievedSoFarGroupInfo = HashSet<GroupInfoDto>()
+    private val retrievedSoFarGroupInfo
+        get() = _retrievedSoFarGroupInfo.toList()
+    private var _retrievedSoFarProfile = HashSet<ProfileDto>()
+    private val retrievedSoFarProfile
+        get() = _retrievedSoFarProfile.toList()
 
     private var nextPostsOffset: Int = 0
 
@@ -58,18 +57,17 @@ class ProfileRemoteDataSourceImpl @Inject constructor(
         wallEventContainer.emit(Unit)
         wallEventContainer.collect {
             try {
-                Log.d("TEST_PROFILE_WALL", "wallContentFlow")
+                val retrievedChunkOfWall = coroutineScope {
+                    async {
+                        retrieveWallContent(currentUser)
+                    }
+                }.await()
 
-                val firstJob = scope.async {
-                    retrieveWallContent(currentUser)
-                }
-
-                val secondJob = scope.async {
-                    retrieveProfileInfo(currentUser)
-                }
-
-                val retrievedChunkOfWall = firstJob.await()
-                val retrievedProfileDetailsDto = secondJob.await()
+                val retrievedProfileDetailsDto = coroutineScope {
+                    async {
+                        retrieveProfileInfo(currentUser)
+                    }
+                }.await()
 
                 if (retrievedChunkOfWall == null) {
                     // private profile
@@ -81,26 +79,25 @@ class ProfileRemoteDataSourceImpl @Inject constructor(
                     )
                     return@collect
                 } else if (retrievedChunkOfWall.posts.isEmpty()) {
-                    emit(ProfileResult.EndOfWallPosts(mapper.mapDtoToEntities(retrievedProfileDetailsDto)))
+                    emit(
+                        ProfileResult.EndOfWallPosts(
+                            mapper.mapDtoToEntities(
+                                retrievedProfileDetailsDto
+                            )
+                        )
+                    )
                     return@collect
                 } else {
                     nextPostsOffset += retrievedChunkOfWall.posts.count()
                     cacheRetrievedData(retrievedChunkOfWall)
                 }
 
-                Log.d("TEST_PROFILE_WALL", "$nextPostsOffset")
-                Log.d(
-                    "TEST_PROFILE_WALL",
-                    "${cachedWallPosts.count()} ${cachedGroupInfo.count()} ${cachedProfile.count()}"
-                )
-
-                Log.d(
-                    "TEST_PROFILE_WALL",
-                    "subscribers: ${wallEventContainer.subscriptionCount.value}"
-                )
-
                 val fullWallDto =
-                    ProfileWallContentDto(cachedWallPosts, cachedGroupInfo, cachedProfile)
+                    ProfileWallContentDto(
+                        retrievedSoFarWallPosts,
+                        retrievedSoFarGroupInfo,
+                        retrievedSoFarProfile
+                    )
 
                 emit(
                     ProfileResult.Success(
@@ -159,20 +156,18 @@ class ProfileRemoteDataSourceImpl @Inject constructor(
     }
 
     private fun cacheRetrievedData(profileResponse: ProfileWallContentDto) {
-        _cachedWallPosts.addAll(profileResponse.posts)
-        _cachedGroupInfo.addAll(profileResponse.communities)
-        _cachedProfile.addAll(profileResponse.profiles)
+        _retrievedSoFarWallPosts.addAll(profileResponse.posts)
+        _retrievedSoFarGroupInfo.addAll(profileResponse.communities)
+        _retrievedSoFarProfile.addAll(profileResponse.profiles)
     }
 
     private fun clearCache() {
-        _cachedWallPosts = HashSet()
-        _cachedGroupInfo = HashSet()
-        _cachedProfile = HashSet()
+        _retrievedSoFarWallPosts = HashSet()
+        _retrievedSoFarGroupInfo = HashSet()
+        _retrievedSoFarProfile = HashSet()
     }
 
     override fun getProfileDataFlow(author: ProfileAuthor): SharedFlow<ProfileResult> {
-        Log.d("TEST_PROFILE_WALL", "getProfileDataFlow")
-        //  Log.d("TEST_PROFILE_WALL", "${this@ProfileRepositoryImpl}")
         currentUser = author//"423328"//userId//"270815158"////"137554875"
         clearCache()
         nextPostsOffset = if (author is ProfileAuthor.Me) 1 else 0
@@ -180,9 +175,6 @@ class ProfileRemoteDataSourceImpl @Inject constructor(
     }
 
     override suspend fun retrieveNextChunkOfWallPosts() {
-        Log.d("TEST_PROFILE_WALL", "retrieveNextChunkOfWallPosts")
-        // Log.d("TEST_PROFILE_WALL", "${this@ProfileRepositoryImpl}")
-        Log.d("TEST_PROFILE_WALL", "subscribers: ${wallEventContainer.subscriptionCount.value}")
         delay(1500)
         wallEventContainer.emit(Unit)
     }
