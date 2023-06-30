@@ -83,7 +83,6 @@ class ProfileMapper @Inject constructor() {
                 } ?: listOf()
             )
 
-            Log.d("PostMapper", entity.toString())
             entities.add(entity)
         }
         return entities

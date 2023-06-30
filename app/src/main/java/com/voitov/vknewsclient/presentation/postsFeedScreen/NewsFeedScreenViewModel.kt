@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.presentation.newsFeedScreen
+package com.voitov.vknewsclient.presentation.postsFeedScreen
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

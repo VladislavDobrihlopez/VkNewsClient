@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.presentation.newsFeedScreen
+package com.voitov.vknewsclient.presentation.postsFeedScreen
 
 import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.getApplicationComponent
-import com.voitov.vknewsclient.presentation.reusableUIs.LoadingGoingOn
+import com.voitov.vknewsclient.presentation.components.LoadingGoingOn
 
 @Composable
 fun HomeScreen(

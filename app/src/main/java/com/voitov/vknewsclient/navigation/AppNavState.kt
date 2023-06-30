@@ -29,15 +29,10 @@ class AppNavState(
     }
 
     fun navigateToProfile(author: ProfileAuthor) {
-        Log.d("TEST_NAVIGATION", "navigated $author")
-        Log.d("TEST_NAVIGATION", "previous $previousNavigatedProfileScreen")
-
         val prevNavigatedProfileScreen = previousNavigatedProfileScreen
 
         val stateNeedToBeRestored = !(prevNavigatedProfileScreen == null || prevNavigatedProfileScreen != author)
         previousNavigatedProfileScreen = author
-
-        Log.d("TEST_NAVIGATION", "previous $stateNeedToBeRestored")
 
         navHostController.navigate(route = AppNavScreen.Profile.passArgs(author)) {
             popUpTo(navHostController.graph.findStartDestination().id) {

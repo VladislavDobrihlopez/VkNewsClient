@@ -32,7 +32,7 @@ import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.entities.PostCommentItem
 import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.getApplicationComponent
-import com.voitov.vknewsclient.presentation.reusableUIs.LoadingGoingOn
+import com.voitov.vknewsclient.presentation.components.LoadingGoingOn
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 
 private const val IN_PROGRESS = "..."

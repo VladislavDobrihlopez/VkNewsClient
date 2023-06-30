@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.entities.PostCommentItem
-import com.voitov.vknewsclient.presentation.reusableUIs.IconFollowedByText
+import com.voitov.vknewsclient.presentation.components.IconFollowedByText
 
 @Composable
 fun Comment(

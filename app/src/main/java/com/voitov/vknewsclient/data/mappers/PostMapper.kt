@@ -1,6 +1,5 @@
 package com.voitov.vknewsclient.data.mappers
 
-import android.util.Log
 import com.voitov.vknewsclient.data.network.models.postsFeedModels.NewsFeedContentResponseDto
 import com.voitov.vknewsclient.data.util.mapTimestampToDatePattern
 import com.voitov.vknewsclient.domain.MetricsType
@@ -16,8 +15,6 @@ class PostMapper @Inject constructor() {
         val communities = response.content.groups
 
         for (post in posts) {
-            Log.d("PostMapper", post.toString())
-
             val postOwner = communities.find { community ->
                 community.id == removeDifferenceBetweenCommunityAndUserPostOwner(post.communityId)
             } ?: break

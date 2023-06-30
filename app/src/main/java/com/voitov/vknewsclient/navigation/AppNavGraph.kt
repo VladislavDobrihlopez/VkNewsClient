@@ -46,21 +46,6 @@ fun AppNavGraph(
             val authorType = it.arguments?.getString(AppNavScreen.Profile.ARGUMENT_KEY_AUTHOR_TYPE)
                 ?: throw NullPointerException("Author type wasn't provided for the profile screen")
 
-
-//            val me = ProfileAuthor.Me
-//            val serialized = Gson().toJson(me)
-//            val deserialized = Gson().fromJson(serialized.decode(), ProfileAuthor.Me::class.java)
-//
-//            Log.d(
-//                "TEST_FOR_ANDREY_SUMIN_TEAM",
-//                "kotlin: $me"
-//            )
-//
-//            Log.d(
-//                "TEST_FOR_ANDREY_SUMIN_TEAM",
-//                "GSON: $deserialized"
-//            )
-
             when (authorType) {
                 ProfileAuthor.ME -> {
                     profileScreenContent(

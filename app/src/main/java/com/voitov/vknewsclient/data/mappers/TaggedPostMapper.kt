@@ -12,7 +12,6 @@ import javax.inject.Inject
 
 class TaggedPostMapper @Inject constructor() {
     fun mapEntityToDbModel(entity: TaggedPostItem): TaggedPostItemDbModel {
-        Log.d("TEST_MAPPER", entity.tag.name)
         return TaggedPostItemDbModel(
             tag = entity.tag.name,
             id = entity.postItem.id,
@@ -36,7 +35,6 @@ class TaggedPostMapper @Inject constructor() {
     }
 
     fun mapDbModelToEntity(dbModel: TaggedPostItemDbModel): TaggedPostItem {
-        Log.d("TEST_MAPPER", dbModel.tag)
         return TaggedPostItem(
             tag = ItemTag(dbModel.tag),
             postItem = PostItem(

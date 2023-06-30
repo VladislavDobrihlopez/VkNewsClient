@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.presentation.newsFeedScreen
+package com.voitov.vknewsclient.presentation.postsFeedScreen
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -60,9 +60,9 @@ import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.entities.ItemTag
 import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.getApplicationComponent
-import com.voitov.vknewsclient.presentation.reusableUIs.IconedChip
-import com.voitov.vknewsclient.presentation.reusableUIs.LoadingGoingOn
-import com.voitov.vknewsclient.presentation.reusableUIs.PostCard
+import com.voitov.vknewsclient.presentation.components.IconedChip
+import com.voitov.vknewsclient.presentation.components.LoadingGoingOn
+import com.voitov.vknewsclient.presentation.components.PostCard
 import com.voitov.vknewsclient.ui.theme.TransparentGreen
 import com.voitov.vknewsclient.ui.theme.TransparentRed
 import kotlinx.coroutines.delay

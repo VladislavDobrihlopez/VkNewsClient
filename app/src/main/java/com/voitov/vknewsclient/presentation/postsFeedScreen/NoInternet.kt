@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.presentation.newsFeedScreen
+package com.voitov.vknewsclient.presentation.postsFeedScreen
 
 import android.os.Build
 import androidx.annotation.RequiresApi

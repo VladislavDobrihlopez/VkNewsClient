@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.presentation.reusableUIs
+package com.voitov.vknewsclient.presentation.components
 
 import android.os.Build
 import android.util.Log
@@ -49,11 +49,9 @@ import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.MetricsType
 import com.voitov.vknewsclient.domain.SocialMetric
 import com.voitov.vknewsclient.domain.entities.PostItem
-import com.voitov.vknewsclient.presentation.mainScreen.TAG
 import com.voitov.vknewsclient.presentation.util.shortenLengthOfMetricsIfPossible
 import com.voitov.vknewsclient.ui.theme.Shapes
 import com.voitov.vknewsclient.ui.theme.TransparentBlue
-import com.voitov.vknewsclient.ui.theme.TransparentGreen
 import com.voitov.vknewsclient.ui.theme.TransparentRed
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 import kotlin.math.min
@@ -76,8 +74,6 @@ fun PostCard(
     onLikesClickListener: ((SocialMetric) -> Unit)? = null,
     onSharesClickListener: ((SocialMetric) -> Unit)? = null
 ) {
-    Log.d(TAG, "NewsPost")
-
     Card(
         shape = Shapes.medium,
         modifier = modifier
@@ -206,8 +202,6 @@ fun PostFeedback(
     onLikesClickListener: ((SocialMetric) -> Unit)? = null,
     onSharesClickListener: ((SocialMetric) -> Unit)? = null
 ) {
-    Log.d(TAG, "PostFeedback")
-
     val firstTimeShownInNewsFeed = rememberSaveable {
         mutableStateOf(true)
     }
@@ -352,8 +346,6 @@ private fun AnimatedLikesCount(
     isPostLiked: Boolean,
     onItemClicked: (() -> Unit)? = null
 ) {
-    Log.d("TEST_ANIMATIONS", "recomposition likes")
-
     IconFollowedByText(
         pictResId = if (isPostLiked) {
             R.drawable.ic_liked

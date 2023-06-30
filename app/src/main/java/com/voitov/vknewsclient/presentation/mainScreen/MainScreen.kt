@@ -10,6 +10,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -20,15 +21,17 @@ import com.voitov.vknewsclient.navigation.AppNavScreen
 import com.voitov.vknewsclient.navigation.rememberNavigationState
 import com.voitov.vknewsclient.presentation.commentsScreen.CommentsScreen
 import com.voitov.vknewsclient.presentation.favoritePostsScreen.FavoritePostsScreen
-import com.voitov.vknewsclient.presentation.newsFeedScreen.HomeScreen
+import com.voitov.vknewsclient.presentation.postsFeedScreen.HomeScreen
 import com.voitov.vknewsclient.presentation.profileScreen.ProfileScreen
 import com.voitov.vknewsclient.ui.theme.VkNewsClientTheme
 
-const val TAG = "COMPOSE_TEST"
-
 @Composable
-fun MainScreen() {
+fun MainScreen(onScreenReady: () -> Unit) {
     val navigationState = rememberNavigationState()
+
+    LaunchedEffect(key1 = Unit) {
+        onScreenReady()
+    }
 
     Scaffold(
         bottomBar = {
@@ -113,6 +116,8 @@ fun MainScreen() {
 @Composable
 private fun PreviewVkNews() {
     VkNewsClientTheme {
-        MainScreen()
+        MainScreen() {
+
+        }
     }
 }

@@ -12,6 +12,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,8 +31,13 @@ import com.voitov.vknewsclient.ui.theme.VkBlue
 
 @Composable
 fun AuthorizationScreen(
+    onScreenIsReady: () -> Unit,
     onSigningIn: () -> Unit
 ) {
+    LaunchedEffect(key1 = Unit) {
+        onScreenIsReady()
+    }
+
     val composition =
         rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.auth_screen_backgorund_animation))
     val progress = animateLottieCompositionAsState(
@@ -54,7 +60,7 @@ fun AuthorizationScreen(
             Image(
                 modifier = Modifier.size(128.dp),
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_vk_compact_logo),
-                contentDescription = "vk logo"
+                contentDescription = stringResource(R.string.vk_logo)
             )
             Spacer(modifier = Modifier.height(24.dp))
             Button(

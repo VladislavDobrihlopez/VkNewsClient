@@ -28,7 +28,12 @@ class MainActivity : ComponentActivity() {
             WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
             WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
         )
-        installSplashScreen()
+        var keepSplashScreenOpened = true
+
+        installSplashScreen().setKeepOnScreenCondition {
+            keepSplashScreenOpened
+        }
+
         setContent {
             val appComponent = getApplicationComponent()
             val viewModel: AuthorizationViewModel =
@@ -48,15 +53,17 @@ class MainActivity : ComponentActivity() {
 
                 when (authorizationState.value) {
                     AuthorizationStateResult.AuthorizationStateFailure -> {
-                        Log.d("AUTH_TEST", "failure")
-
-                        AuthorizationScreen {
+                        AuthorizationScreen(onScreenIsReady = {
+                            keepSplashScreenOpened = false
+                        }) {
                             loginLauncher.launch(listOf(VKScope.WALL, VKScope.FRIENDS))
                         }
                     }
 
                     AuthorizationStateResult.AuthorizationStateSuccess -> {
-                        MainScreen()
+                        MainScreen() {
+                            keepSplashScreenOpened = false
+                        }
                     }
 
                     else -> {

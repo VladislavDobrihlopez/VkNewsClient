@@ -39,9 +39,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Backpack
 import androidx.compose.material.icons.filled.NoBackpack
-import androidx.compose.material.icons.filled.Notes
 import androidx.compose.material.rememberDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -67,10 +65,10 @@ import com.voitov.vknewsclient.R
 import com.voitov.vknewsclient.domain.entities.ItemTag
 import com.voitov.vknewsclient.domain.entities.TaggedPostItem
 import com.voitov.vknewsclient.getApplicationComponent
-import com.voitov.vknewsclient.presentation.reusableUIs.IconedChip
-import com.voitov.vknewsclient.presentation.reusableUIs.LoadingGoingOn
-import com.voitov.vknewsclient.presentation.reusableUIs.PostCard
-import com.voitov.vknewsclient.presentation.reusableUIs.PostFeedback
+import com.voitov.vknewsclient.presentation.components.IconedChip
+import com.voitov.vknewsclient.presentation.components.LoadingGoingOn
+import com.voitov.vknewsclient.presentation.components.PostCard
+import com.voitov.vknewsclient.presentation.components.PostFeedback
 import com.voitov.vknewsclient.ui.theme.Shapes
 import com.voitov.vknewsclient.ui.theme.TransparentGreen
 import com.voitov.vknewsclient.ui.theme.TransparentRed

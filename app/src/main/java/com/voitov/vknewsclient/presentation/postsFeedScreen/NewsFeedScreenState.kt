@@ -1,4 +1,4 @@
-package com.voitov.vknewsclient.presentation.newsFeedScreen
+package com.voitov.vknewsclient.presentation.postsFeedScreen
 
 import com.voitov.vknewsclient.domain.entities.PostItem
 

@@ -80,10 +80,10 @@ import com.voitov.vknewsclient.domain.entities.PostItem
 import com.voitov.vknewsclient.domain.entities.Profile
 import com.voitov.vknewsclient.domain.entities.WallPost
 import com.voitov.vknewsclient.getApplicationComponent
-import com.voitov.vknewsclient.presentation.reusableUIs.LoadingGoingOn
-import com.voitov.vknewsclient.presentation.reusableUIs.PostAdditionalPhotos
-import com.voitov.vknewsclient.presentation.reusableUIs.PostCard
-import com.voitov.vknewsclient.presentation.reusableUIs.PostText
+import com.voitov.vknewsclient.presentation.components.LoadingGoingOn
+import com.voitov.vknewsclient.presentation.components.PostAdditionalPhotos
+import com.voitov.vknewsclient.presentation.components.PostCard
+import com.voitov.vknewsclient.presentation.components.PostText
 import com.voitov.vknewsclient.ui.theme.CoolBlack
 import com.voitov.vknewsclient.ui.theme.CoolWhite
 import com.voitov.vknewsclient.ui.theme.Shapes
