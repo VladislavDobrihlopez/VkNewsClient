@@ -23,7 +23,7 @@ vk api: https://dev.vk.com/reference
 5. Profile 
 
 #### 1. Authorization screen
-In the authorization screen the user sign in or sign up to their account using VK ID.
+In the authorization screen the user sign in or sign up to their account using VK ID. Here you can see lottie-animation
 ![auth_screen](imgs/vk_auth.gif)
 
 #### 2. Recommendations screen
