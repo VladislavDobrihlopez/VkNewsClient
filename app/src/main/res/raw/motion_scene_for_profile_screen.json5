@@ -1,0 +1,141 @@
+{
+  ConstraintSets: {
+    start: {
+      profile_picture: {
+        width: 150,
+        height: 150,
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        top: ['parent', 'top', 16],
+        custom: {
+          border_color: '#FFFFFF'
+        }
+      },
+      cover: {
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        top: ['parent', 'top'],
+        bottom: ['divider', 'top', 24]
+      },
+      divider: {
+        height: 3,
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        top: ['profile_picture', 'top', 24],
+        bottom: ['profile_picture', 'bottom']
+      },
+      username: {
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        top: ['profile_picture', 'bottom', 16],
+      },
+      background: {
+        width: 'spread',
+        height: 'spread',
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        top: ['parent', 'top'],
+        bottom: ['parent', 'bottom']
+      },
+      social_metrics: {
+        width: 'spread',
+        height: 'wrap',
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        top: ['username', 'bottom', 8]
+      },
+      wall_content: {
+        width: 'parent',
+        height: 'spread',
+        top: ['social_metrics', 'bottom', 8],
+      }
+    },
+    end: {
+      profile_picture: {
+        width: 48,
+        height: 48,
+        start: ['parent', 'start', 16],
+        top: ['parent', 'top', 8],
+        custom: {
+          border_color: '#0FF0077FF'
+        }
+      },
+      cover: {
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        top: ['parent', 'top'],
+        bottom: ['divider', 'top', 24]
+      },
+      divider: {
+        height: 4,
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        top: ['parent', 'top', 24],
+      },
+      username: {
+        start: ['profile_picture', 'end', 16],
+        top: ['profile_picture', 'top'],
+        bottom: ['profile_picture', 'bottom'],
+      },
+      background: {
+        width: 'spread',
+        height: 'spread',
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        top: ['parent', 'top'],
+        bottom: ['parent', 'bottom']
+      },
+      social_metrics: {
+        width: '0',
+        height: '0',
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        top: ['username', 'bottom', 8]
+      },
+      wall_content: {
+        width: 'parent',
+        height: 'spread',
+        top: ['social_metrics', 'bottom', 12],
+      }
+    }
+  },
+  Transitions: {
+    default: {
+      from: 'start',
+      to: 'end',
+      pathMotionArc: 'startHorizontal',
+      KeyFrames: {
+        KeyAttributes: [
+          {
+            target: ['profile_picture'],
+            frames: [0, 100],
+          },
+          {
+            target: ['username'],
+            frames: [0, 45, 100],
+            translationX: [0, 30, 0],
+
+          },
+          {
+            target: ['divider'],
+            frames: [0, 5, 10, 100],
+            alpha: [1, 0.25, 0, 0],
+            transitionEasing: 'easeIn',
+          },
+          {
+            target: ['cover'],
+            frames: [0, 65, 100],
+            alpha: [1, 0.25, 0],
+            transitionEasing: 'easeIn',
+          },
+          {
+            target: ['social_metrics'],
+            frames: [0, 10, 15, 100],
+            alpha: [1, 0.25, 0, 0],
+            transitionEasing: 'linear'
+          }
+        ]
+      }
+    }
+  }
+}

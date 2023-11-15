@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.VkNewsClient.MySplash" parent="Theme.SplashScreen">
+        <item name="postSplashScreenTheme">@style/Theme.VkNewsClient</item>
+        <item name="windowSplashScreenBackground">#191919</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/vk_logo_dark</item>
+    </style>
+</resources>

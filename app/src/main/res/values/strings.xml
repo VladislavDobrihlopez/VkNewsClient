@@ -1,3 +1,55 @@
 <resources>
-    <string name="app_name">VkNewsClient</string>
+    <string name="app_name" translatable="false">VkEnjoyerClient</string>
+    <integer name="com_vk_sdk_AppId">51579174</integer>
+    <string name="post_text" translatable="false">Сколько здесь ни гулял\nНо никогда не замечал следы\nДумал, из леса вой, да из людей так некому здесь выть\nНо острые глаза пялятся зорко\nОкружив мой дом\nЖдут, когда оступлюсь, чтобы навязать мне свой закон</string>
+    <string name="bottom_navigation_item_home">Home</string>
+    <string name="bottom_navigation_item_favorite">Favorite</string>
+    <string name="bottom_navigation_item_profile">Profile</string>
+    <string name="bookmark">add this post to your bookmark</string>
+    <string name="trash_post">Do not show me this piece of shit again!</string>
+    <string name="troubles_with_the_internet">Troubles with the internet</string>
+    <string name="sign_in">Auth</string>
+    <string name="try_reconnecting">Try reconnecting</string>
+    <string name="all_the_posts_are_viewed">You\'ve viewed all the posts</string>
+    <string name="profile_private_info">This profile is private. Add them as a friend to see their posts, photos and other content</string>
+    <string name="content_description_community_thumbnail">community thumbnail</string>
+    <string name="more_details">More details</string>
+    <string name="content_description_access_denied">You are not allowed to read the wall content due to profile privacy settings</string>
+    <string name="content_description_posted_by_another_group">Posted by another group</string>
+    <string name="content_description_profile_cover">Profile cover</string>
+    <string name="content_description_owner_photo">Profile\'s owner photo</string>
+    <string name="content_description_profiles_owner_info">Profile\'s owner info</string>
+    <string name="short_link">Short_link</string>
+    <string name="birthday">Birthday</string>
+    <string name="country">Country</string>
+    <string name="city">City</string>
+    <string name="gifts">Gifts</string>
+    <string name="alert_title_changing_status_of_like">Changing the like status</string>
+    <string name="alert_agreement_text_change_like">Do you agree to change the status of the like to the opposite?</string>
+    <string name="confirm">Confirm</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="alert_agreement_on_sharing_post">Do you agree to share this post?</string>
+    <string name="alert_title_changing_share_status">Changing share status</string>
+    <string name="alert_title_ignore_the_post">Ignore the post</string>
+    <string name="alert_switching_post_to_ignored_state">Do you agree to ignore the post?</string>
+    <string name="alert_select_tags">Select tags you want to associate to this post</string>
+    <string name="cache_the_post">Cache the post</string>
+    <string name="you_ve_viewed_all_the_posts">You\'ve viewed all the posts</string>
+    <string name="you_have_viewed_all_the_comments">You have viewed all the comments</string>
+    <string name="comments_post">"Comments post: "</string>
+    <string name="content_description_navigate_back">navigate back</string>
+    <string name="content_description_image">commentator\'s image</string>
+    <string name="add_a_new_tag">Add a new tag</string>
+    <string name="delete_a_tag">Delete a tag</string>
+    <string name="creating_a_new_tag">Creating a new tag</string>
+    <string name="removing_a_tag">Removing a tag</string>
+    <string name="select_the_tag_you_want_to_remove">Select the tag you want to remove</string>
+    <string name="removing_cached_post">"Removing cached post "</string>
+    <string name="do_you_agree_to_remove_the_post_from_cache">Do you agree to remove the post from cache?</string>
+    <string name="delete_item">Delete item</string>
+    <string name="swipe_from_right_to_left_to_add_tags">Swipe from right to left to add tags</string>
+    <string name="title_tags_manager">Tags manager</string>
+    <string name="no_posts">Posts haven\'t been cached yet</string>
+    <string name="title_tags">Tags</string>
+    <string name="vk_logo">vk logo</string>
 </resources>
